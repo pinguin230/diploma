@@ -7,12 +7,12 @@ import type { Complex, Graph, Token } from '@/core/types';
 import { DataflowRuntime } from '@/core/scheduler';
 
 export type TokenVis = { id: string; t0: number; delay: number };
-type PresetName = 'impulse' | 'two-impulses' | 'sin1' | 'sin3' | 'sin1+3';
+type PresetName = 'impulse' | 'two-impulses' | 'sin1' | 'sin3' | 'sin1+3' | 'ramp';
 type BaModel = '4M2A' | '3M5A';
 type InspectorState = {
   visible: boolean;
   nodeId: string | null;
-  kind: 'source' | 'sink' | 'add' | 'mul' | 'butterfly' | null;
+  kind: 'source' | 'sink' | 'add' | 'mul' | 'butterfly' | 'dft4' | 'twiddle' | null;
   twiddle?: { N: number; k: number } | null;
   inputs: Record<string, Token> | null;
   outputs: Record<string, Token> | null;
@@ -61,6 +61,9 @@ type SimState = {
   pauseOnFire: boolean;
   setPauseOnFire: (v: boolean) => void;
 
+  nodesDraggable: boolean;
+  setNodesDraggable: (v: boolean) => void;
+
   mode: 'run' | 'single-fire';
   setMode: (m: 'run' | 'single-fire') => void;
 
@@ -80,6 +83,7 @@ type SimState = {
   setSpectrumHover: (h: SimState['spectrumHover']) => void;
 
   nodeActivity: Record<string, number>; // heatmap інтенсивність 0..1+
+  nodeDataCache: Record<string, { inputs?: Record<string, Token>; outputs?: Record<string, Token> }>;
   decayActivity: () => void; // експоненційний розпад
   bumpActivity: (nodeId: string) => void;
 
@@ -136,6 +140,10 @@ const makePreset = (N: number, kind: PresetName): Record<string, { re: number; i
         v = { re: a.re + b.re, im: a.im + b.im };
         break;
       }
+      case 'ramp': {
+        v = { re: n, im: 0 };
+        break;
+      }
     }
     out[`src${n}`] = v;
   }
@@ -170,6 +178,11 @@ export const useSimStore = create<SimState>()(
 
       simTime: 0,
       lastWall: null,
+
+      nodesDraggable: false,
+      setNodesDraggable: (v) => set({ nodesDraggable: v }),
+      nodeDataCache: {},
+
 
       lastInput: {},
       sinks: {},
@@ -252,9 +265,9 @@ export const useSimStore = create<SimState>()(
             visible: true,
             nodeId: p.nodeId ?? s.inspector.nodeId,
             kind: (p.kind as any) ?? s.inspector.kind,
-            twiddle: p.twiddle ?? s.inspector.twiddle,
-            inputs: p.inputs ?? s.inspector.inputs,
-            outputs: p.outputs ?? s.inspector.outputs,
+            twiddle: p.twiddle !== undefined ? p.twiddle : s.inspector.twiddle,
+            inputs: p.inputs !== undefined ? p.inputs : s.inspector.inputs,
+            outputs: p.outputs !== undefined ? p.outputs : s.inspector.outputs,
           },
         })),
       closeInspector: () => set((s) => ({ inspector: { ...s.inspector, visible: false } })),
@@ -301,6 +314,7 @@ export const useSimStore = create<SimState>()(
         }
 
         get().resetMetrics(); // ← тепер доречно
+        set({ nodeDataCache: {} });
       },
 
       mode: 'run',
@@ -358,19 +372,33 @@ export const useSimStore = create<SimState>()(
               },
               onBeforeFire: (node, inputs) => {
                 const tw = node.params?.twiddle ?? null;
+
+                set((s) => ({
+                  nodeDataCache: {
+                    ...s.nodeDataCache,
+                    [node.id]: { ...s.nodeDataCache[node.id], inputs },
+                  },
+                }));
+
                 get().openInspector({
                   nodeId: node.id,
                   kind: node.kind,
                   twiddle: tw,
-                  inputs,
-                  outputs: null,
                 });
+
                 get().bumpActivity(node.id);
                 if (get().pauseOnFire && get().running) {
                   get().stop();
                 }
               },
               onOutput: (node, outputs) => {
+                set((s) => ({
+                  nodeDataCache: {
+                    ...s.nodeDataCache,
+                    [node.id]: { ...s.nodeDataCache[node.id], outputs: outputs as any },
+                  },
+                }));
+
                 if (node.kind !== 'sink') return;
 
                 const first = Object.values(outputs)[0] as Token | undefined;
@@ -402,7 +430,7 @@ export const useSimStore = create<SimState>()(
             },
             () => get().simTime,
           );
-        set({ graph: g, runtime: mkRuntime(g), mismatches: {}, tokensByEdge: {}, sinks: {} });
+        set({ graph: g, runtime: mkRuntime(g), mismatches: {}, tokensByEdge: {}, sinks: {}, nodeDataCache: {} });
       },
 
       addEdgeToGraph(p) {

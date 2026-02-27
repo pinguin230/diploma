@@ -82,6 +82,9 @@ export default function GraphView() {
     setMismatches(mismatches);
   };
 
+  const nodesDraggable = useSimStore((s) => s.nodesDraggable);
+  const setNodesDraggable = useSimStore((s) => s.setNodesDraggable);
+
   useEffect(() => {
     if (!graph) return;
     setEdges(
@@ -109,6 +112,18 @@ export default function GraphView() {
     },
     [setEdges, addEdgeToGraph],
   );
+
+  const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
+    const state = useSimStore.getState();
+    const spec = state.graph?.nodes.find((n) => n.id === node.id);
+    if (!spec) return;
+
+    state.openInspector({
+      nodeId: spec.id,
+      kind: spec.kind as any,
+      twiddle: spec.params?.twiddle ?? null,
+    });
+  }, []);
 
   // ОНОВЛЕНИЙ useEffect для генерації графа
   useEffect(() => {
@@ -176,6 +191,15 @@ export default function GraphView() {
           Pause on fire
         </label>
 
+        <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginLeft: '10px' }}>
+          <input
+              type='checkbox'
+              checked={nodesDraggable}
+              onChange={(e) => setNodesDraggable(e.target.checked)}
+          />
+          Move nodes
+        </label>
+
         {/* speed */}
         <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
           speed
@@ -211,6 +235,7 @@ export default function GraphView() {
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button onClick={() => useSimStore.getState().applyPreset('impulse')}>Impulse</button>
             <button onClick={() => useSimStore.getState().applyPreset('two-impulses')}>2×Impulse</button>
+            <button onClick={() => useSimStore.getState().applyPreset('ramp')}>Ramp 0..15</button>
             <button onClick={() => useSimStore.getState().applyPreset('sin1')}>sin k=1</button>
             <button onClick={() => useSimStore.getState().applyPreset('sin3')}>sin k=3</button>
             <button onClick={() => useSimStore.getState().applyPreset('sin1+3')}>sin k=1+3</button>
@@ -236,6 +261,8 @@ export default function GraphView() {
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         nodeTypes={nodeTypes}
+        nodesDraggable={nodesDraggable}
+        onNodeClick={onNodeClick}
         fitView
       >
         <Background />
