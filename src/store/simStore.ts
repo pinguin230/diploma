@@ -177,7 +177,7 @@ export const useSimStore = create<SimState>()(
 
       firesTotal: 0,
 
-      N: 8,
+      N: 16,
       setN: (n) => {
         // гарантуємо ступінь двійки
         const pow = Math.round(Math.log2(n));

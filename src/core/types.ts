@@ -1,11 +1,13 @@
-// core/types.ts
+// src/core/types.ts
 
 export type NodeId = string;
 export type PortId = string;
 
+export type Complex = { re: number; im: number };
+
 export type Token = {
   id: string;
-  value: number | { re: number; im: number };
+  value: number | Complex;
   t: number; // логічний час надходження
   originT: number;
 };
@@ -15,11 +17,9 @@ export type Edge = {
   from: { node: NodeId; port: PortId };
   to: { node: NodeId; port: PortId };
   delay?: number; // затримка каналу (мс симуляції)
-  label?: string; // ← ТЕКСТ НА РЕБРІ (напр. "W8^2")
-  labelValue?: { re: number; im: number }; // ← числове значення (для тултіпу)
+  label?: string; // ← ТЕКСТ НА РЕБРІ
+  labelValue?: Complex; // ← числове значення (для тултіпу)
 };
-
-export type Complex = { re: number; im: number };
 
 export type NodeSpec = {
   id: NodeId;
@@ -43,4 +43,4 @@ export type FireResult = {
   outputs: Record<PortId, Token>;
 };
 
-export type NodeKind = 'source' | 'sink' | 'add' | 'mul' | 'butterfly';
+export type NodeKind = 'source' | 'sink' | 'add' | 'mul' | 'butterfly' | 'dft4' | 'twiddle';

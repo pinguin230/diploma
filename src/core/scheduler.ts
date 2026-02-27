@@ -137,6 +137,61 @@ export class DataflowRuntime {
           },
         };
       }
+
+      case 'dft4': {
+        const x0 = inputs['in0']!.value as { re: number; im: number };
+        const x1 = inputs['in1']!.value as { re: number; im: number };
+        const x2 = inputs['in2']!.value as { re: number; im: number };
+        const x3 = inputs['in3']!.value as { re: number; im: number };
+
+        // Оптимізований алгоритм з вашого C-коду
+        // E0 = x0 + x2,  E1 = x0 - x2
+        const E0 = { re: x0.re + x2.re, im: x0.im + x2.im };
+        const E1 = { re: x0.re - x2.re, im: x0.im - x2.im };
+        // O0 = x1 + x3,  O1 = x1 - x3
+        const O0 = { re: x1.re + x3.re, im: x1.im + x3.im };
+        const O1 = { re: x1.re - x3.re, im: x1.im - x3.im };
+
+        // X0 = E0 + O0,  X2 = E0 - O0
+        const X0 = { re: E0.re + O0.re, im: E0.im + O0.im };
+        const X2 = { re: E0.re - O0.re, im: E0.im - O0.im };
+
+        // X1 = E1 - j*O1. Множення на j: j*(re + j*im) = -im + j*re
+        // Отже: j*O1 = { re: -O1.im, im: O1.re }
+        const X1 = {
+          re: E1.re - (-O1.im),
+          im: E1.im - O1.re
+        };
+        // X3 = E1 + j*O1
+        const X3 = {
+          re: E1.re + (-O1.im),
+          im: E1.im + O1.re
+        };
+
+        return {
+          outputs: {
+            out0: { id: crypto.randomUUID(), value: X0, t: this.now(), originT },
+            out1: { id: crypto.randomUUID(), value: X1, t: this.now(), originT },
+            out2: { id: crypto.randomUUID(), value: X2, t: this.now(), originT },
+            out3: { id: crypto.randomUUID(), value: X3, t: this.now(), originT },
+          },
+        };
+      }
+
+      case 'twiddle': {
+        // Окремий вузол для проміжного множення на W_{16}
+        const x = inputs['in']!.value as { re: number; im: number };
+        const tw = node.params?.twiddle; // { N: 16, k: ... }
+
+        const result = tw ? this.complexMul(x, this.twiddle(tw.N, tw.k)) : x;
+
+        return {
+          outputs: {
+            out: { id: crypto.randomUUID(), value: result, t: this.now(), originT },
+          },
+        };
+      }
+
       case 'sink': {
         const tok = inputs['in']!;
         if (!tok) return { outputs: {} };

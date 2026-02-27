@@ -15,20 +15,29 @@ import {
   type Connection,
   useReactFlow,
 } from '@xyflow/react';
-import ButterflyNode from './nodes/ButterflyNode';
+
+import { DFT4Node } from './nodes/DFT4Node';
+import { TwiddleNode } from './nodes/TwiddleNode';
 import SourceNode from './nodes/SourceNode';
 import SinkNode from './nodes/SinkNode';
-import { useSimStore } from '@/store/simStore';
 import TokenEdge from './TokenEdge';
-import { generateRadix2 } from '@/graph/generateRadix2';
+
+import { generateDFT4x4 } from '@/graph/generateDFT4x4';
+import { layoutDFT4x4 } from '@/graph/layout4x4';
+
+import { useSimStore } from '@/store/simStore';
 import { compareWithFFT } from '@/utils/compare';
 import { useShallow } from 'zustand/react/shallow';
-import { layoutRadix2 } from '@/graph/layout';
 import SpectrumView from '@/components/SpectrumView';
 import Metrics from '@/components/Metrics';
 import NodeInspector from '@/components/NodeInspector';
 
-const nodeTypes = { butterfly: ButterflyNode, source: SourceNode, sink: SinkNode } as const;
+const nodeTypes = {
+  dft4: DFT4Node,
+  twiddle: TwiddleNode,
+  source: SourceNode,
+  sink: SinkNode,
+} as const;
 const edgeTypes = { token: TokenEdge } as const;
 
 export default function GraphView() {
@@ -53,8 +62,7 @@ export default function GraphView() {
   const scale = useSimStore((s) => s.spectrumScale);
   const setScale = useSimStore((s) => s.setSpectrumScale);
 
-  const N = useSimStore((s) => s.N);
-  const setN = useSimStore((s) => s.setN);
+  const N = 16;
 
   const lastAggRef = useRef({ t: performance.now(), fires: 0 });
 
@@ -102,17 +110,20 @@ export default function GraphView() {
     [setEdges, addEdgeToGraph],
   );
 
+  // ОНОВЛЕНИЙ useEffect для генерації графа
   useEffect(() => {
-    const g = generateRadix2(N, 120);
+    // Генеруємо 4x4 граф для 16 точок
+    const g = generateDFT4x4();
     setGraph(g);
 
-    const nodePositions = layoutRadix2(g, N, { stageGap: 280, rowGap: 120, colPad: 50 });
+    // Розміщуємо по матричній сітці (рядки -> множники -> стовпці)
+    const nodePositions = layoutDFT4x4(g, { stageGap: 280, rowGap: 140 });
     setNodes(nodePositions);
-  }, [N, setGraph, setNodes]);
+  }, [setGraph, setNodes]);
 
   useEffect(() => {
     queueMicrotask(() => rf.fitView({ padding: 0.15, includeHiddenNodes: true }));
-  }, [N, nodes.length, rf]);
+  }, [nodes.length, rf]);
 
   useEffect(() => {
     if (!runtime) return;
@@ -137,13 +148,6 @@ export default function GraphView() {
           metrics: { ...s.metrics, windowStartSimT: s.simTime, firesInWindow: 0 },
         }));
         lastAggRef.current = { t: now, fires: 0 };
-        useSimStore.setState((s) => ({
-          metrics: {
-            ...s.metrics,
-            windowStartSimT: s.simTime,
-            firesInWindow: 0,
-          },
-        }));
       }
 
       frame.current = requestAnimationFrame(loop);
@@ -157,7 +161,7 @@ export default function GraphView() {
 
   return (
     <div style={{ width: '100%', height: '100%' }}>
-      <div style={{ position: 'absolute', zIndex: 10, left: 22, top: 160, display: 'flex', gap: 8 }}>
+      <div style={{ position: 'absolute', zIndex: 10, left: 22, top: 160, display: 'flex', gap: 8, alignItems: 'center' }}>
         <button onClick={start}>▶︎</button>
         <button onClick={stop}>⏸</button>
         <button onClick={step}>Step</button>
@@ -188,16 +192,9 @@ export default function GraphView() {
         </label>
         <button onClick={onCompare}>Compare</button>
 
-        <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-          N
-          <select value={N} onChange={(e) => setN(Number(e.target.value))}>
-            {[8, 16, 32, 64, 128, 256].map((v) => (
-              <option key={v} value={v}>
-                {v}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, paddingLeft: '10px', color: '#888' }}>
+          Mode: 16-point 4x4 DFT
+        </div>
       </div>
       <div
         style={{
