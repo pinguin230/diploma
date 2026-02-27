@@ -1,0 +1,86 @@
+.node {
+  --bg: #151823;
+  --bd: #2a2f3a;
+  background: var(--bg);
+  border: 1px solid var(--bd);
+  padding: 8px 10px;
+  border-radius: 12px;
+  min-width: 160px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03), 0 8px 24px rgba(0, 0, 0, 0.25);
+  transition: box-shadow .15s ease, background-color .15s ease;
+
+  .title {
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .body {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .symbol {
+    font-size: 22px;
+    color: #121212;
+  }
+}
+
+.selected {
+  outline: 2px solid #6ea8fe;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  font-size: 11px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #2c3346;
+  color: #cfe2ff;
+  border: 1px solid #3a4258;
+}
+
+.node {
+  border: 1px solid #c9d1e0;
+  transition: box-shadow 120ms ease, border-color 120ms ease;
+}
+
+.selected {
+  border-color: #6ea8fe;
+}
+
+.active {
+  border-color: #52b788;
+  box-shadow: 0 0 0 3px rgba(82, 183, 136, .25);
+}
+
+.heat0 {
+  background: #2e3447;
+}
+
+/* світлий, але адаптований до темного фону */
+.heat1 {
+  background: #3b4a6b;
+}
+
+/* легка активність */
+.heat2 {
+  background: #4a5e8c;
+}
+
+/* середня активність */
+.heat3 {
+  background: #5b76b3;
+}
+
+/* висока активність */
+.heat4 {
+  background: #6d91e0;
+}
+
+/* гаряче */
