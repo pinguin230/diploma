@@ -1,3 +1,4 @@
+// src/graph/TokenEdge.tsx
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { BaseEdge, getBezierPath, type EdgeProps } from '@xyflow/react';
 import { useSimStore } from '@/store/simStore';
@@ -12,18 +13,19 @@ export default memo(function TokenEdge(props: EdgeProps) {
   const simTime = useSimStore((s) => s.simTime);
 
   const inBufferCount = useMemo(
-    () => tokens.reduce((acc, tk) => acc + (simTime - tk.t0 < tk.delay ? 1 : 0), 0),
-    [tokens, simTime],
+      () => tokens.reduce((acc, tk) => acc + (simTime - tk.t0 < tk.delay ? 1 : 0), 0),
+      [tokens, simTime],
   );
 
   const [path, labelX, labelY] = useMemo(
-    () => getBezierPath({ sourceX, sourceY, targetX, targetY }),
-    [sourceX, sourceY, targetX, targetY],
+      () => getBezierPath({ sourceX, sourceY, targetX, targetY }),
+      [sourceX, sourceY, targetX, targetY],
   );
 
   const pathRef = useRef<SVGPathElement | null>(null);
   const [totalLen, setTotalLen] = useState(0);
 
+  // Вимірюємо довжину кривої для точної інтерполяції
   useEffect(() => {
     if (!pathRef.current) return;
     try {
@@ -33,12 +35,21 @@ export default memo(function TokenEdge(props: EdgeProps) {
     }
   }, [path]);
 
+  // АРХІТЕКТУРНЕ ВИПРАВЛЕННЯ: Безпечне видалення токенів поза циклом рендеру
+  useEffect(() => {
+    const expiredTokens = tokens.filter((tk) => simTime - tk.t0 >= tk.delay);
+    if (expiredTokens.length > 0) {
+      expiredTokens.forEach((tk) => remove(id, tk.id));
+    }
+  }, [tokens, simTime, remove, id]);
+
   const circles = tokens.map((tk) => {
     const p = tk.delay > 0 ? (simTime - tk.t0) / tk.delay : 1;
+    // Якщо токен вже вийшов за межі 1, він буде видалений у useEffect, 
+    // але для поточного кадру фіксуємо його на кінці (1)
     const clamped = Math.min(Math.max(p, 0), 1);
 
-    let cx = sourceX,
-      cy = sourceY;
+    let cx = sourceX, cy = sourceY;
     const pathEl = pathRef.current;
 
     if (pathEl && totalLen > 0) {
@@ -50,57 +61,80 @@ export default memo(function TokenEdge(props: EdgeProps) {
       cy = sourceY + (targetY - sourceY) * clamped;
     }
 
-    if (p >= 1) queueMicrotask(() => remove(id, tk.id));
-
-    return <circle key={tk.id} cx={cx} cy={cy} r={5} style={{ fill: '#cfe2ff', opacity: 0.9 }} />;
+    return (
+        <circle
+            key={tk.id}
+            cx={cx} cy={cy} r={5}
+            style={{ fill: '#22d3ee', filter: 'drop-shadow(0 0 4px #06b6d4)' }}
+        />
+    );
   });
 
-  // ✅ і центр-бейдж, і «квадратики» беруть одне й те саме число
+  // Відображення кількості елементів у буфері
   const centerBadge = (() => {
+    if (inBufferCount === 0) return null; // Ховаємо бейдж, якщо ребро порожнє
     const p = pathRef.current;
     if (!p) return null;
     const total = p.getTotalLength() || 1;
     const mid = p.getPointAtLength(total / 2);
-    const x = mid.x,
-      y = mid.y;
+
+    // Зсуваємо бейдж трохи вище, щоб він не перекривав мітки (labels)
+    const x = mid.x, y = mid.y - 12;
     return (
-      <>
-        <rect x={x - 9} y={y - 18} width='18' height='14' rx='3' fill='#2c3346' stroke='#3a4258' />
-        <text x={x} y={y - 7} textAnchor='middle' fontSize='10' fill='#cfe2ff'>
-          {inBufferCount}
-        </text>
-      </>
+        <g pointerEvents="none">
+          <rect x={x - 10} y={y - 10} width='20' height='20' rx='10' fill='#1e293b' stroke='#334155' />
+          <text x={x} y={y + 3} textAnchor='middle' fontSize='10' fill='#94a3b8' fontWeight="bold">
+            {inBufferCount}
+          </text>
+        </g>
     );
   })();
 
-  const pad = 6,
-    size = 4;
+  const pad = 6, size = 4;
   const bufferBadges = Array.from({ length: Math.min(inBufferCount, 3) }, (_, i) => (
-    <rect key={i} x={-10} y={-10 - i * (size + pad)} width={size} height={size} rx={1} ry={1} />
+      <rect key={i} x={-10} y={-10 - i * (size + pad)} width={size} height={size} rx={1} ry={1} />
   ));
 
   const badgeX = sourceX + 20;
   const badgeY = sourceY + 10;
 
   return (
-    <>
-      <path d={path} ref={pathRef} fill='none' stroke='transparent' pointerEvents='none' />
-      <BaseEdge id={id} path={path} />
-      <g fill='white' transform={`translate(${badgeX}, ${badgeY})`}>
-        {bufferBadges}
-      </g>
+      <>
+        {/* Невидима крива для обчислення траєкторії */}
+        <path d={path} ref={pathRef} fill='none' stroke='transparent' pointerEvents='none' />
 
-      {data?.label && (
-        <g pointerEvents='none'>
-          <rect x={labelX - 14} y={labelY - 9} width={28} height={16} rx={4} ry={4} opacity={0.15} />
-          <text x={labelX} y={labelY} fontSize={11} fill='red' textAnchor='middle' dominantBaseline='central'>
-            {String((data as { label?: unknown })?.label)}
-          </text>
+        {/* Візуальне ребро */}
+        <BaseEdge id={id} path={path} style={{ stroke: '#475569', strokeWidth: 1.5 }} />
+
+        {/* Квадратики черги біля входу */}
+        <g fill='#64748b' transform={`translate(${badgeX}, ${badgeY})`}>
+          {bufferBadges}
         </g>
-      )}
 
-      <g>{circles}</g>
-      <g>{centerBadge}</g>
-    </>
+        {/* АКАДЕМІЧНА МІТКА ДЛЯ ПОВОРОТНИХ МНОЖНИКІВ */}
+        {data?.label && (
+            <g pointerEvents='none'>
+              <rect
+                  x={labelX - 22} y={labelY - 10}
+                  width={44} height={20}
+                  rx={10} ry={10}
+                  fill="#2c2c2c" stroke="#fbbf24" strokeWidth={1}
+              />
+              <text
+                  x={labelX} y={labelY + 1}
+                  fontSize={11} fill='#fbbf24'
+                  textAnchor='middle' dominantBaseline='central' fontWeight="bold"
+              >
+                {String((data as { label?: unknown }).label)}
+              </text>
+            </g>
+        )}
+
+        {/* Рухомі токени */}
+        <g pointerEvents='none'>{circles}</g>
+
+        {/* Бейдж кількості токенів */}
+        <g pointerEvents='none'>{centerBadge}</g>
+      </>
   );
 });

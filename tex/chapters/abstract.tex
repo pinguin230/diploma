@@ -1,0 +1,62 @@
+% chapters/abstract.tex
+\addcontentsline{toc}{section}{АНОТАЦІЯ}
+{\centering\bfseries АНОТАЦІЯ\par}
+\vspace{1em}
+
+\textbf{Тесля М.} Візуальне моделювання роботи обчислювача ШПФ під керуванням потоку даних. ---
+Кваліфікаційна робота бакалавра. Спеціальність 122 «Комп'ютерні науки». ---
+Національний університет «Львівська політехніка», Львів, 2026. ---
+\pageref{LastPage}~с., рис., табл., бібліогр.:~25~джерел.
+
+У роботі розроблено математичну модель і програмний симулятор 16-точкового
+дискретного перетворення Фур'є за алгоритмом з основою~4 в парадигмі
+обчислень під керуванням потоку даних.
+Тристадійна $4\times4$ декомпозиція дозволяє скоротити кількість нетривіальних
+комплексних множень з~256 до~9, що відповідає прискоренню ${\approx}28{,}4\times$
+відносно прямого обчислення ДПФ.
+Розроблено граф потоку даних обчислювача, що містить 56~вузлів чотирьох типів
+та 64~дуги із затримкою 600~умовних одиниць.
+Визначено теоретичний коефіцієнт паралелізму $K_p^{\text{теор}} \approx 2{,}9\times$
+і практичний $K_p \approx 1{,}88\times$ з урахуванням затримок дуг.
+Симулятор реалізовано як веб-застосунок на платформі Next.js~14 з ядром
+\texttt{DataflowRuntime}, генератором графа \texttt{generateDFT4x4()} та
+інтерфейсом React~Flow.
+Верифікація за шістьма тестовими сценаріями підтвердила коректність обчислень:
+максимальна абсолютна похибка становить $3\times10^{-12}$ при допустимій
+$\varepsilon = 10^{-9}$.
+
+\textbf{Ключові слова:} швидке перетворення Фур'є, radix-4, граф потоку даних,
+dataflow computing, симулятор, Next.js, React~Flow, паралелізм.
+
+\vspace{1em}\hrule\vspace{1em}
+
+\addcontentsline{toc}{section}{ABSTRACT}
+{\centering\bfseries ABSTRACT\par}
+\vspace{1em}
+
+\begin{otherlanguage}{english}
+\textbf{Teslia M.} Visual Modeling of a Dataflow-Driven FFT Processor. ---
+Bachelor's Qualification Work. Specialty 122 Computer Science. ---
+Lviv Polytechnic National University, Lviv, 2026. ---
+\pageref{LastPage}~p., fig., tabl., references:~25~sources.
+
+This work presents a mathematical model and a web-based simulator of a
+16-point Discrete Fourier Transform computed via the radix-4 algorithm
+under the dataflow computing paradigm.
+The three-stage $4\times4$ decomposition reduces the number of non-trivial
+complex multiplications from~256 to~9, achieving a speedup of
+${\approx}28.4\times$ over the direct DFT computation.
+A data-flow graph of the processor is developed comprising 56~nodes of four
+types and 64~arcs with an edge delay of 600 time units.
+The theoretical parallelism factor is $K_p^{\mathrm{theor}} \approx 2.9\times$
+and the practical factor, accounting for arc delays, is $K_p \approx 1.88\times$.
+The simulator is implemented as a web application on the Next.js~14 platform
+with the \texttt{DataflowRuntime} engine, the \texttt{generateDFT4x4()} graph
+generator, and a React~Flow visualisation interface.
+Verification across six test scenarios confirms computational correctness:
+the maximum absolute error is $3\times10^{-12}$, well within the
+tolerance $\varepsilon = 10^{-9}$.
+
+\textbf{Keywords:} fast Fourier transform, radix-4, data-flow graph,
+dataflow computing, simulator, Next.js, React~Flow, parallelism.
+\end{otherlanguage}

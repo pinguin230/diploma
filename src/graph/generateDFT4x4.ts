@@ -2,7 +2,7 @@
 
 import type { Graph, NodeSpec, Edge } from '@/core/types';
 
-export function generateDFT4x4(latency = 10): Graph {
+export function generateDFT4x4(latency = 400): Graph {
   const nodes: NodeSpec[] = [];
   const edges: Edge[] = [];
 
@@ -38,7 +38,7 @@ export function generateDFT4x4(latency = 10): Graph {
         id: `edge-src${srcIndex}-row${n1}in${n2}`,
         from: { node: `src${srcIndex}`, port: 'out' },
         to: { node: `row-${n1}`, port: `in${n2}` },
-        delay: 5, // Невелика затримка на шині
+        delay: 600, // Невелика затримка на шині
       });
     }
   }
@@ -67,7 +67,7 @@ export function generateDFT4x4(latency = 10): Graph {
         from: { node: `row-${n1}`, port: `out${k2}` },
         to: { node: twiddleId, port: 'in' },
         label: twiddlePower > 0 ? `W¹⁶_${twiddlePower}` : undefined,
-        delay: 5,
+        delay: 600,
       });
     }
   }
@@ -90,7 +90,7 @@ export function generateDFT4x4(latency = 10): Graph {
         id: `edge-tw${n1}_${k2}-col${k2}in${n1}`,
         from: { node: twiddleId, port: 'out' },
         to: { node: `col-${k2}`, port: `in${n1}` },
-        delay: 5,
+        delay: 600,
       });
     }
   }
@@ -115,7 +115,7 @@ export function generateDFT4x4(latency = 10): Graph {
         id: `edge-col${k2}out${k1}-sink${sinkIndex}`,
         from: { node: `col-${k2}`, port: `out${k1}` },
         to: { node: `snk${sinkIndex}`, port: 'in' },
-        delay: 5,
+        delay: 600,
       });
     }
   }

@@ -31,6 +31,8 @@ import { useShallow } from 'zustand/react/shallow';
 import SpectrumView from '@/components/SpectrumView';
 import Metrics from '@/components/Metrics';
 import NodeInspector from '@/components/NodeInspector';
+import TerminalOutput from "@/components/TerminalOutput";
+import PresetManager from "@/components/PresetManager";
 
 const nodeTypes = {
   dft4: DFT4Node,
@@ -81,6 +83,10 @@ export default function GraphView() {
     const { mismatches } = compareWithFFT(graph, lastInput, sinks, 1e-9);
     setMismatches(mismatches);
   };
+
+  const customPresets = useSimStore((s) => s.customPresets);
+  const setPresetManagerOpen = useSimStore((s) => s.setPresetManagerOpen);
+  const applyCustomPreset = useSimStore((s) => s.applyCustomPreset);
 
   const nodesDraggable = useSimStore((s) => s.nodesDraggable);
   const setNodesDraggable = useSimStore((s) => s.setNodesDraggable);
@@ -237,8 +243,19 @@ export default function GraphView() {
             <button onClick={() => useSimStore.getState().applyPreset('two-impulses')}>2×Impulse</button>
             <button onClick={() => useSimStore.getState().applyPreset('ramp')}>Ramp 0..15</button>
             <button onClick={() => useSimStore.getState().applyPreset('sin1')}>sin k=1</button>
-            <button onClick={() => useSimStore.getState().applyPreset('sin3')}>sin k=3</button>
-            <button onClick={() => useSimStore.getState().applyPreset('sin1+3')}>sin k=1+3</button>
+
+            {customPresets.map(p => (
+                <button key={p.id} onClick={() => applyCustomPreset(p.id)} style={{ background: '#e0f2fe', borderColor: '#bae6fd', color: '#0369a1' }}>
+                  {p.name}
+                </button>
+            ))}
+
+            <button
+                onClick={() => setPresetManagerOpen(true)}
+                style={{ background: '#1e293b', color: '#fff', border: 'none', padding: '4px 10px', borderRadius: 4 }}
+            >
+              ⚙️ Manage Presets
+            </button>
 
             <span>scale</span>
             <button onClick={() => setScale('linear')} style={{ opacity: scale === 'linear' ? 1 : 0.5 }}>
@@ -253,6 +270,8 @@ export default function GraphView() {
         </div>
       </div>
       <NodeInspector />
+      <TerminalOutput />
+      <PresetManager />
       <ReactFlow
         edgeTypes={edgeTypes}
         nodes={nodes}

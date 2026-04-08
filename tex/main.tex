@@ -1,0 +1,181 @@
+% =============================================================
+% BKR_FFT_Teslja — main.tex
+% Бакалаврська робота: Візуальне моделювання ШПФ
+% НУ «Львівська політехніка», каф. АСУ, 2025
+% =============================================================
+
+\documentclass[14pt,a4paper]{extarticle}
+
+% --- Мова і кодування ---
+\usepackage[utf8]{inputenc}
+\usepackage[ukrainian,english]{babel}
+
+% --- Шрифт Times New Roman ---
+\usepackage{tempora}
+\usepackage[T1,T2A]{fontenc}
+
+
+% --- Поля (вимоги кафедри АСУ) ---
+\usepackage[
+  left=25mm,
+  right=10mm,
+  top=20mm,
+  bottom=20mm
+]{geometry}
+
+% --- Міжрядковий інтервал 1.5 ---
+\usepackage{setspace}
+\onehalfspacing
+
+% --- Математика ---
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+
+% --- Зображення ---
+\usepackage{graphicx}
+\usepackage{float}
+\graphicspath{{images/}}
+
+% --- Таблиці ---
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{multirow}
+
+% --- Код і лістинги ---
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstdefinestyle{jsstyle}{
+  language=Java,
+  basicstyle=\small\ttfamily,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{orange},
+  numberstyle=\tiny\color{gray},
+  numbers=left,
+  numbersep=8pt,
+  breaklines=true,
+  breakatwhitespace=true,
+  frame=single,
+  rulecolor=\color{gray!30},
+  tabsize=2
+}
+
+\lstdefinestyle{cstyle}{
+  language=C,
+  basicstyle=\small\ttfamily,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{orange},
+  numberstyle=\tiny\color{gray},
+  numbers=left,
+  numbersep=8pt,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{gray!30},
+  tabsize=2
+}
+
+% --- Гіперпосилання ---
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  citecolor=black,
+  urlcolor=blue,
+  pdfauthor={Тесля М.},
+  pdftitle={Візуальне моделювання роботи обчислювача ШПФ під керуванням потоку даних}
+}
+
+% --- Нумерація рисунків, таблиць, формул у межах розділу ---
+\usepackage{chngcntr}
+\counterwithin{figure}{section}
+\counterwithin{table}{section}
+\counterwithin{equation}{section}
+
+% --- Бібліографія ---
+\usepackage[square,numbers,sort]{natbib}
+
+% --- Відступи і параграфи ---
+\usepackage{indentfirst}
+\setlength{\parindent}{1.25cm}
+
+% --- Налаштування заголовків ---
+\usepackage{titlesec}
+\titleformat{\section}[block]
+  {\normalfont\large\bfseries\centering}
+  {РОЗДІЛ \thesection.}{0.5em}{}
+\titleformat{\subsection}[block]
+  {\normalfont\normalsize\bfseries}
+  {\thesubsection}{0.5em}{}
+\titleformat{\subsubsection}[block]
+  {\normalfont\normalsize\bfseries}
+  {\thesubsubsection}{0.5em}{}
+
+% --- Зміст ---
+\usepackage{tocloft}
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+\usepackage{lastpage}
+
+% =============================================================
+\begin{document}
+
+% --- Титульний аркуш ---
+% (вставляється окремим PDF або вручну друкується на бланку)
+
+% --- Завдання ---
+% (вставляється на бланку кафедри)
+
+% --- Анотація ---
+\input{chapters/abstract}
+\newpage
+
+% --- Зміст ---
+\tableofcontents
+\newpage
+
+% --- Перелік скорочень ---
+\input{chapters/abbreviations}
+\newpage
+
+% --- Вступ ---
+\input{chapters/intro}
+\newpage
+
+% --- Розділ 1 ---
+\input{chapters/chapter1}
+\newpage
+
+% --- Розділ 2 ---
+\input{chapters/chapter2}
+\newpage
+
+% --- Розділ 3 ---
+\input{chapters/chapter3}
+\newpage
+
+% --- Розділ 4 ---
+\input{chapters/chapter4}
+\newpage
+
+% --- Розділ 5 (Економічна частина) ---
+\input{chapters/economic}
+\newpage
+
+% --- Висновки ---
+\input{chapters/conclusions}
+\newpage
+
+% --- Перелік посилань ---
+\addcontentsline{toc}{section}{ПЕРЕЛІК ПОСИЛАНЬ}
+\bibliographystyle{ugost2003}
+\bibliography{references}
+\newpage
+
+% --- Додатки ---
+\appendix
+\input{chapters/appendix_a}
+
+\end{document}

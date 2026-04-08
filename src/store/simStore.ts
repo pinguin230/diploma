@@ -7,6 +7,11 @@ import type { Complex, Graph, Token } from '@/core/types';
 import { DataflowRuntime } from '@/core/scheduler';
 
 export type TokenVis = { id: string; t0: number; delay: number };
+export type CustomPreset = {
+  id: string;
+  name: string;
+  data: Record<string, { re: number; im: number }>;
+};
 type PresetName = 'impulse' | 'two-impulses' | 'sin1' | 'sin3' | 'sin1+3' | 'ramp';
 type BaModel = '4M2A' | '3M5A';
 type InspectorState = {
@@ -71,6 +76,17 @@ type SimState = {
   setActiveNode: (id: string | null) => void;
 
   applyPreset: (p: PresetName) => void;
+
+  injectData: (vec: Record<string, Complex>) => void;
+  customPresets: CustomPreset[];
+  setCustomPresets: (ps: CustomPreset[]) => void;
+  addCustomPreset: (p: CustomPreset) => void;
+  updateCustomPreset: (id: string, p: CustomPreset) => void;
+  deleteCustomPreset: (id: string) => void;
+  applyCustomPreset: (id: string) => void;
+
+  isPresetManagerOpen: boolean;
+  setPresetManagerOpen: (v: boolean) => void;
 
   firesTotal: number;
 
@@ -293,13 +309,11 @@ export const useSimStore = create<SimState>()(
           return { nodeActivity: { ...s.nodeActivity, [id]: v } };
         }),
 
-      applyPreset(preset) {
+      injectData: (vec) => {
         const { N, runtime } = get();
         if (!runtime) return;
 
-        const vec = makePreset(N, preset);
         set(() => ({ lastInput: { ...vec } }));
-
         const now = get().simTime;
 
         for (let i = 0; i < N; i++) {
@@ -308,14 +322,37 @@ export const useSimStore = create<SimState>()(
           runtime.emitFrom(nodeId, 'out', {
             id: crypto.randomUUID(),
             value,
-            t: now, // одразу в сим-час
-            originT: now, // «народження» токена теж у сим-часі
+            t: now,
+            originT: now,
           });
         }
-
-        get().resetMetrics(); // ← тепер доречно
+        get().resetMetrics();
         set({ nodeDataCache: {} });
       },
+
+      // Старі вбудовані пресети тепер використовують injectData
+      applyPreset(preset) {
+        const vec = makePreset(get().N, preset);
+        get().injectData(vec);
+      },
+
+      // --- ЛОГІКА КАСТОМНИХ ПРЕСЕТІВ ---
+      customPresets: [],
+      setCustomPresets: (ps) => set({ customPresets: ps }),
+      addCustomPreset: (p) => set((s) => ({ customPresets: [...s.customPresets, p] })),
+      updateCustomPreset: (id, p) => set((s) => ({
+        customPresets: s.customPresets.map((x) => x.id === id ? p : x)
+      })),
+      deleteCustomPreset: (id) => set((s) => ({
+        customPresets: s.customPresets.filter((x) => x.id !== id)
+      })),
+      applyCustomPreset: (id) => {
+        const p = get().customPresets.find(x => x.id === id);
+        if (p) get().injectData(p.data);
+      },
+
+      isPresetManagerOpen: false,
+      setPresetManagerOpen: (v) => set({ isPresetManagerOpen: v }),
 
       mode: 'run',
       pauseOnFire: false,

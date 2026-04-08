@@ -1,0 +1,634 @@
+% chapters/chapter3.tex
+\section{РОЗРОБЛЕННЯ ПРОГРАМНОЇ РЕАЛІЗАЦІЇ}
+
+% ─────────────────────────────────────────────────
+\subsection{Загальна структура програмного забезпечення}
+
+Програмну реалізацію симулятора виконано у вигляді веб-застосунку
+на платформі Next.js~14~\cite{nextjsdocs} з використанням мови TypeScript.
+Усі сторінки позначені директивою \texttt{'use client'}: серверна генерація
+(SSR) відключена, оскільки симулятор вимагає синхронного клієнтського
+стану та циклу \texttt{requestAnimationFrame}. Управління станом
+реалізовано за допомогою бібліотеки Zustand, граф відображається через
+React Flow (бібліотека \texttt{@xyflow/react}), спектральна панель ---
+через Canvas API.
+
+\begin{table}[H]
+  \caption{Модулі програмного забезпечення симулятора}
+  \label{tab:modules}
+  \centering
+  \begin{tabular}{p{3.0cm}p{4.5cm}p{5.5cm}}
+    \toprule
+    Модуль & Файл(и) & Призначення \\
+    \midrule
+    Типи даних
+      & \texttt{src/core/types.ts}
+      & \texttt{Token}, \texttt{Edge}, \texttt{NodeSpec}, \texttt{NodeKind}, \texttt{Graph} \\[3pt]
+    Ядро симуляції
+      & \texttt{src/core/scheduler.ts}
+      & Клас \texttt{DataflowRuntime}, метод \texttt{tick()} \\[3pt]
+    FIFO-черги
+      & \texttt{src/core/buffers.ts}
+      & Черга токенів на дугах \\[3pt]
+    Генерація графа
+      & \texttt{src/graph/generateDFT4x4.ts}
+      & Побудова DFG $4\times4$ (56 вузлів, 64 дуги) \\[3pt]
+    Компонування
+      & \texttt{src/graph/layout4x4.ts}
+      & Координати вузлів за ярусами \\[3pt]
+    Граф і анімація
+      & \texttt{src/graph/GraphView.tsx}
+      & React Flow + rAF-цикл \\[3pt]
+    Управління станом
+      & \texttt{src/store/simStore.ts}
+      & Zustand store \\[3pt]
+    Спектр
+      & \texttt{src/components/SpectrumView.tsx}
+      & Canvas bar chart $|X(k)|$ \\[3pt]
+    Метрики
+      & \texttt{src/components/Metrics.tsx}
+      & EMA пропускна здатність, затримка, черги \\[3pt]
+    Математика
+      & \texttt{src/utils/math.ts}
+      & \texttt{cplxAdd}, \texttt{cplxMulJ}, \texttt{computeDFT4} \\[3pt]
+    Верифікація
+      & \texttt{src/utils/compare.ts}
+      & \texttt{compareWithFFT()}, $\varepsilon = 10^{-9}$ \\[3pt]
+    Web Worker
+      & \texttt{src/workers/fft.worker.ts}
+      & Comlink + \texttt{applyTwiddle()} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Схема потоку управління у симуляторі будується з наступних кроків:
+
+\begin{enumerate}
+  \item \texttt{injectData(vec)} --- завантаження вхідного вектора
+    $\{x(n)\}_{n=0}^{15}$; для кожного вузла \texttt{source} викликається
+    \texttt{runtime.emitFrom()}, що поміщає токен у вихідний буфер.
+  \item \texttt{requestAnimationFrame} --- запуск анімаційного циклу;
+    кожен кадр починається з виклику \texttt{tickSimTime()}.
+  \item \texttt{tickSimTime()} --- обчислює приріст логічного часу
+    $\Delta t = (t_{\text{wall}} - t_{\text{prev}}) \times \texttt{speed}$
+    і оновлює \texttt{simTime}.
+  \item \texttt{runtime.tick(dt, maxFires)} --- виконує один крок
+    симуляції: доставляє токени, перевіряє готовність вузлів, активує їх.
+  \item Обробники подій \texttt{onToken}, \texttt{onFire}, \texttt{onOutput}
+    оновлюють стан store: \texttt{tokensByEdge}, \texttt{sinks},
+    \texttt{nodeActivity}, \texttt{metrics}.
+  \item React повторно рендерить компоненти \texttt{GraphView},
+    \texttt{SpectrumView}, \texttt{Metrics} зі свіжими даними зі store.
+\end{enumerate}
+
+\begin{figure}[H]
+  \centering
+  \IfFileExists{image/simulator_ui.png}{%
+    \includegraphics[width=0.95\textwidth]{image/simulator_ui.png}%
+  }{%
+    \fbox{\parbox[c][0.22\textheight][c]{0.95\textwidth}{\centering
+      Скріншот буде додано після фінального тестування.\\
+      Файл: \texttt{tex/image/simulator\_ui.png}}}%
+  }
+  \caption{Діаграма компонентів програмного симулятора.
+           Джерело: розроблено автором.}
+  \label{fig:components}
+\end{figure}
+
+
+% ─────────────────────────────────────────────────
+\subsection{Реалізація ядра симуляції}
+
+\subsubsection*{Клас DataflowRuntime}
+
+Клас \texttt{DataflowRuntime} (модуль \texttt{src/core/scheduler.ts})
+є програмною реалізацією абстрактної машини потоку даних, описаної
+у підрозділі~1.4~\cite{veen1986}. Він відповідає за виконання правила
+активації вузлів та управління FIFO-чергами на дугах графа.
+
+Клас зберігає:
+\begin{itemize}
+  \item незмінне посилання на граф \texttt{Graph} (вузли і дуги);
+  \item відображення \texttt{Map<edgeId, FIFO<Token>>} --- окрема
+        черга токенів для кожної дуги;
+  \item відображення \texttt{readyAt: Map<nodeId, number>} --- час,
+        раніше якого вузол не може активуватись повторно (моделює latency);
+  \item відображення \texttt{inbox: Map<nodeId, Map<portId, Token>>} ---
+        токени, що вже доставлені до вузла, але ще не поглинуті;
+  \item обробники подій: \texttt{onToken}, \texttt{onFire},
+        \texttt{onBeforeFire}, \texttt{onOutput}.
+\end{itemize}
+
+Логічний час надається ззовні через функцію \texttt{getTime: () => number},
+що передається у конструктор. У симуляторі цією функцією є
+\texttt{() => store.simTime}, завдяки чому весь годинник ядра
+відокремлений від астрономічного часу.
+
+\subsubsection*{Метод tick() --- алгоритм одного кроку симуляції}
+
+Метод \texttt{tick(dt, maxFires)} виконує єдиний крок потокового
+обчислення і реалізує правило активації (firing rule), описане
+у підрозділі~1.4~\cite{veen1986,dennis1975}. Алгоритм складається
+з чотирьох послідовних кроків:
+
+\begin{enumerate}
+  \item \textbf{Доставка токенів.} Для кожної дуги~$e$ перевіряється
+    чи найстарший токен у черзі $\mathrm{buf}[e.\mathrm{id}]$ задовольняє
+    умові доставки:
+    \begin{equation}
+      t_{\text{now}} - \mathrm{token}.t \;\geq\; e.\mathrm{delay},
+      \label{eq:delivery}
+    \end{equation}
+    де $t_{\text{now}} = \texttt{simTime}$. Якщо умова~(\ref{eq:delivery})
+    виконана, токен видаляється з черги і поміщається у \texttt{inbox}
+    відповідного вузла-приймача; емітується подія \texttt{onToken}.
+
+  \item \textbf{Перевірка готовності вузла.} Вузол~$n$ вважається
+    \emph{готовим} до активації, якщо одночасно виконуються дві умови:
+    \begin{itemize}
+      \item[а)] у \texttt{inbox}$[n]$ є токен на \emph{кожному} вхідному
+        порті: $\forall p \in n.\mathrm{inPorts}: \texttt{inbox}[n].\mathrm{has}(p)$;
+      \item[б)] вузол вільний від блокування: $\texttt{readyAt}[n] \leq t_{\text{now}}$.
+    \end{itemize}
+
+  \item \textbf{Активація вузла.} Для кожного готового вузла (не більше
+    \texttt{maxFires} за виклик):
+    \begin{enumerate}
+      \item[3.1] Токени поглинаються з \texttt{inbox}$[n]$ і передаються
+        у метод \texttt{execute(node, inputs)};
+      \item[3.2] Виконується логіка вузла (залежно від \texttt{NodeKind})
+        і обчислюються вихідні токени;
+      \item[3.3] Час блокування оновлюється:
+        $\texttt{readyAt}[n] \leftarrow t_{\text{now}} + n.\mathrm{latency}$;
+      \item[3.4] Емітуються події \texttt{onBeforeFire} і \texttt{onFire}.
+    \end{enumerate}
+
+  \item \textbf{Розміщення вихідних токенів.} Для кожного вихідного
+    токена знаходяться всі дуги із відповідним портом-джерелом; токен
+    поміщається у чергу кожної такої дуги з часом народження:
+    \begin{equation}
+      \mathrm{token}.t = t_{\text{now}} + n.\mathrm{latency},
+      \label{eq:emit_time}
+    \end{equation}
+    що гарантує правильну затримку доставки на наступному кроці.
+    Емітується подія \texttt{onToken}.
+\end{enumerate}
+
+\subsubsection*{FIFO-черга (buffers.ts)}
+
+Клас \texttt{FIFO<T>} є узагальненою чергою на базі масиву з методами:
+\texttt{push(item)}, \texttt{pop(): T | undefined}, \texttt{peek(): T | undefined}
+та властивістю \texttt{size(): number}. Одна черга ставиться у відповідність
+кожній дузі графа; черги ініціалізуються у конструкторі
+\texttt{DataflowRuntime} ітерацією по \texttt{graph.edges}.
+
+\subsubsection*{Логічний час і speed multiplier}
+
+Логічний час \texttt{simTime} збільшується методом
+\texttt{tickSimTime()} пропорційно до астрономічного часу та параметра
+\texttt{speed}:
+
+\begin{equation}
+  \texttt{simTime}_{i+1} = \texttt{simTime}_{i} +
+    (\Delta t_{\text{wall}}) \times \texttt{speed},
+  \label{eq:simtime}
+\end{equation}
+
+де $\Delta t_{\text{wall}}$ --- реальний проміжок між кадрами
+(у мілісекундах), а \texttt{speed} --- множник від 0{,}1 до 10.
+Відокремлення логічного часу від астрономічного дозволяє досліджувати
+поведінку алгоритму у будь-якому масштабі без зміни логіки
+активації~\cite{veen1986}.
+
+Метод \texttt{inject(nodeId, port, token)} дозволяє безпосередньо
+розмістити токен у \texttt{inbox} довільного вузла без проходження
+через дугу; метод \texttt{emitFrom(nodeId, outPort, token)} поміщає
+токен у черги всіх дуг, що відходять від зазначеного вузла і порту.
+
+
+% ─────────────────────────────────────────────────
+\subsection{Реалізація вузлів обчислення}
+
+\subsubsection*{Логіка виконання за типом вузла}
+
+Метод \texttt{execute(node, inputs)} реалізує перемикач за типом
+\texttt{NodeKind} і повертає об'єкт \texttt{FireResult} з вихідними
+токенами. Нижче описано логіку кожного типу.
+
+\textbf{SOURCE.} Вузол-джерело не має вхідних портів і не обробляється
+методом \texttt{execute}: його токени вводяться ззовні через виклик
+\texttt{runtime.emitFrom(nodeId, 'out', token)}. Токен містить значення
+$x(n) = \{re, im\}$ і поля \texttt{t = originT = simTime}, що фіксує
+момент народження токена для вимірювання наскрізної затримки.
+
+\textbf{DFT4.} Вузол приймає 4~токени через порти \texttt{in0}\ldots\texttt{in3}
+і застосовує алгоритм «метелика» radix-4~(\ref{eq:dft4_butterfly}), реалізований
+також у \texttt{computeDFT4()} модуля \texttt{math.ts}~\cite{nussbaumer1982}:
+
+\begin{align}
+  E_0 &= x_0 + x_2, \quad E_1 = x_0 - x_2, \notag \\
+  O_0 &= x_1 + x_3, \quad O_1 = x_1 - x_3, \notag \\
+  X_0 &= E_0 + O_0, \quad X_2 = E_0 - O_0, \notag \\
+  X_1 &= E_1 + jO_1, \quad X_3 = E_1 - jO_1.
+  \label{eq:dft4_impl}
+\end{align}
+
+Вузол породжує 4~вихідних токени через порти \texttt{out0}\ldots\texttt{out3}.
+Жодного нетривіального множення не виконується: множення на~$j$ зводиться
+до перестановки компонент зі зміною знаку.
+
+\textbf{TWIDDLE.} Вузол приймає 1~токен і виконує комплексне множення
+на поворотний множник $W_{16}^k = e^{-j2\pi k/16}$, де ціле число~$k$
+зберігається у \texttt{NodeSpec.params.twiddle.k}. Обчислення:
+
+\begin{equation}
+  z' = z \cdot W_{16}^k, \quad
+  \mathrm{re}' = z.\mathrm{re}\cdot\cos\theta - z.\mathrm{im}\cdot\sin\theta, \quad
+  \mathrm{im}' = z.\mathrm{re}\cdot\sin\theta + z.\mathrm{im}\cdot\cos\theta,
+  \label{eq:twiddle_impl}
+\end{equation}
+
+де $\theta = -2\pi k/16$. Вузол виконує 4~дійсних множення і 2~додавання.
+При $k = 0$ маємо $W_{16}^0 = 1$, і множення є тривіальним.
+
+\textbf{BUTTERFLY (DIF).} Вузол приймає 2~токени $x_0$, $x_1$,
+і реалізує метелик DIF (проріджування по частоті):
+
+\begin{equation}
+  y_0 = x_0 + x_1, \quad y_1 = (x_0 - x_1) \cdot W_N^k,
+  \label{eq:butterfly_dif}
+\end{equation}
+
+де параметр~$k$ береться з \texttt{NodeSpec.params.twiddle}. Тип
+\texttt{butterfly} використовується у відлагоджувальних конфігураціях
+графа; у граф $4\times4$ він не входить.
+
+\textbf{SINK.} Вузол приймає 1~токен, передає його значення у
+\texttt{store.sinks[nodeId]} через серіалізацію \texttt{JSON.stringify}
+і емітує подію \texttt{onOutput}. Під час обробки \texttt{onOutput}
+store обчислює наскрізну затримку:
+
+\begin{equation}
+  \mathrm{lat} = \texttt{simTime} - \mathrm{token}.\texttt{originT},
+  \label{eq:lat_calc}
+\end{equation}
+
+і оновлює EMA-метрику~(\ref{eq:heat_decay}).
+
+\subsubsection*{Складність окремих операцій}
+
+Таблиця~\ref{tab:op_complexity} наводить кількість арифметичних операцій
+для кожного типу обчислювального вузла.
+
+\begin{table}[H]
+  \caption{Обчислювальна складність вузлів DFG}
+  \label{tab:op_complexity}
+  \centering
+  \begin{tabular}{lcccc}
+    \toprule
+    Тип вузла & Вхідних & Вихідних & Множень & Додавань \\
+    \midrule
+    \texttt{dft4}      & 4 & 4 & 0 & 8 \\
+    \texttt{twiddle}   & 1 & 1 & 4 & 2 \\
+    \texttt{butterfly} & 2 & 2 & 4 & 2 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection*{Web Worker для пакетного обчислення}
+
+Для уникнення блокування головного потоку при великих розмірах
+перетворення реалізовано Web Worker у файлі
+\texttt{src/workers/fft.worker.ts}. Через бібліотеку Comlink
+функція \texttt{applyTwiddle(tokens, factors)} приймає масив токенів
+і масив поворотних множників, виконує пакетне комплексне множення
+у фоновому потоці та повертає результат. У конфігурації $N = 16$
+Worker не задіяний; він зарезервований для масштабування.
+
+
+% ─────────────────────────────────────────────────
+\subsection{Реалізація 16-точкового ШПФ (generateDFT4x4)}
+
+\subsubsection*{Алгоритм побудови графа}
+
+Функція \texttt{generateDFT4x4(latency): Graph} у модулі
+\texttt{src/graph/generateDFT4x4.ts} будує DFG, описаний у
+підрозділі~2.2, за таким алгоритмом:
+
+\begin{enumerate}
+  \item Створюються 16~вузлів \texttt{source} з ідентифікаторами
+    \texttt{src0}\ldots\texttt{src15}, кожен з одним вихідним портом \texttt{out}.
+
+  \item Створюються 4~вузли \texttt{dft4} першого ярусу
+    (\texttt{row-0}\ldots\texttt{row-3}) з 4~вхідними та 4~вихідними
+    портами і затримкою \texttt{latency}.
+
+  \item Додаються 16~дуг \texttt{source}~$\to$~\texttt{dft4}:
+    вузол \texttt{src}$_i$ з'єднується з \texttt{row-}$r$.\texttt{in}$s$,
+    де $i = r + 4s$, затримка \texttt{delay}~$= 600$.
+
+  \item Створюються 16~вузлів \texttt{twiddle}
+    (\texttt{tw-}$r$\texttt{-}$k_2$ для $r, k_2 \in \{0,1,2,3\}$)
+    з параметром $\{N{:}16,\; k{:} r \cdot k_2\}$ і затримкою
+    \texttt{latency/2} $= 200$.
+
+  \item Додаються 16~дуг \texttt{dft4}~$\to$~\texttt{twiddle}:
+    \texttt{row-}$r$\texttt{.out}$k_2$~$\to$~\texttt{tw-}$r$\texttt{-}$k_2$\texttt{.in},
+    \texttt{delay}~$= 600$.
+
+  \item Створюються 4~вузли \texttt{dft4} другого ярусу
+    (\texttt{col-0}\ldots\texttt{col-3}).
+
+  \item Додаються 16~дуг \texttt{twiddle}~$\to$~\texttt{dft4}:
+    \texttt{tw-}$r$\texttt{-}$k_2$\texttt{.out}~$\to$~\texttt{col-}$k_2$\texttt{.in}$r$,
+    \texttt{delay}~$= 600$.
+
+  \item Створюються 16~вузлів \texttt{sink}
+    (\texttt{snk0}\ldots\texttt{snk15}).
+
+  \item Додаються 16~дуг \texttt{dft4}~$\to$~\texttt{sink}:
+    \texttt{col-}$k_2$\texttt{.out}$k_1$~$\to$~\texttt{snk}$_{k_2 + 4k_1}$\texttt{.in},
+    \texttt{delay}~$= 600$.
+\end{enumerate}
+
+Результат --- об'єкт \texttt{Graph} із 56~вузлами і 64~дугами.
+
+\subsubsection*{Компонування вузлів}
+
+Модуль \texttt{src/graph/layout4x4.ts} обчислює координати вузлів
+для їх відображення у React Flow. Граф розподіляється на
+п'ять вертикальних ярусів із фіксованим горизонтальним кроком
+\texttt{stageGap}~$= 280$ пікселів:
+
+\begin{itemize}
+  \item Ярус~1: 16~вузлів \texttt{source} (рівномірно по~$y$);
+  \item Ярус~2: 4~вузли \texttt{dft4} першого ярусу;
+  \item Ярус~3: 16~вузлів \texttt{twiddle};
+  \item Ярус~4: 4~вузли \texttt{dft4} другого ярусу;
+  \item Ярус~5: 16~вузлів \texttt{sink}.
+\end{itemize}
+
+Вузли в кожному ярусі рівномірно розподіляються по~$y$ з кроком
+\texttt{rowGap}~$= 140$ пікселів. Координати передаються React Flow
+у вигляді масиву \texttt{Node[]\{position:\{x,y\}\}}.
+
+\subsubsection*{Відповідність математичній моделі}
+
+Таблиця~\ref{tab:math_code} деталізує відповідність між математичною
+моделлю розділу~2 і компонентами коду.
+
+\begin{table}[H]
+  \caption{Відповідність математичної моделі та програмної реалізації}
+  \label{tab:math_code}
+  \centering
+  \begin{tabular}{p{4.5cm}p{7.5cm}}
+    \toprule
+    Математика (розд.~2) & Програмна реалізація \\
+    \midrule
+    Стадія~1: $G_r(k_1) =$ ДПФ4 рядка~$r$
+      & Вузли \texttt{row-0}\ldots\texttt{row-3}, алгоритм~(\ref{eq:dft4_impl}) \\[3pt]
+    Стадія~2: $H_r(k_1) = W_{16}^{r k_1} G_r(k_1)$
+      & Вузли \texttt{tw-}$r$\texttt{-}$k_2$, формула~(\ref{eq:twiddle_impl}) \\[3pt]
+    Стадія~3: $X(k_2+4k_1) =$ ДПФ4 стовпця~$k_1$
+      & Вузли \texttt{col-0}\ldots\texttt{col-3}, алгоритм~(\ref{eq:dft4_impl}) \\[3pt]
+    $A[r][s] = x(4s+r)$, формула~(\ref{eq:mat_A})
+      & Дуги \texttt{src}$_i$~$\to$~\texttt{row-}$r$\texttt{.in}$s$, $i = r+4s$ \\[3pt]
+    \texttt{edge.delay}~$= 600$
+      & Транспортна затримка між ярусами \\[3pt]
+    \texttt{latency dft4}~$= 400$
+      & Час виконання алгоритму~(\ref{eq:dft4_impl}) \\[3pt]
+    \texttt{latency twiddle}~$= 200$
+      & Час виконання формули~(\ref{eq:twiddle_impl}) \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+
+% ─────────────────────────────────────────────────
+\subsection{Візуалізація та інтерфейс користувача}
+
+\subsubsection*{Компонент GraphView та анімаційний цикл}
+
+Компонент \texttt{GraphView} (файл \texttt{src/graph/GraphView.tsx})
+є головним контейнером інтерфейсу симулятора. Він реєструє
+кастомні типи вузлів і ребер у React Flow:
+
+\begin{itemize}
+  \item вузлові типи: \texttt{source}~$\to$~\texttt{SourceNode},
+    \texttt{sink}~$\to$~\texttt{SinkNode},
+    \texttt{dft4}~$\to$~\texttt{DFT4Node},
+    \texttt{twiddle}~$\to$~\texttt{TwiddleNode};
+  \item тип ребра: \texttt{token}~$\to$~\texttt{TokenEdge}.
+\end{itemize}
+
+При монтуванні компонент викликає \texttt{generateDFT4x4()} і
+\texttt{layoutDFT4x4()}, передає отриманий граф у store через
+\texttt{setGraph(g)}, а позиції вузлів --- у стан React Flow.
+
+Анімаційний цикл запускається у ефекті \texttt{useEffect} після
+ініціалізації \texttt{runtime}:
+
+\begin{enumerate}
+  \item Якщо \texttt{store.running = true}: викликається \texttt{tickSimTime()},
+    потім \texttt{runtime.tick(dt, maxFires)};
+    у режимі \texttt{'single-fire'} \texttt{maxFires}~$= 1$,
+    у режимі \texttt{'run'} --- \texttt{Infinity}.
+  \item Після кожного кадру викликаються \texttt{sampleQueues()} та
+    \texttt{decayActivity()} для підтримки актуальних метрик і
+    теплової карти.
+  \item Щосекунди агрегуються лічильники \texttt{firesInWindow} для
+    обчислення пропускної здатності у \texttt{metrics}.
+  \item Цикл перезапускається через \texttt{requestAnimationFrame}.
+\end{enumerate}
+
+\subsubsection*{Компонент TokenEdge та анімація токенів}
+
+Компонент \texttt{TokenEdge} (файл \texttt{src/graph/TokenEdge.tsx})
+відображає кожну дугу DFG як анімовану стрілку, по якій переміщуються
+кружечки-токени. Для кожного токена у \texttt{store.tokensByEdge[edgeId]}
+обчислюється відносний прогрес руху:
+
+\begin{equation}
+  \mathrm{progress} = \frac{\texttt{simTime} - \mathrm{token}.t_0}
+                           {\mathrm{token}.\texttt{delay}} \in [0, 1],
+  \label{eq:progress}
+\end{equation}
+
+де $t_0$ --- час додавання токена у \texttt{tokensByEdge} (момент
+виникнення на дузі). Координата токена на ребрі визначається лінійною
+інтерполяцією:
+
+\begin{equation}
+  \mathbf{r}(\mathrm{progress}) =
+    (1 - \mathrm{progress})\,\mathbf{r}_{\text{src}} +
+    \mathrm{progress}\,\mathbf{r}_{\text{tgt}},
+  \label{eq:lerp}
+\end{equation}
+
+де $\mathbf{r}_{\text{src}}$ та $\mathbf{r}_{\text{tgt}}$ --- координати
+вузлів-кінців дуги. Колір кружечка кодує тип вузла, з якого вийшов токен.
+
+\subsubsection*{Вузлові компоненти}
+
+\textbf{SourceNode.} Відображає два повзунки (Re і Im) для введення
+вхідного значення $x(n)$ і кнопку «Emit», що викликає
+\texttt{store.setLastInput(id, v)}.
+Після підтвердження введення \texttt{store.injectData()} розміщує токени
+у буфери всіх \texttt{source}-вузлів одночасно.
+
+\textbf{SinkNode.} Відображає поточне спектральне значення $X(k)$
+у форматі $\mathrm{re} + j \cdot \mathrm{im}$. Якщо функція
+\texttt{compareWithFFT()} виявила розбіжність для цього індексу~$k$,
+вузол підсвічується червоним (поле \texttt{store.mismatches[id] = true}).
+
+\textbf{DFT4Node, TwiddleNode.} Відображають тип вузла, поточне
+значення активності (через CSS-клас з \texttt{\_shared.ts}) і,
+при натисканні, відкривають панель інспектора \texttt{NodeInspector}
+з останніми вхідними та вихідними токенами.
+
+\subsubsection*{Управління симуляцією}
+
+Інтерфейс містить кнопки «$\blacktriangleright$», «$\mathbf{\vert\vert}$», «Step» і перемикач режимів
+«Run~/ Single-fire». У режимі «Single-fire» кожен виклик \texttt{tick()}
+активує не більше одного вузла, що дозволяє покроково спостерігати
+поширення токенів по графу. Прапорець «Pause on fire» автоматично
+зупиняє цикл при кожній активації будь-якого вузла.
+
+Компонент \texttt{PresetManager} забезпечує збереження і завантаження
+користувацьких наборів вхідних значень. Вбудовані пресети
+(\texttt{impulse}, \texttt{sin1}, \texttt{sin3}, \texttt{ramp} тощо)
+генеруються функцією \texttt{makePreset(N, kind)} у store.
+
+Компонент \texttt{TerminalOutput} відображає прокручуваний журнал
+подій \texttt{onToken} / \texttt{onFire} / \texttt{onOutput} у режимі
+реального часу, що дозволяє простежити послідовність активацій.
+
+
+% ─────────────────────────────────────────────────
+\subsection{Управління станом симуляції}
+
+\subsubsection*{Структура Zustand-store}
+
+Централізований стан симулятора реалізовано за допомогою бібліотеки
+Zustand у модулі \texttt{src/store/simStore.ts}. Бібліотека надає
+реактивне сховище без класів і контекстів: компоненти підписуються на
+окремі зрізи стану через хук \texttt{useSimStore(selector)}.
+Таблиця~\ref{tab:store} описує ключові поля store.
+
+\begin{table}[H]
+  \caption{Ключові поля Zustand-store симулятора}
+  \label{tab:store}
+  \centering
+  \begin{tabular}{p{3.2cm}p{3.5cm}p{5.5cm}}
+    \toprule
+    Поле & Тип & Призначення \\
+    \midrule
+    \texttt{graph}
+      & \texttt{Graph}
+      & Поточна топологія DFG \\[3pt]
+    \texttt{runtime}
+      & \texttt{DataflowRuntime|null}
+      & Ядро симуляції \\[3pt]
+    \texttt{running}
+      & \texttt{boolean}
+      & Стан rAF-циклу \\[3pt]
+    \texttt{speed}
+      & \texttt{number}
+      & Множник швидкості $\texttt{speed} \in [0{,}1;\;10]$ \\[3pt]
+    \texttt{simTime}
+      & \texttt{number}
+      & Поточний логічний час \\[3pt]
+    \texttt{tokensByEdge}
+      & \texttt{Record<id, TokenVis[]>}
+      & Токени для анімації у TokenEdge \\[3pt]
+    \texttt{sinks}
+      & \texttt{Record<id, string>}
+      & JSON-серіалізовані $X(k)$ із sink-вузлів \\[3pt]
+    \texttt{nodeActivity}
+      & \texttt{Record<id, number>}
+      & Інтенсивність теплової карти $a_i \in [0;\infty)$ \\[3pt]
+    \texttt{metrics}
+      & \texttt{\{throughputFps,} \texttt{latencyEmaMs,} \texttt{queueEma,\ldots\}}
+      & EMA-метрики \\[3pt]
+    \texttt{mismatches}
+      & \texttt{Record<id, boolean>}
+      & Результат порівняння з еталоном \\[3pt]
+    \texttt{inspector}
+      & \texttt{InspectorState}
+      & Вміст панелі NodeInspector \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection*{Ключові методи store}
+
+\textbf{setGraph(g).} Встановлює новий граф і одночасно створює
+новий екземпляр \texttt{DataflowRuntime}, передаючи йому
+обробники подій \texttt{onToken}, \texttt{onFire}, \texttt{onBeforeFire},
+\texttt{onOutput} та функцію \texttt{() => store.simTime} як годинник.
+Усі буфери токенів і результати скидаються.
+
+\textbf{injectData(vec).} Для кожного з 16~вузлів \texttt{source}
+викликає \texttt{runtime.emitFrom()}, що поміщає токен зі значенням
+$\{re, im\}$ у черги вихідних дуг. Після введення даних скидаються
+метрики і кеш вхідних/вихідних значень вузлів.
+
+\textbf{start() / stop() / step().} Метод \texttt{start()} встановлює
+\texttt{running~= true} і запам'ятовує \texttt{lastWall = performance.now()}.
+Метод \texttt{stop()} зупиняє цикл і нараховує останній приріст
+\texttt{simTime}. Метод \texttt{step()} виконує один крок без запуску
+rAF-циклу: збільшує \texttt{simTime} на $16 \times \texttt{speed}$ і
+викликає \texttt{runtime.tick(dt)}.
+
+\textbf{applyPreset(name).} Формує вектор вхідних значень
+через \texttt{makePreset(N, kind)} і делегує виклик до \texttt{injectData()}.
+Вбудовані пресети охоплюють: \texttt{impulse}, \texttt{two-impulses},
+\texttt{sin1}, \texttt{sin3}, \texttt{sin1+3}, \texttt{ramp}.
+
+\subsubsection*{Верифікація результатів}
+
+Функція \texttt{compareWithFFT(graph, lastInput, sinks, eps)} у модулі
+\texttt{src/utils/compare.ts} порівнює результати симулятора з еталонним
+ДПФ, обчисленим бібліотекою \texttt{fft.js}. Для кожного $k \in \{0 \ldots 15\}$
+перевіряється умова:
+
+\begin{equation}
+  \bigl|\,X_{\text{sim}}(k) - X_{\text{ref}}(k)\,\bigr| < \varepsilon,
+  \quad \varepsilon = 10^{-9}.
+  \label{eq:compare}
+\end{equation}
+
+Функція повертає об'єкт \texttt{\{mismatches: Record<sinkId, boolean>\}},
+де значення \texttt{true} означає перевищення порогу~$\varepsilon$.
+Результат записується у \texttt{store.mismatches} і відображається
+підсвічуванням відповідних \texttt{SinkNode}. Детальний аналіз верифікації
+наводиться у розділі~4.
+
+
+% ─────────────────────────────────────────────────
+\subsection*{Висновки до розділу~3}
+
+У третьому розділі описано програмну реалізацію симулятора потокового
+обчислювача 16-точкового ШПФ на основі Next.js, TypeScript та React~Flow.
+
+Ядро симуляції \texttt{DataflowRuntime} реалізує правило активації
+вузлів через чотирикроковий метод \texttt{tick()}: доставка токенів,
+перевірка готовності, активація та розміщення вихідних токенів ---
+що точно відповідає теоретичній моделі DFG~(\ref{eq:delivery})--(\ref{eq:emit_time}).
+
+Функція \texttt{generateDFT4x4()} будує граф із 56~вузлів і 64~дуг
+відповідно до математичної моделі підрозділу~2.2, де стадії~1--3
+відображаються на яруси \texttt{row}, \texttt{twiddle} і \texttt{col}
+з параметрами \texttt{latency}~$\in\{400, 200\}$ і \texttt{delay}~$= 600$.
+
+Логічний час відокремлений від астрономічного через формулу~(\ref{eq:simtime}),
+що забезпечує підтримку регульованої швидкості симуляції без зміни
+логіки активації.
+
+Компонент \texttt{TokenEdge} анімує рух токенів через обчислення
+прогресу~(\ref{eq:progress}) і лінійну інтерполяцію~(\ref{eq:lerp}),
+забезпечуючи безперервну візуалізацію потоку даних.
+
+Верифікація результатів через \texttt{compareWithFFT()} з порогом
+$\varepsilon = 10^{-9}$~(\ref{eq:compare}) забезпечує числову коректність
+симулятора; детальне тестування розглядається у розділі~4.

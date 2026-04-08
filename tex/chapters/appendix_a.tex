@@ -1,0 +1,289 @@
+% chapters/appendix_a.tex
+\section*{ДОДАТОК А}
+\addcontentsline{toc}{section}{ДОДАТОК А. Фрагменти вихідного коду симулятора}
+{\centering\bfseries Додаток А\par}
+{\centering Фрагменти вихідного коду програмної реалізації\par}
+\vspace{1em}
+
+% -------------------------------------------------------------------
+\subsection*{А.1 Визначення типів даних (src/core/types.ts)}
+% -------------------------------------------------------------------
+
+\begin{lstlisting}[style=jsstyle,
+  caption={Визначення типів даних симулятора},
+  label={lst:types}]
+// src/core/types.ts
+
+export type NodeId = string;
+export type PortId = string;
+
+export type Complex = { re: number; im: number };
+
+export type Token = {
+  id: string;
+  value: number | Complex;
+  t: number;       // logical arrival time
+  originT: number;
+};
+
+export type Edge = {
+  id: string;
+  from: { node: NodeId; port: PortId };
+  to:   { node: NodeId; port: PortId };
+  delay?: number;      // channel delay (simulation ms)
+  label?: string;      // arc label text
+  labelValue?: Complex; // numeric value (tooltip)
+};
+
+export type NodeSpec = {
+  id: NodeId;
+  kind: NodeKind;
+  inPorts: PortId[];
+  outPorts: PortId[];
+  latency: number;  // computation time (simulation ms)
+  state?: Record<string, unknown>;
+  params?: {
+    twiddle?: { N: number; k: number };
+  };
+};
+
+export type Graph = {
+  nodes: NodeSpec[];
+  edges: Edge[];
+};
+
+export type FireResult = {
+  outputs: Record<PortId, Token>;
+};
+
+export type NodeKind =
+  'source' | 'sink' | 'add' | 'mul' | 'butterfly' | 'dft4' | 'twiddle';
+\end{lstlisting}
+
+% -------------------------------------------------------------------
+\subsection*{А.2 Функції комплексної арифметики (src/utils/math.ts)}
+% -------------------------------------------------------------------
+
+\begin{lstlisting}[style=jsstyle,
+  caption={Функції комплексної арифметики та алгоритм 4-точкового ДПФ},
+  label={lst:math}]
+// src/utils/math.ts
+import { Complex } from '../core/types';
+
+export const cplxAdd = (a: Complex, b: Complex): Complex => ({
+  re: a.re + b.re,
+  im: a.im + b.im,
+});
+
+export const cplxSub = (a: Complex, b: Complex): Complex => ({
+  re: a.re - b.re,
+  im: a.im - b.im,
+});
+
+// Multiply by j: (re + im*j) * j = -im + re*j
+export const cplxMulJ = (a: Complex): Complex => ({
+  re: -a.im,
+  im: a.re,
+});
+
+// Optimised 4-point DFT without non-trivial multiplications
+export function computeDFT4(
+  x0: Complex, x1: Complex, x2: Complex, x3: Complex
+): Complex[] {
+  // E0 = x0 + x2
+  const E0 = cplxAdd(x0, x2);
+  // E1 = x0 - x2
+  const E1 = cplxSub(x0, x2);
+  // O0 = x1 + x3
+  const O0 = cplxAdd(x1, x3);
+  // O1 = x1 - x3
+  const O1 = cplxSub(x1, x3);
+
+  // X0 = E0 + O0
+  const X0 = cplxAdd(E0, O0);
+  // X2 = E0 - O0
+  const X2 = cplxSub(E0, O0);
+
+  // X1 = E1 - j*O1
+  const jO1 = cplxMulJ(O1);
+  const X1  = cplxSub(E1, jO1);
+  // X3 = E1 + j*O1
+  const X3  = cplxAdd(E1, jO1);
+
+  return [X0, X1, X2, X3];
+}
+\end{lstlisting}
+
+% -------------------------------------------------------------------
+\subsection*{А.3 Генерація графу потоку даних (src/graph/generateDFT4x4.ts)}
+% -------------------------------------------------------------------
+
+\begin{lstlisting}[style=jsstyle,
+  caption={Генерація DFG обчислювача 16-точкового ШПФ},
+  label={lst:generate}]
+// src/graph/generateDFT4x4.ts
+
+import type { Graph, NodeSpec, Edge } from '@/core/types';
+
+export function generateDFT4x4(latency = 400): Graph {
+  const nodes: NodeSpec[] = [];
+  const edges: Edge[] = [];
+
+  const N = 16;
+  const radix = 4;
+
+  // 1. CREATE SOURCE NODES
+  for (let i = 0; i < N; i++) {
+    nodes.push({
+      id: `src${i}`,
+      kind: 'source',
+      inPorts: [],
+      outPorts: ['out'],
+      latency: 0,
+    });
+  }
+
+  // 2. CREATE ROW DFT4 NODES
+  for (let n1 = 0; n1 < radix; n1++) {
+    nodes.push({
+      id: `row-${n1}`,
+      kind: 'dft4',
+      inPorts: ['in0', 'in1', 'in2', 'in3'],
+      outPorts: ['out0', 'out1', 'out2', 'out3'],
+      latency,
+    });
+
+    // Connect Source -> Row DFT
+    // Input array index: i = n1 + 4*n2
+    for (let n2 = 0; n2 < radix; n2++) {
+      const srcIndex = n1 + 4 * n2;
+      edges.push({
+        id: `edge-src${srcIndex}-row${n1}in${n2}`,
+        from: { node: `src${srcIndex}`, port: 'out' },
+        to:   { node: `row-${n1}`,      port: `in${n2}` },
+        delay: 600,
+      });
+    }
+  }
+
+  // 3. CREATE TWIDDLE FACTOR NODES  W_16^(n1 * k2)
+  for (let n1 = 0; n1 < radix; n1++) {
+    for (let k2 = 0; k2 < radix; k2++) {
+      const twiddlePower = n1 * k2;
+      const twiddleId    = `tw-${n1}-${k2}`;
+
+      nodes.push({
+        id: twiddleId,
+        kind: 'twiddle',
+        inPorts:  ['in'],
+        outPorts: ['out'],
+        latency: latency / 2, // multiplication is faster than DFT4
+        params: {
+          twiddle: { N: 16, k: twiddlePower },
+        },
+      });
+
+      // Connect Row DFT -> Twiddle
+      edges.push({
+        id: `edge-row${n1}out${k2}-tw${n1}_${k2}`,
+        from:  { node: `row-${n1}`, port: `out${k2}` },
+        to:    { node: twiddleId,   port: 'in' },
+        label: twiddlePower > 0 ? `W16_${twiddlePower}` : undefined,
+        delay: 600,
+      });
+    }
+  }
+
+  // 4. CREATE COLUMN DFT4 NODES
+  for (let k2 = 0; k2 < radix; k2++) {
+    nodes.push({
+      id: `col-${k2}`,
+      kind: 'dft4',
+      inPorts:  ['in0', 'in1', 'in2', 'in3'],
+      outPorts: ['out0', 'out1', 'out2', 'out3'],
+      latency,
+    });
+
+    // Connect Twiddle -> Column DFT (matrix transpose)
+    // Column node k2 collects outputs from all row nodes n1
+    for (let n1 = 0; n1 < radix; n1++) {
+      const twiddleId = `tw-${n1}-${k2}`;
+      edges.push({
+        id:   `edge-tw${n1}_${k2}-col${k2}in${n1}`,
+        from: { node: twiddleId,  port: 'out' },
+        to:   { node: `col-${k2}`, port: `in${n1}` },
+        delay: 600,
+      });
+    }
+  }
+
+  // 5. CREATE SINK NODES
+  for (let i = 0; i < N; i++) {
+    nodes.push({
+      id: `snk${i}`,
+      kind: 'sink',
+      inPorts:  ['in'],
+      outPorts: [],
+      latency:  0,
+    });
+  }
+
+  // Connect Column DFT -> Sink
+  // Output index: k = k2 + 4*k1
+  for (let k2 = 0; k2 < radix; k2++) {
+    for (let k1 = 0; k1 < radix; k1++) {
+      const sinkIndex = k2 + 4 * k1;
+      edges.push({
+        id:   `edge-col${k2}out${k1}-sink${sinkIndex}`,
+        from: { node: `col-${k2}`,     port: `out${k1}` },
+        to:   { node: `snk${sinkIndex}`, port: 'in' },
+        delay: 600,
+      });
+    }
+  }
+
+  return { nodes, edges };
+}
+\end{lstlisting}
+
+% -------------------------------------------------------------------
+\subsection*{А.4 Короткий опис модуля ядра симуляції (src/core/scheduler.ts)}
+% -------------------------------------------------------------------
+
+Модуль \texttt{src/core/scheduler.ts} реалізує клас \texttt{DataflowRuntime} ---
+ядро виконання dataflow-моделі.
+Конструктор приймає об'єкт \texttt{Graph} (вузли та дуги) і функцію
+\texttt{getTime(): number}, що повертає поточний логічний час симуляції.
+При ініціалізації для кожної дуги графа створюється окрема FIFO-черга
+типу \texttt{Map<edgeId, Token[]>}, а для кожного вузла --- запис у
+\texttt{Map<nodeId, number>} (час готовності \texttt{readyAt}).
+
+Основний метод \texttt{tick(dt: number, maxFires: number)} виконує чотири
+кроки на кожному кроці симуляції:
+\begin{enumerate}
+  \item \textbf{Доставка токенів.} Для кожної дуги перевіряється умова
+    $t_{\text{now}} - t_{\text{token}} \geq \mathtt{edge.delay}$; токени, що
+    задовольняють умову, переміщуються з черги дуги до вхідного буфера
+    \texttt{inbox} відповідного вузла.
+  \item \textbf{Перевірка готовності вузла.} Вузол вважається готовим до
+    виконання, якщо всі його вхідні порти заповнені токенами і поточний
+    логічний час не менший за \texttt{readyAt[nodeId]}.
+  \item \textbf{Активація вузла.} Для готового вузла викликається метод
+    \texttt{execute()}, що обчислює вихідні токени залежно від типу вузла
+    (\texttt{NodeKind}): \texttt{dft4} викликає \texttt{computeDFT4()},
+    \texttt{twiddle} --- комплексне множення на $W_N^k$, \texttt{sink} ---
+    зберігає результат у масиві виходів.
+    Значення \texttt{readyAt[nodeId]} оновлюється на
+    $t_{\text{now}} + \mathtt{node.latency}$.
+  \item \textbf{Постановка вихідних токенів у черги.} Метод
+    \texttt{emitFrom()} поміщає кожен вихідний токен у FIFO-черги дуг,
+    що виходять з активованого вузла, з міткою часу $t_{\text{emit}}$.
+\end{enumerate}
+
+Клас підтримує механізм подій: \texttt{onToken} (токен доставлено на вхід
+вузла), \texttt{onFire} (вузол активовано), \texttt{onOutput} (результат
+з'явився на виході \texttt{sink}).
+Ці події використовуються компонентом \texttt{GraphView} для анімації
+руху токенів і оновлення теплової карти активності вузлів.
+
+Повний код модуля наведено у репозиторії проекту.
