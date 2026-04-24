@@ -17,7 +17,7 @@ React Flow (бібліотека \texttt{@xyflow/react}), спектральна
   \caption{Модулі програмного забезпечення симулятора}
   \label{tab:modules}
   \centering
-  \begin{tabular}{p{3.0cm}p{4.5cm}p{5.5cm}}
+  \begin{tabular}{p{2.8cm}p{5.5cm}p{4.2cm}}
     \toprule
     Модуль & Файл(и) & Призначення \\
     \midrule
@@ -25,25 +25,25 @@ React Flow (бібліотека \texttt{@xyflow/react}), спектральна
       & \texttt{src/core/types.ts}
       & \texttt{Token}, \texttt{Edge}, \texttt{NodeSpec}, \texttt{NodeKind}, \texttt{Graph} \\[3pt]
     Ядро симуляції
-      & \texttt{src/core/scheduler.ts}
+      & \texttt{src/core/\allowbreak scheduler.ts}
       & Клас \texttt{DataflowRuntime}, метод \texttt{tick()} \\[3pt]
     FIFO-черги
-      & \texttt{src/core/buffers.ts}
+      & \texttt{src/core/\allowbreak buffers.ts}
       & Черга токенів на дугах \\[3pt]
     Генерація графа
-      & \texttt{src/graph/generateDFT4x4.ts}
+      & \texttt{src/graph/\allowbreak generateDFT4x4.ts}
       & Побудова DFG $4\times4$ (56 вузлів, 64 дуги) \\[3pt]
     Компонування
-      & \texttt{src/graph/layout4x4.ts}
+      & \texttt{src/graph/\allowbreak layout4x4.ts}
       & Координати вузлів за ярусами \\[3pt]
     Граф і анімація
-      & \texttt{src/graph/GraphView.tsx}
+      & \texttt{src/graph/\allowbreak GraphView.tsx}
       & React Flow + rAF-цикл \\[3pt]
     Управління станом
-      & \texttt{src/store/simStore.ts}
+      & \texttt{src/store/\allowbreak simStore.ts}
       & Zustand store \\[3pt]
     Спектр
-      & \texttt{src/components/SpectrumView.tsx}
+      & \texttt{src/components/\allowbreak SpectrumView.tsx}
       & Canvas bar chart $|X(k)|$ \\[3pt]
     Метрики
       & \texttt{src/components/Metrics.tsx}
@@ -52,10 +52,10 @@ React Flow (бібліотека \texttt{@xyflow/react}), спектральна
       & \texttt{src/utils/math.ts}
       & \texttt{cplxAdd}, \texttt{cplxMulJ}, \texttt{computeDFT4} \\[3pt]
     Верифікація
-      & \texttt{src/utils/compare.ts}
+      & \texttt{src/utils/\allowbreak compare.ts}
       & \texttt{compareWithFFT()}, $\varepsilon = 10^{-9}$ \\[3pt]
     Web Worker
-      & \texttt{src/workers/fft.worker.ts}
+      & \texttt{src/workers/\allowbreak fft.worker.ts}
       & Comlink + \texttt{applyTwiddle()} \\
     \bottomrule
   \end{tabular}
@@ -101,7 +101,7 @@ React Flow (бібліотека \texttt{@xyflow/react}), спектральна
 
 \subsubsection*{Клас DataflowRuntime}
 
-Клас \texttt{DataflowRuntime} (модуль \texttt{src/core/scheduler.ts})
+Клас \texttt{DataflowRuntime} (модуль \texttt{src/core/\allowbreak scheduler.ts})
 є програмною реалізацією абстрактної машини потоку даних, описаної
 у підрозділі~1.4~\cite{veen1986}. Він відповідає за виконання правила
 активації вузлів та управління FIFO-чергами на дугах графа.
@@ -225,13 +225,19 @@ $x(n) = \{re, im\}$ і поля \texttt{t = originT = simTime}, що фіксу�
 і застосовує алгоритм «метелика» radix-4~(\ref{eq:dft4_butterfly}), реалізований
 також у \texttt{computeDFT4()} модуля \texttt{math.ts}~\cite{nussbaumer1982}:
 
-\begin{align}
-  E_0 &= x_0 + x_2, \quad E_1 = x_0 - x_2, \notag \\
-  O_0 &= x_1 + x_3, \quad O_1 = x_1 - x_3, \notag \\
-  X_0 &= E_0 + O_0, \quad X_2 = E_0 - O_0, \notag \\
-  X_1 &= E_1 + jO_1, \quad X_3 = E_1 - jO_1.
+\begin{equation*}
+  E_0 = x_0 + x_2, \quad E_1 = x_0 - x_2,
+\end{equation*}
+\begin{equation*}
+  O_0 = x_1 + x_3, \quad O_1 = x_1 - x_3,
+\end{equation*}
+\begin{equation*}
+  X_0 = E_0 + O_0, \quad X_2 = E_0 - O_0,
+\end{equation*}
+\begin{equation}
+  X_1 = E_1 + jO_1, \quad X_3 = E_1 - jO_1.
   \label{eq:dft4_impl}
-\end{align}
+\end{equation}
 
 Вузол породжує 4~вихідних токени через порти \texttt{out0}\ldots\texttt{out3}.
 Жодного нетривіального множення не виконується: множення на~$j$ зводиться
@@ -299,7 +305,7 @@ store обчислює наскрізну затримку:
 
 Для уникнення блокування головного потоку при великих розмірах
 перетворення реалізовано Web Worker у файлі
-\texttt{src/workers/fft.worker.ts}. Через бібліотеку Comlink
+\texttt{src/workers/\allowbreak fft.worker.ts}. Через бібліотеку Comlink
 функція \texttt{applyTwiddle(tokens, factors)} приймає масив токенів
 і масив поворотних множників, виконує пакетне комплексне множення
 у фоновому потоці та повертає результат. У конфігурації $N = 16$
@@ -311,8 +317,8 @@ Worker не задіяний; він зарезервований для мас�
 
 \subsubsection*{Алгоритм побудови графа}
 
-Функція \texttt{generateDFT4x4(latency): Graph} у модулі
-\texttt{src/graph/generateDFT4x4.ts} будує DFG, описаний у
+Функція \texttt{generateDFT4x4\allowbreak (latency): Graph} у модулі
+\texttt{src/graph/\allowbreak generateDFT4x4.ts} будує DFG, описаний у
 підрозділі~2.2, за таким алгоритмом:
 
 \begin{enumerate}
@@ -355,7 +361,7 @@ Worker не задіяний; він зарезервований для мас�
 
 \subsubsection*{Компонування вузлів}
 
-Модуль \texttt{src/graph/layout4x4.ts} обчислює координати вузлів
+Модуль \texttt{src/graph/\allowbreak layout4x4.ts} обчислює координати вузлів
 для їх відображення у React Flow. Граф розподіляється на
 п'ять вертикальних ярусів із фіксованим горизонтальним кроком
 \texttt{stageGap}~$= 280$ пікселів:
@@ -409,7 +415,7 @@ Worker не задіяний; він зарезервований для мас�
 
 \subsubsection*{Компонент GraphView та анімаційний цикл}
 
-Компонент \texttt{GraphView} (файл \texttt{src/graph/GraphView.tsx})
+Компонент \texttt{GraphView} (файл \texttt{src/graph/\allowbreak GraphView.tsx})
 є головним контейнером інтерфейсу симулятора. Він реєструє
 кастомні типи вузлів і ребер у React Flow:
 
@@ -443,7 +449,7 @@ Worker не задіяний; він зарезервований для мас�
 
 \subsubsection*{Компонент TokenEdge та анімація токенів}
 
-Компонент \texttt{TokenEdge} (файл \texttt{src/graph/TokenEdge.tsx})
+Компонент \texttt{TokenEdge} (файл \texttt{src/graph/\allowbreak TokenEdge.tsx})
 відображає кожну дугу DFG як анімовану стрілку, по якій переміщуються
 кружечки-токени. Для кожного токена у \texttt{store.tokensByEdge[edgeId]}
 обчислюється відносний прогрес руху:
@@ -510,7 +516,7 @@ Worker не задіяний; він зарезервований для мас�
 \subsubsection*{Структура Zustand-store}
 
 Централізований стан симулятора реалізовано за допомогою бібліотеки
-Zustand у модулі \texttt{src/store/simStore.ts}. Бібліотека надає
+Zustand у модулі \texttt{src/store/\allowbreak simStore.ts}. Бібліотека надає
 реактивне сховище без класів і контекстів: компоненти підписуються на
 окремі зрізи стану через хук \texttt{useSimStore(selector)}.
 Таблиця~\ref{tab:store} описує ключові поля store.
@@ -527,7 +533,7 @@ Zustand у модулі \texttt{src/store/simStore.ts}. Бібліотека н�
       & \texttt{Graph}
       & Поточна топологія DFG \\[3pt]
     \texttt{runtime}
-      & \texttt{DataflowRuntime|null}
+      & \texttt{Dataflow\allowbreak Runtime|null}
       & Ядро симуляції \\[3pt]
     \texttt{running}
       & \texttt{boolean}
@@ -539,16 +545,18 @@ Zustand у модулі \texttt{src/store/simStore.ts}. Бібліотека н�
       & \texttt{number}
       & Поточний логічний час \\[3pt]
     \texttt{tokensByEdge}
-      & \texttt{Record<id, TokenVis[]>}
+      & \texttt{Record\textless{}id, ...\textgreater{}}
       & Токени для анімації у TokenEdge \\[3pt]
     \texttt{sinks}
-      & \texttt{Record<id, string>}
+      & \texttt{Record\textless{}id, ...\textgreater{}}
       & JSON-серіалізовані $X(k)$ із sink-вузлів \\[3pt]
     \texttt{nodeActivity}
       & \texttt{Record<id, number>}
       & Інтенсивність теплової карти $a_i \in [0;\infty)$ \\[3pt]
     \texttt{metrics}
-      & \texttt{\{throughputFps,} \texttt{latencyEmaMs,} \texttt{queueEma,\ldots\}}
+      & \texttt{\{throughputFps,} \newline
+        \texttt{latencyEmaMs,} \newline
+        \texttt{queueEma,\ldots\}}
       & EMA-метрики \\[3pt]
     \texttt{mismatches}
       & \texttt{Record<id, boolean>}
@@ -588,7 +596,7 @@ rAF-циклу: збільшує \texttt{simTime} на $16 \times \texttt{speed}
 \subsubsection*{Верифікація результатів}
 
 Функція \texttt{compareWithFFT(graph, lastInput, sinks, eps)} у модулі
-\texttt{src/utils/compare.ts} порівнює результати симулятора з еталонним
+\texttt{src/utils/\allowbreak compare.ts} порівнює результати симулятора з еталонним
 ДПФ, обчисленим бібліотекою \texttt{fft.js}. Для кожного $k \in \{0 \ldots 15\}$
 перевіряється умова:
 

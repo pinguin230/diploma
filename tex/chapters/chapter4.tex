@@ -182,10 +182,10 @@ $N(N-1) = 240$~комплексних додавань. Таблиця~\ref{tab:
   \caption{Порівняння обчислювальної складності для $N = 16$}
   \label{tab:complexity}
   \centering
-  \begin{tabular}{lcccc}
+  \begin{tabular}{p{4.5cm}cccc}
     \toprule
-    Метод & Компл. множень & Дійсн. множень &
-            Компл. додавань & Складність \\
+    Метод & \makecell{Компл.\\множень} & \makecell{Дійсн.\\множень} &
+            \makecell{Компл.\\додавань} & Складність \\
     \midrule
     Прямий ДПФ
       & 256 & 1024 & 240 & $O(N^2)$ \\
@@ -236,17 +236,12 @@ $N(N-1) = 240$~комплексних додавань. Таблиця~\ref{tab:
 для $N = 16$:
 
 \begin{equation}
-  T_{\text{крит}} =
-    \underbrace{600}_{\text{дуга}_1} +
-    \underbrace{400}_{\texttt{dft4}_1} +
-    \underbrace{600}_{\text{дуга}_2} +
-    \underbrace{200}_{\texttt{twiddle}} +
-    \underbrace{600}_{\text{дуга}_3} +
-    \underbrace{400}_{\texttt{dft4}_2} +
-    \underbrace{600}_{\text{дуга}_4}
-  = 3400 \text{ од.}
+  T_{\mathrm{kr}} = 600 + 400 + 600 + 200 + 600 + 400 + 600
+    = 3400
   \label{eq:critical_full}
 \end{equation}
+
+де результат наведено в умовних одиницях часу.
 
 \subsubsection*{Послідовний час}
 
@@ -254,9 +249,12 @@ $N(N-1) = 240$~комплексних додавань. Таблиця~\ref{tab:
 вузлі за раз):
 
 \begin{equation}
-  T_{\text{посл}} = 8 \times 400 + 16 \times 200 = 3200 + 3200 = 6400 \text{ од.}
+  T_{\mathrm{ps}} = 8 \times 400 + 16 \times 200
+    = 3200 + 3200 = 6400
   \label{eq:seq_full}
 \end{equation}
+
+(результат у тих самих умовних одиницях).
 
 \subsubsection*{Коефіцієнт паралелізму}
 

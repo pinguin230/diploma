@@ -31,6 +31,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsfonts}
+\usepackage{icomma}
 
 % --- Зображення ---
 \usepackage{graphicx}
@@ -42,6 +43,7 @@
 \usepackage{array}
 \usepackage{longtable}
 \usepackage{multirow}
+\usepackage{makecell}
 
 % --- Код і лістинги ---
 \usepackage{listings}
@@ -100,7 +102,12 @@
 
 % --- Відступи і параграфи ---
 \usepackage{indentfirst}
+\usepackage{microtype}
+\emergencystretch=3em
 \setlength{\parindent}{1.25cm}
+
+% Перенос довгих \texttt{} виразів
+\usepackage[htt]{hyphenat}
 
 % --- Налаштування заголовків ---
 \usepackage{titlesec}

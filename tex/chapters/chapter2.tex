@@ -57,13 +57,19 @@ $\mathbf{A}$ розміром $4 \times 4$ за правилом:
 множень~\cite{nussbaumer1982,burrus1985dft}. Для вхідних значень
 $x_0, x_1, x_2, x_3 \in \mathbb{C}$ алгоритм визначається як:
 
-\begin{align}
-  E_0 &= x_0 + x_2, \quad E_1 = x_0 - x_2, \notag \\
-  O_0 &= x_1 + x_3, \quad O_1 = x_1 - x_3, \notag \\
-  X_0 &= E_0 + O_0, \quad X_2 = E_0 - O_0, \notag \\
-  X_1 &= E_1 - j \cdot O_1, \quad X_3 = E_1 + j \cdot O_1.
+\begin{equation*}
+  E_0 = x_0 + x_2, \quad E_1 = x_0 - x_2,
+\end{equation*}
+\begin{equation*}
+  O_0 = x_1 + x_3, \quad O_1 = x_1 - x_3,
+\end{equation*}
+\begin{equation*}
+  X_0 = E_0 + O_0, \quad X_2 = E_0 - O_0,
+\end{equation*}
+\begin{equation}
+  X_1 = E_1 - j \cdot O_1, \quad X_3 = E_1 + j \cdot O_1.
   \label{eq:dft4_butterfly}
-\end{align}
+\end{equation}
 
 Множення на $j$ у~(\ref{eq:dft4_butterfly}) є тривіальним: воно
 зводиться до перестановки дійсної та уявної частин зі зміною знаку
@@ -251,25 +257,21 @@ $k_1$ --- порт виходу, вихідний спектральний ві�
 з урахуванням затримок вузлів і дуг~\cite{lee1994}:
 
 \begin{equation}
-  T_{\text{крит}} = \underbrace{400}_{\texttt{dft4}} +
-                    \underbrace{600}_{\text{дуга}} +
-                    \underbrace{200}_{\texttt{twiddle}} +
-                    \underbrace{600}_{\text{дуга}} +
-                    \underbrace{400}_{\texttt{dft4}} = 2200 \text{ од.}
+  T_{\mathrm{kr}} = 400 + 600 + 200 + 600 + 400 = 2200
   \label{eq:critical_path}
 \end{equation}
 
-Послідовний час виконання (при одному активному вузлі) становив би:
+де результат наведено в умовних одиницях часу. Послідовний час виконання (при одному активному вузлі) становив би:
 
 \begin{equation}
-  T_{\text{посл}} = 8 \times 400 + 16 \times 200 = 3200 + 3200 = 6400 \text{ од.}
+  T_{\mathrm{ps}} = 8 \times 400 + 16 \times 200 = 6400
   \label{eq:seq_time}
 \end{equation}
 
-Коефіцієнт паралелізму:
+(результат у тих самих умовних одиницях). Коефіцієнт паралелізму:
 
 \begin{equation}
-  K_p = \frac{T_{\text{посл}}}{T_{\text{крит}}} = \frac{6400}{2200} \approx 2{,}9.
+  K_p = \frac{T_{\mathrm{ps}}}{T_{\mathrm{kr}}} = \frac{6400}{2200} \approx 2{,}9.
   \label{eq:parallelism}
 \end{equation}
 
@@ -320,7 +322,7 @@ $k_1$ --- порт виходу, вихідний спектральний ві�
 між значеннями 0 та 1 пропорційно до відношення часу в черзі до
 \texttt{edge.delay}, що дає безперервну анімацію руху.
 
-Граф будується функцією \texttt{generateDFT4x4(latency)} у модулі
+Граф будується функцією \texttt{generateDFT4x4\allowbreak (latency)} у модулі
 \texttt{graph/generateDFT4x4.ts}: вона повертає об'єкт \texttt{Graph}
 із масивами \texttt{nodes} і \texttt{edges} та приймає параметр
 затримки \texttt{latency} (за замовчуванням 400), що дозволяє змінювати
