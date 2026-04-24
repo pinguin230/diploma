@@ -3,30 +3,62 @@
 {\centering\bfseries АНОТАЦІЯ\par}
 \vspace{1em}
 
-\textbf{Тесля М.} Візуальне моделювання роботи обчислювача ШПФ під керуванням потоку даних. ---
-Кваліфікаційна робота бакалавра. Спеціальність 122 «Комп'ютерні науки». ---
-Національний університет «Львівська політехніка», Львів, 2026. ---
-\pageref{LastPage}~с., рис., табл., бібліогр.:~25~джерел.
+\textbf{Тесля М.} Візуальне моделювання роботи обчислювача ШПФ під
+керуванням потоку даних. Бакалаврська кваліфікаційна робота за
+спеціальністю 122 «Комп'ютерні науки». Національний університет
+«Львівська політехніка», Львів, 2026.
 
-У роботі розроблено математичну модель і програмний симулятор 16-точкового
-дискретного перетворення Фур'є за алгоритмом з основою~4 в парадигмі
-обчислень під керуванням потоку даних.
-Тристадійна $4\times4$ декомпозиція дозволяє скоротити кількість нетривіальних
-комплексних множень з~256 до~9, що відповідає прискоренню ${\approx}28{,}4\times$
-відносно прямого обчислення ДПФ.
-Розроблено граф потоку даних обчислювача, що містить 56~вузлів чотирьох типів
-та 64~дуги із затримкою 600~умовних одиниць.
-Визначено теоретичний коефіцієнт паралелізму $K_p^{\text{теор}} \approx 2{,}9\times$
-і практичний $K_p \approx 1{,}88\times$ з урахуванням затримок дуг.
-Симулятор реалізовано як веб-застосунок на платформі Next.js~14 з ядром
-\texttt{DataflowRuntime}, генератором графа \texttt{generateDFT4x4()} та
-інтерфейсом React~Flow.
-Верифікація за шістьма тестовими сценаріями підтвердила коректність обчислень:
-максимальна абсолютна похибка становить $3\times10^{-12}$ при допустимій
-$\varepsilon = 10^{-9}$.
+У межах бакалаврської кваліфікаційної роботи розроблено математичну
+модель, граф потоку даних та веб-орієнтований програмний симулятор
+16-точкового швидкого перетворення Фур'є за алгоритмом radix-4 для
+інтерактивної візуалізації потокового виконання обчислень із
+використанням технологій Next.js, React~Flow, Zustand і TypeScript.
 
-\textbf{Ключові слова:} швидке перетворення Фур'є, radix-4, граф потоку даних,
-dataflow computing, симулятор, Next.js, React~Flow, паралелізм.
+Робота складається із вступу, чотирьох основних розділів, економічної
+частини, висновків, списку використаних джерел та додатків.
+
+У вступі обґрунтовано актуальність теми, визначено мету, задачі,
+об'єкт і предмет дослідження, описано методологію та інструментарій,
+а також практичну цінність розробки.
+
+У першому розділі проведено аналіз предметної області, огляд
+сучасних підходів до обчислення ШПФ, порівняльний аналіз існуючих
+рішень (FFTW, CMSIS-DSP, cuFFT, SPIRAL), виконано системний аналіз
+із виділенням зацікавлених сторін, цілей та обмежень, розглянуто
+етичні й правові аспекти та сформульовано формальну постановку
+задачі з вимогами F1--F9, NF1--NF8 і сценаріями використання UC1--UC9.
+
+Другий розділ присвячено проєктуванню системи: обґрунтовано вибір
+клієнтського SPA-підходу, розроблено математичну модель тристадійної
+$4\times4$ декомпозиції, сформовано граф потоку даних (56~вузлів,
+64~дуги), визначено критичний шлях і коефіцієнт паралелізму, описано
+структури даних та механізми обміну між компонентами.
+
+Третій розділ описує програмну реалізацію симулятора: технологічний
+стек, структуру проєкту, реалізацію ядра \texttt{DataflowRuntime}
+з методом \texttt{tick()}, обчислювальних вузлів, алгоритму
+\texttt{generateDFT4x4()}, класифікацію винятків, процедуру
+розгортання та модульне тестування у середовищі Jest.
+
+У четвертому розділі подано результати експериментальних досліджень:
+верифікацію на шести тестових сценаріях (максимальна похибка
+$3\times10^{-12}$ при допуску $\varepsilon=10^{-9}$), аналіз
+обчислювальної складності ($K_M\approx28{,}4\times$), аналіз
+паралелізму dataflow-моделі ($K_p\approx1{,}88\times$),
+обговорення, моніторинг експлуатаційних метрик та підтвердження
+нефункціональних вимог NF1--NF8.
+
+У висновках узагальнено основні результати виконаної роботи,
+визначено практичне значення та перспективні напрями подальших
+досліджень.
+
+Дана бакалаврська кваліфікаційна робота містить: \pageref{LastPage}~сторінок,
+1~додаток та 25~джерел літератури.
+
+\textbf{Ключові слова:} швидке перетворення Фур'є, radix-4, граф
+потоку даних, dataflow computing, візуальне моделювання,
+веб-симулятор, Next.js, React~Flow, паралелізм, цифрове оброблення
+сигналів.
 
 \vspace{1em}\hrule\vspace{1em}
 
@@ -35,28 +67,56 @@ dataflow computing, симулятор, Next.js, React~Flow, паралеліз�
 \vspace{1em}
 
 \begin{otherlanguage}{english}
-\textbf{Teslia M.} Visual Modeling of a Dataflow-Driven FFT Processor. ---
-Bachelor's Qualification Work. Specialty 122 Computer Science. ---
-Lviv Polytechnic National University, Lviv, 2026. ---
-\pageref{LastPage}~p., fig., tabl., references:~25~sources.
+\textbf{Teslia M.} Visual Modeling of a Dataflow-Driven FFT Processor.
+Bachelor's Qualification Work for specialty 122 «Computer Science».
+Lviv Polytechnic National University, Lviv, 2026.
 
-This work presents a mathematical model and a web-based simulator of a
-16-point Discrete Fourier Transform computed via the radix-4 algorithm
-under the dataflow computing paradigm.
-The three-stage $4\times4$ decomposition reduces the number of non-trivial
-complex multiplications from~256 to~9, achieving a speedup of
-${\approx}28.4\times$ over the direct DFT computation.
-A data-flow graph of the processor is developed comprising 56~nodes of four
-types and 64~arcs with an edge delay of 600 time units.
-The theoretical parallelism factor is $K_p^{\mathrm{theor}} \approx 2.9\times$
-and the practical factor, accounting for arc delays, is $K_p \approx 1.88\times$.
-The simulator is implemented as a web application on the Next.js~14 platform
-with the \texttt{DataflowRuntime} engine, the \texttt{generateDFT4x4()} graph
-generator, and a React~Flow visualisation interface.
-Verification across six test scenarios confirms computational correctness:
-the maximum absolute error is $3\times10^{-12}$, well within the
-tolerance $\varepsilon = 10^{-9}$.
+Within this bachelor's qualification work, a mathematical model, a
+data-flow graph, and a web-based software simulator of a 16-point
+Fast Fourier Transform (radix-4) have been developed for interactive
+visualization of the dataflow-driven computation, using Next.js,
+React~Flow, Zustand, and TypeScript technologies.
+
+The work consists of an introduction, four main chapters, an economic
+part, conclusions, a list of references, and appendices.
+
+The introduction substantiates the relevance of the topic and defines
+the aim, tasks, object, subject of the study, the methodology, and
+the practical value of the development.
+
+The first chapter presents an analysis of the problem domain, a
+review of modern FFT computation approaches, a comparative analysis
+of existing solutions (FFTW, CMSIS-DSP, cuFFT, SPIRAL), a systems
+analysis with stakeholders, goals and constraints, a discussion of
+ethical and legal aspects, and a formal task statement with F1--F9,
+NF1--NF8 requirements and UC1--UC9 use cases.
+
+The second chapter is devoted to the system design: justification of
+a client-side SPA approach, a mathematical model of the three-stage
+$4\times4$ decomposition, a data-flow graph (56~nodes, 64~arcs),
+determination of the critical path and parallelism factor, data
+structures, and inter-component communication mechanisms.
+
+The third chapter describes the software implementation of the
+simulator: technology stack, project structure, the
+\texttt{DataflowRuntime} engine with the \texttt{tick()} method,
+computational nodes, the \texttt{generateDFT4x4()} algorithm,
+exception handling, deployment procedure, and unit testing using Jest.
+
+The fourth chapter presents the experimental results: verification
+across six test scenarios (maximum error $3\times10^{-12}$ against
+tolerance $\varepsilon=10^{-9}$), analysis of computational complexity
+($K_M\approx28.4\times$), analysis of dataflow-model parallelism
+($K_p\approx1.88\times$), discussion, monitoring of operational
+metrics, and confirmation of non-functional requirements NF1--NF8.
+
+The conclusions summarize the key results of the work and outline
+the practical value and promising directions for further research.
+
+This bachelor's qualification work contains: \pageref{LastPage}~pages,
+1~appendix, and 25~references.
 
 \textbf{Keywords:} fast Fourier transform, radix-4, data-flow graph,
-dataflow computing, simulator, Next.js, React~Flow, parallelism.
+dataflow computing, visual modeling, web-based simulator, Next.js,
+React~Flow, parallelism, digital signal processing.
 \end{otherlanguage}
