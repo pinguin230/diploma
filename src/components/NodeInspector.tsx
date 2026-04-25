@@ -1,16 +1,44 @@
-// components/NodeInspector.tsx
+'use client';
+
+import { useState } from 'react';
+import clsx from 'clsx';
+import { BlockMath, InlineMath } from 'react-katex';
+import { X } from 'lucide-react';
 import { useSimStore } from '@/store/simStore';
+import {
+  traceDft4,
+  traceTwiddle,
+  traceSource,
+  traceSink,
+  type TraceResult,
+} from '@/components/node-trace';
+import { Dft4ButterflyDiagram, TwiddleDiagram } from '@/components/node-diagram';
+import p from '@/styles/panels.module.scss';
+import ui from '@/styles/ui.module.scss';
+
+type Tab = 'values' | 'formula' | 'trace' | 'complexity';
 
 export default function NodeInspector() {
   const { visible, nodeId, kind, twiddle, baModel } = useSimStore((s) => s.inspector);
   const setBaModel = useSimStore((s) => s.setBaModel);
   const close = useSimStore((s) => s.closeInspector);
 
-  const nodeData = useSimStore((s) => nodeId ? s.nodeDataCache[nodeId] : null);
+  const nodeData = useSimStore((s) => (nodeId ? s.nodeDataCache[nodeId] : null));
   const inputs = nodeData?.inputs;
   const outputs = nodeData?.outputs;
 
-  if (!visible) return null;
+  const [tab, setTab] = useState<Tab>('values');
+
+  if (!visible) {
+    return (
+      <section className={p.panel}>
+        <div className={p.panelHeader}>
+          <span>Node inspector</span>
+        </div>
+        <div className={p.emptyState}>Click a node on the graph to inspect it.</div>
+      </section>
+    );
+  }
 
   const fmtC = (v: any) => {
     if (!v) return '—';
@@ -19,120 +47,259 @@ export default function NodeInspector() {
     return `${re.toFixed(3)} ${im >= 0 ? '+' : '−'} j${Math.abs(im).toFixed(3)}`;
   };
 
-  // Отримуємо ключі портів, щоб рендерити їх динамічно
   const inKeys = inputs ? Object.keys(inputs).sort() : [];
   const outKeys = outputs ? Object.keys(outputs).sort() : [];
 
-  // Оцінка арифметичної складності (BA - Butterfly/Block Arithmetic)
   const ba = (() => {
     if (kind === 'twiddle') {
-      // Для одного комплексного множення
       if (baModel === '4M2A') return { mul: 4, add: 2 };
       return { mul: 3, add: 5 };
     }
-    if (kind === 'dft4') {
-      // 4-точкове ДПФ: 8 комплексних додавань (16 дійсних),
-      // множення на j - це просто перестановка, тому 0 дійсних множень!
-      return { mul: 0, add: 16 };
-    }
+    if (kind === 'dft4') return { mul: 0, add: 16 };
     return null;
   })();
 
-  return (
-      <div
-          style={{
-            position: 'absolute',
-            right: 16,
-            top: 16,
-            width: 360,
-            background: '#fff',
-            border: '1px solid #ddd',
-            borderRadius: 8,
-            padding: 12,
-            boxShadow: '0 6px 18px rgba(0,0,0,.08)',
-            zIndex: 1000,
-            color: '#121212',
-          }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-          <div style={{ fontWeight: 700 }}>Node Inspector</div>
-          <button onClick={close} style={{ cursor: 'pointer', border: 'none', background: 'transparent', fontSize: '16px' }}>✕</button>
-        </div>
+  const kindLabel: Record<string, string> = {
+    source: 'Source',
+    sink: 'Sink',
+    dft4: '4-point DFT',
+    twiddle: 'Twiddle multiplier',
+    butterfly: 'Butterfly',
+    add: 'Adder',
+    mul: 'Multiplier',
+  };
 
-        <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 8 }}>
-          node: <b>{nodeId}</b> &middot; kind: <b>{kind}</b>
+  return (
+    <section className={p.panel}>
+      <div className={p.panelHeader}>
+        <span>Node inspector</span>
+        <button
+          type="button"
+          className={clsx(ui.btn, ui.btnIcon, ui.btnGhost)}
+          style={{ height: 24, width: 24 }}
+          onClick={close}
+          aria-label="Close inspector"
+        >
+          <X size={12} />
+        </button>
+      </div>
+      <div className={p.panelBody}>
+        <div className={p.inspectorMeta}>
+          <span>
+            kind <strong>{kind ? kindLabel[kind] ?? kind : '—'}</strong>
+          </span>
+          <span>
+            id <strong>{nodeId}</strong>
+          </span>
           {twiddle && (
-              <>
-                {' '}
-                &middot; factor: W<sub>{twiddle.N}</sub>
-                <sup>{twiddle.k}</sup>
-              </>
+            <span>
+              factor <strong>W{twiddle.N}^{twiddle.k}</strong>
+            </span>
           )}
         </div>
 
-        {/* Математичні формули залежно від типу вузла */}
-        {kind === 'dft4' && (
-            <div style={{ marginBottom: 12, background: '#f5f5f5', padding: '6px', borderRadius: '4px' }}>
-              <div style={{ fontFamily: 'monospace', fontSize: 11, lineHeight: 1.4 }}>
-                E₀ = in₀ + in₂ &nbsp; | &nbsp; O₀ = in₁ + in₃<br />
-                E₁ = in₀ − in₂ &nbsp; | &nbsp; O₁ = in₁ − in₃<br />
-                out₀ = E₀ + O₀ &nbsp;&nbsp;&nbsp; | &nbsp; out₂ = E₀ − O₀<br />
-                out₁ = E₁ − jO₁ &nbsp; | &nbsp; out₃ = E₁ + jO₁
-              </div>
-            </div>
-        )}
-
-        {kind === 'twiddle' && (
-            <div style={{ marginBottom: 12, background: '#f5f5f5', padding: '6px', borderRadius: '4px' }}>
-              <div style={{ fontFamily: 'monospace', fontSize: 12, lineHeight: 1.4 }}>
-                out = in · W<sub>{twiddle?.N ?? 'N'}</sub>
-                <sup>{twiddle?.k ?? 'k'}</sup>
-              </div>
-            </div>
-        )}
-
-        {/* Динамічний рендер вхідних та вихідних портів */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
-          <div>
-            <div style={{ fontSize: 12, fontWeight: 'bold', borderBottom: '1px solid #eee', paddingBottom: 4, marginBottom: 4 }}>Inputs</div>
-            {inKeys.length === 0 ? <div style={{ fontSize: 12, opacity: 0.5 }}>—</div> : inKeys.map((k) => (
-                <div key={k} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
-                  <span style={{ fontSize: 12, opacity: 0.7 }}>{k}:</span>
-                  <span style={{ fontSize: 12, fontFamily: 'monospace' }}>{fmtC(inputs?.[k])}</span>
-                </div>
-            ))}
-          </div>
-          <div>
-            <div style={{ fontSize: 12, fontWeight: 'bold', borderBottom: '1px solid #eee', paddingBottom: 4, marginBottom: 4 }}>Outputs</div>
-            {outKeys.length === 0 ? <div style={{ fontSize: 12, opacity: 0.5 }}>—</div> : outKeys.map((k) => (
-                <div key={k} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
-                  <span style={{ fontSize: 12, opacity: 0.7 }}>{k}:</span>
-                  <span style={{ fontSize: 12, fontFamily: 'monospace' }}>{fmtC(outputs?.[k])}</span>
-                </div>
-            ))}
-          </div>
+        <div className={p.inspectorTabs}>
+          <button
+            type="button"
+            className={clsx(tab === 'values' && p.active)}
+            onClick={() => setTab('values')}
+          >
+            Values
+          </button>
+          <button
+            type="button"
+            className={clsx(tab === 'formula' && p.active)}
+            onClick={() => setTab('formula')}
+          >
+            Formula
+          </button>
+          <button
+            type="button"
+            className={clsx(tab === 'trace' && p.active)}
+            onClick={() => setTab('trace')}
+          >
+            Trace
+          </button>
+          <button
+            type="button"
+            className={clsx(tab === 'complexity' && p.active)}
+            onClick={() => setTab('complexity')}
+          >
+            Complexity
+          </button>
         </div>
 
-        {ba && (
-            <div style={{ marginBottom: 4 }}>
-              <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 4 }}>Arithmetic Complexity (Real ops)</div>
+        {tab === 'values' && (
+          <div className={p.portGrid}>
+            <div className={p.portColumn}>
+              <div className={p.portColumnTitle}>Inputs</div>
+              {inKeys.length === 0 ? (
+                <div className={p.portRow}>
+                  <span>—</span>
+                  <span />
+                </div>
+              ) : (
+                inKeys.map((k) => (
+                  <div key={k} className={p.portRow}>
+                    <span>{k}</span>
+                    <span>{fmtC(inputs?.[k])}</span>
+                  </div>
+                ))
+              )}
+            </div>
+            <div className={p.portColumn}>
+              <div className={p.portColumnTitle}>Outputs</div>
+              {outKeys.length === 0 ? (
+                <div className={p.portRow}>
+                  <span>—</span>
+                  <span />
+                </div>
+              ) : (
+                outKeys.map((k) => (
+                  <div key={k} className={p.portRow}>
+                    <span>{k}</span>
+                    <span>{fmtC(outputs?.[k])}</span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
 
-              {kind === 'twiddle' && (
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 6 }}>
-                    <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11 }}>
-                      <input type='radio' checked={baModel === '4M2A'} onChange={() => setBaModel('4M2A')} /> 4M+2A
+        {tab === 'formula' && (
+          <div className={p.formulaBlock}>
+            {kind === 'dft4' && (
+              <BlockMath math={String.raw`\begin{aligned}
+                E_0 &= x_0 + x_2 & O_0 &= x_1 + x_3 \\
+                E_1 &= x_0 - x_2 & O_1 &= x_1 - x_3 \\
+                X_0 &= E_0 + O_0 & X_2 &= E_0 - O_0 \\
+                X_1 &= E_1 - j O_1 & X_3 &= E_1 + j O_1
+              \end{aligned}`} />
+            )}
+            {kind === 'twiddle' && (
+              <BlockMath
+                math={`y = x \\cdot W_{${twiddle?.N ?? 'N'}}^{${twiddle?.k ?? 'k'}} = x \\cdot e^{-j 2\\pi \\cdot ${twiddle?.k ?? 'k'} / ${twiddle?.N ?? 'N'}}`}
+              />
+            )}
+            {kind === 'source' && (
+              <div className={p.formulaInline}>
+                Source node emits a constant complex token x(n) = re + j·im.
+              </div>
+            )}
+            {kind === 'sink' && (
+              <div className={p.formulaInline}>
+                Sink node records spectrum bin <InlineMath math="X(k)" /> on arrival.
+              </div>
+            )}
+            {kind && !['dft4', 'twiddle', 'source', 'sink'].includes(kind) && (
+              <div className={p.formulaInline}>No formula documented for this kind.</div>
+            )}
+          </div>
+        )}
+
+        {tab === 'trace' && (
+          <TraceView
+            kind={kind}
+            inputs={inputs}
+            outputs={outputs}
+            twiddle={twiddle ?? undefined}
+          />
+        )}
+
+        {tab === 'complexity' && (
+          <>
+            {!ba && (
+              <div className={p.emptyState}>No arithmetic cost defined for this node.</div>
+            )}
+            {ba && (
+              <>
+                {kind === 'twiddle' && (
+                  <div style={{ display: 'flex', gap: 12, marginBottom: 8 }}>
+                    <label className={ui.checkbox}>
+                      <input
+                        type="radio"
+                        checked={baModel === '4M2A'}
+                        onChange={() => setBaModel('4M2A')}
+                      />
+                      4M + 2A
                     </label>
-                    <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11 }}>
-                      <input type='radio' checked={baModel === '3M5A'} onChange={() => setBaModel('3M5A')} /> 3M+5A
+                    <label className={ui.checkbox}>
+                      <input
+                        type="radio"
+                        checked={baModel === '3M5A'}
+                        onChange={() => setBaModel('3M5A')}
+                      />
+                      3M + 5A
                     </label>
                   </div>
-              )}
-
-              <div style={{ fontFamily: 'monospace', fontSize: 12, background: '#eef2ff', padding: '4px 8px', borderRadius: '4px', color: '#3730a3' }}>
-                Multiplications: <b>{ba.mul}</b> | Additions: <b>{ba.add}</b>
-              </div>
-            </div>
+                )}
+                <div className={p.complexityBox}>
+                  Real multiplications: <strong>{ba.mul}</strong> · Real additions:{' '}
+                  <strong>{ba.add}</strong>
+                </div>
+              </>
+            )}
+          </>
         )}
       </div>
+    </section>
+  );
+}
+
+function TraceView({
+  kind,
+  inputs,
+  outputs,
+  twiddle,
+}: {
+  kind: string | null;
+  inputs: Record<string, any> | null | undefined;
+  outputs: Record<string, any> | null | undefined;
+  twiddle?: { N: number; k: number } | null;
+}) {
+  let result: TraceResult;
+  if (kind === 'dft4') result = traceDft4(inputs);
+  else if (kind === 'twiddle') result = traceTwiddle(inputs, twiddle?.N, twiddle?.k);
+  else if (kind === 'source') result = traceSource(outputs);
+  else if (kind === 'sink') result = traceSink(inputs);
+  else {
+    return <div className={p.emptyState}>No trace available for this node kind.</div>;
+  }
+
+  const diagram = (() => {
+    if (kind === 'dft4') return <Dft4ButterflyDiagram inputs={inputs} />;
+    if (kind === 'twiddle')
+      return <TwiddleDiagram inputs={inputs} N={twiddle?.N} k={twiddle?.k} />;
+    return null;
+  })();
+
+  if (result.kind === 'missing') {
+    return (
+      <>
+        <div className={p.emptyState}>{result.message}</div>
+        {diagram}
+      </>
+    );
+  }
+
+  return (
+    <>
+      <div className={p.formulaBlock}>
+        <BlockMath math={result.math} />
+      </div>
+      {diagram}
+      {result.note && (
+        <p
+          style={{
+            marginTop: 8,
+            fontSize: 11,
+            color: 'var(--fg-muted)',
+            lineHeight: 1.5,
+          }}
+        >
+          {result.note}
+        </p>
+      )}
+    </>
   );
 }

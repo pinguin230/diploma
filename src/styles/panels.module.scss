@@ -1,0 +1,312 @@
+/* Panels that live in the right sidebar */
+
+.panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-sunken);
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg-secondary);
+}
+
+button.panelHeader {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--bg-elevated);
+  }
+}
+
+.panelBody {
+  padding: var(--space-3);
+}
+
+.panelBodyTight {
+  padding: var(--space-2);
+}
+
+.metricGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-2);
+  background: var(--bg-sunken);
+  border-radius: var(--radius-sm);
+}
+
+.metricLabel {
+  font-size: 10px;
+  color: var(--fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.metricValue {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--fg-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.complexityRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+}
+
+.complexityCard {
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--bg-sunken);
+  font-size: 11px;
+  line-height: 1.5;
+
+  strong {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 12px;
+  }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 11px;
+  }
+}
+
+.complexityCardDirect strong {
+  color: var(--danger);
+}
+
+.complexityCardFast strong {
+  color: var(--accent);
+}
+
+.complexityCardFast {
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+}
+
+.complexityFoot {
+  margin-top: var(--space-2);
+  font-size: 10px;
+  color: var(--fg-muted);
+  line-height: 1.4;
+}
+
+/* Spectrum */
+
+.spectrumCaption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-sunken);
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--fg-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.spectrumCanvas {
+  display: block;
+  width: 100%;
+  height: 160px;
+  background: var(--bg-surface);
+}
+
+.spectrumScale {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+
+  button {
+    padding: 2px 8px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--fg-muted);
+    background: transparent;
+    border: none;
+    border-radius: calc(var(--radius-sm) - 2px);
+    cursor: pointer;
+
+    &:hover {
+      color: var(--fg-primary);
+    }
+
+    &.active {
+      background: var(--accent);
+      color: var(--accent-on);
+    }
+  }
+}
+
+/* Node inspector */
+
+.inspectorMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
+  font-size: 11px;
+  color: var(--fg-muted);
+  margin-bottom: var(--space-3);
+
+  strong {
+    color: var(--fg-primary);
+  }
+}
+
+.inspectorTabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-3);
+
+  button {
+    flex: 1;
+    padding: var(--space-2) var(--space-2);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--fg-muted);
+    cursor: pointer;
+    transition: color 120ms ease, border-color 120ms ease;
+
+    &:hover {
+      color: var(--fg-primary);
+    }
+
+    &.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+  }
+}
+
+.portGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.portColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.portColumnTitle {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-1);
+}
+
+.portRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-family: var(--font-mono);
+
+  span:first-child {
+    color: var(--fg-muted);
+  }
+}
+
+.formulaBlock {
+  padding: var(--space-3);
+  background: var(--bg-sunken);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  overflow-x: auto;
+}
+
+.formulaInline {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.complexityBox {
+  padding: var(--space-2) var(--space-3);
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Terminal */
+
+.terminal {
+  background: #0d0f15;
+  color: #d4d4d4;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: var(--space-3);
+}
+
+.terminalPrompt {
+  color: #ce9178;
+  margin-bottom: var(--space-2);
+}
+
+.terminalRow {
+  white-space: pre;
+
+  &.pending {
+    opacity: 0.4;
+  }
+}
+
+.terminalKey {
+  color: #4fc1ff;
+}
+
+.emptyState {
+  padding: var(--space-4);
+  text-align: center;
+  font-size: 12px;
+  color: var(--fg-muted);
+  font-style: italic;
+}

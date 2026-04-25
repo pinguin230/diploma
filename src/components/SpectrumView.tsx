@@ -1,21 +1,30 @@
 'use client';
 
-// components/SpectrumView.tsx
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
+import clsx from 'clsx';
 import { useSimStore } from '@/store/simStore';
+import p from '@/styles/panels.module.scss';
 
 function phaseOf(re: number, im: number) {
-  return Math.atan2(im, re); // [-π, π]
+  return Math.atan2(im, re);
+}
+
+function readCssVar(name: string, fallback: string) {
+  if (typeof window === 'undefined') return fallback;
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return v || fallback;
 }
 
 export default function SpectrumView() {
   const N = useSimStore((s) => s.N);
   const sinks = useSimStore((s) => s.sinks);
   const scale = useSimStore((s) => s.spectrumScale);
+  const setScale = useSimStore((s) => s.setSpectrumScale);
   const setHover = useSimStore((s) => s.setSpectrumHover);
+  const hover = useSimStore((s) => s.spectrumHover);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  // зібрати комплексні X[k] із sinks
+
   const X = useMemo(() => {
     const arr: { re: number; im: number }[] = [];
     for (let k = 0; k < N; k++) {
@@ -36,32 +45,36 @@ export default function SpectrumView() {
   useEffect(() => {
     const c = canvasRef.current;
     if (!c) return;
-    const w = (c.width = c.clientWidth);
-    const h = (c.height = c.clientHeight);
+    const dpr = window.devicePixelRatio || 1;
+    const rect = c.getBoundingClientRect();
+    c.width = rect.width * dpr;
+    c.height = rect.height * dpr;
     const ctx = c.getContext('2d')!;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const w = rect.width;
+    const h = rect.height;
     ctx.clearRect(0, 0, w, h);
 
-    const barW = w / Math.max(1, N);
+    const axis = readCssVar('--border', '#e2e8f0');
+    const bar = readCssVar('--accent', '#3b82f6');
 
-    // ось
-    ctx.strokeStyle = '#e3e3e3';
+    ctx.strokeStyle = axis;
     ctx.beginPath();
     ctx.moveTo(0, h - 0.5);
     ctx.lineTo(w, h - 0.5);
     ctx.stroke();
 
-    // шкала
+    const barW = w / Math.max(1, N);
     const toY = (m: number) => {
       if (scale === 'linear') return h - (m / maxMag) * (h - 4);
-      // log: 20*log10(m/max)
-      const db = 20 * Math.log10(Math.max(m, 1e-12) / maxMag); // ≤ 0
-      const minDb = -80; // динамічний діапазон
-      const t = Math.max(db, minDb) / minDb; // 0..1
+      const db = 20 * Math.log10(Math.max(m, 1e-12) / maxMag);
+      const minDb = -80;
+      const t = Math.max(db, minDb) / minDb;
       return h - t * (h - 4);
     };
 
-    // стовпчики
-    ctx.fillStyle = '#6aa9ff';
+    ctx.fillStyle = bar;
     mags.forEach((m, k) => {
       const x = k * barW + 1;
       const y = toY(m);
@@ -69,7 +82,6 @@ export default function SpectrumView() {
     });
   }, [N, mags, maxMag, scale]);
 
-  // курсор-інспектор
   useEffect(() => {
     const c = canvasRef.current;
     if (!c) return;
@@ -79,7 +91,7 @@ export default function SpectrumView() {
       const k = Math.min(N - 1, Math.max(0, Math.floor((x / r.width) * N)));
       const v = X[k];
       const mag = Math.hypot(v!.re, v!.im);
-      const ph = phaseOf(v!.re, v!.im); // рад
+      const ph = phaseOf(v!.re, v!.im);
       setHover({ k, mag, phase: ph });
     };
     const onLeave = () => setHover(null);
@@ -91,21 +103,39 @@ export default function SpectrumView() {
     };
   }, [N, X, setHover]);
 
-  const hover = useSimStore((s) => s.spectrumHover);
-
   return (
-    <div style={{ width: 520, border: '1px solid #ddd', borderRadius: 8, background: '#fff' }}>
-      <div
-        style={{ padding: '6px 8px', fontSize: 12, color: '#121212', display: 'flex', justifyContent: 'space-between' }}
-      >
-        <span>|X[k]| ({scale === 'linear' ? 'linear' : 'log dB'})</span>
-        {hover && hover.k !== null && (
-          <span>
-            k={hover.k} • |X|={hover.mag.toFixed(3)} • arg={((hover.phase * 180) / Math.PI).toFixed(1)}°
-          </span>
-        )}
+    <section className={p.panel}>
+      <div className={p.panelHeader}>
+        <span>Output spectrum |X[k]|</span>
+        <div className={p.spectrumScale}>
+          <button
+            type="button"
+            onClick={() => setScale('linear')}
+            className={clsx(scale === 'linear' && p.active)}
+          >
+            linear
+          </button>
+          <button
+            type="button"
+            onClick={() => setScale('log')}
+            className={clsx(scale === 'log' && p.active)}
+          >
+            dB
+          </button>
+        </div>
       </div>
-      <canvas ref={canvasRef} style={{ width: '100%', height: 160, display: 'block' }} />
-    </div>
+      <canvas ref={canvasRef} className={p.spectrumCanvas} />
+      <div className={p.spectrumCaption}>
+        {hover && hover.k !== null ? (
+          <span>
+            k = {hover.k} · |X| = {hover.mag.toFixed(3)} · ∠ ={' '}
+            {((hover.phase * 180) / Math.PI).toFixed(1)}°
+          </span>
+        ) : (
+          <span>Hover bars to inspect bin</span>
+        )}
+        <span>{scale === 'linear' ? 'linear scale' : 'log (dB)'}</span>
+      </div>
+    </section>
   );
 }

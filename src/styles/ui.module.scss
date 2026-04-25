@@ -1,0 +1,257 @@
+/* Shared UI primitives: buttons, inputs, cards, badges */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 var(--space-3);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fg-primary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease,
+    color 120ms ease, box-shadow 120ms ease;
+  user-select: none;
+  white-space: nowrap;
+
+  &:hover:not(:disabled) {
+    background: var(--bg-sunken);
+    border-color: var(--fg-muted);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0.5px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.btnPrimary {
+  background: var(--accent);
+  color: var(--accent-on);
+  border-color: var(--accent);
+
+  &:hover:not(:disabled) {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+    color: var(--accent-on);
+  }
+}
+
+.btnGhost {
+  background: transparent;
+  border-color: transparent;
+
+  &:hover:not(:disabled) {
+    background: var(--bg-sunken);
+    border-color: var(--border);
+  }
+}
+
+.btnDanger {
+  color: var(--danger);
+  border-color: var(--danger);
+  background: transparent;
+
+  &:hover:not(:disabled) {
+    background: var(--danger-soft);
+    color: var(--danger-fg);
+  }
+}
+
+.btnSuccess {
+  color: var(--success-fg);
+  background: var(--success-soft);
+  border-color: var(--success);
+
+  &:hover:not(:disabled) {
+    background: var(--success);
+    color: var(--fg-inverse);
+  }
+}
+
+.btnIcon {
+  width: 32px;
+  padding: 0;
+}
+
+.btnActive {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.input {
+  height: 32px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  color: var(--fg-primary);
+  font-size: 13px;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+  width: 100%;
+
+  &:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+}
+
+.range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: var(--border-strong);
+  border-radius: var(--radius-pill);
+  outline: none;
+  cursor: pointer;
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: var(--accent);
+    border: 2px solid var(--bg-surface);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+  }
+
+  &::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    background: var(--accent);
+    border: 2px solid var(--bg-surface);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+.checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+
+  input[type='checkbox'] {
+    width: 14px;
+    height: 14px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+}
+
+.card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-sunken);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg-secondary);
+}
+
+.cardBody {
+  padding: var(--space-3);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--bg-sunken);
+  color: var(--fg-secondary);
+  border: 1px solid var(--border);
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+}
+
+.badgeSuccess {
+  background: var(--success-soft);
+  color: var(--success-fg);
+  border-color: var(--success);
+}
+
+.badgeWarn {
+  background: var(--warn-soft);
+  color: var(--warn-fg);
+  border-color: var(--warn);
+}
+
+.badgeMuted {
+  opacity: 0.85;
+}
+
+.select {
+  composes: input;
+  padding-right: var(--space-5);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path fill='none' stroke='%2364748b' stroke-width='1.5' d='M3 5l3 3 3-3'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right var(--space-2) center;
+  appearance: none;
+}
+
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  margin-left: var(--space-1);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--fg-muted);
+  background: var(--bg-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: var(--space-2) 0;
+}
