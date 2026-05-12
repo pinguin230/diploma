@@ -3,7 +3,7 @@ import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { BaseEdge, getBezierPath, type EdgeProps } from '@xyflow/react';
 import { useSimStore } from '@/store/simStore';
 
-const EMPTY: readonly { id: string; t0: number; delay: number }[] = Object.freeze([]);
+const EMPTY: readonly { id: string; t0: number; delay: number; value?: { re: number; im: number } }[] = Object.freeze([]);
 
 export default memo(function TokenEdge(props: EdgeProps) {
   const { id, sourceX, sourceY, targetX, targetY, data } = props;
@@ -11,6 +11,8 @@ export default memo(function TokenEdge(props: EdgeProps) {
   const tokens = useSimStore((s) => s.tokensByEdge?.[id] ?? EMPTY);
   const remove = useSimStore((s) => s.removeEdgeToken);
   const simTime = useSimStore((s) => s.simTime);
+  const showCriticalPath = useSimStore((s) => s.showCriticalPath);
+  const isCritical = showCriticalPath && !!(data as { critical?: boolean })?.critical;
 
   const inBufferCount = useMemo(
       () => tokens.reduce((acc, tk) => acc + (simTime - tk.t0 < tk.delay ? 1 : 0), 0),
@@ -61,12 +63,23 @@ export default memo(function TokenEdge(props: EdgeProps) {
       cy = sourceY + (targetY - sourceY) * clamped;
     }
 
+    const label = tk.value
+      ? `${tk.value.re.toFixed(2)}${tk.value.im >= 0 ? '+' : ''}j${tk.value.im.toFixed(2)}`
+      : null;
+
     return (
-        <circle
-            key={tk.id}
-            cx={cx} cy={cy} r={5}
-            style={{ fill: '#22d3ee', filter: 'drop-shadow(0 0 4px #06b6d4)' }}
-        />
+        <g key={tk.id} pointerEvents="none">
+          <circle cx={cx} cy={cy} r={5} style={{ fill: '#22d3ee', filter: 'drop-shadow(0 0 4px #06b6d4)' }} />
+          {label && (
+            <text
+              x={cx} y={cy - 9}
+              fontSize={8} fill='#22d3ee'
+              textAnchor='middle' dominantBaseline='auto'
+            >
+              {label}
+            </text>
+          )}
+        </g>
     );
   });
 
@@ -104,7 +117,15 @@ export default memo(function TokenEdge(props: EdgeProps) {
         <path d={path} ref={pathRef} fill='none' stroke='transparent' pointerEvents='none' />
 
         {/* Візуальне ребро */}
-        <BaseEdge id={id} path={path} style={{ stroke: '#475569', strokeWidth: 1.5 }} />
+        <BaseEdge
+          id={id}
+          path={path}
+          style={{
+            stroke: isCritical ? 'var(--warn)' : '#475569',
+            strokeWidth: isCritical ? 2.5 : 1.5,
+            filter: isCritical ? 'drop-shadow(0 0 3px var(--warn))' : undefined,
+          }}
+        />
 
         {/* Квадратики черги біля входу */}
         <g fill='#64748b' transform={`translate(${badgeX}, ${badgeY})`}>

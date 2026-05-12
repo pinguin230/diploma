@@ -38,6 +38,11 @@ export default function GraphView() {
   const setGraph = useSimStore((s) => s.setGraph);
   const addEdgeToGraph = useSimStore((s) => s.addEdgeToGraph);
   const nodesDraggable = useSimStore((s) => s.nodesDraggable);
+  const criticalPathNodeIds = useSimStore((s) => s.criticalPathNodeIds);
+  const criticalPathEdgeIds = useSimStore((s) => s.criticalPathEdgeIds);
+  const showCriticalPath = useSimStore((s) => s.showCriticalPath);
+  const pendingNodePositions = useSimStore((s) => s.pendingNodePositions);
+  const setPendingNodePositions = useSimStore((s) => s.setPendingNodePositions);
 
   const rf = useReactFlow();
 
@@ -48,6 +53,7 @@ export default function GraphView() {
 
   useEffect(() => {
     if (!graph) return;
+    const cpEdges = new Set(criticalPathEdgeIds);
     setEdges(
       graph.edges.map((e) => ({
         id: e.id,
@@ -56,10 +62,21 @@ export default function GraphView() {
         sourceHandle: e.from.port,
         target: e.to.node,
         targetHandle: e.to.port,
-        data: { label: e.label },
+        data: { label: e.label, critical: cpEdges.has(e.id) },
       })),
     );
-  }, [graph, setEdges]);
+  }, [graph, criticalPathEdgeIds, setEdges]);
+
+  // Apply critical-path node highlighting
+  useEffect(() => {
+    const cpNodes = new Set(criticalPathNodeIds);
+    setNodes((nds) =>
+      nds.map((n) => ({
+        ...n,
+        className: showCriticalPath && cpNodes.has(n.id) ? 'cp-node' : undefined,
+      })),
+    );
+  }, [showCriticalPath, criticalPathNodeIds, setNodes]);
 
   const onConnect = useCallback(
     (params: Connection) => {
@@ -91,6 +108,18 @@ export default function GraphView() {
     const nodePositions = layoutDFT4x4(g, { stageGap: 280, rowGap: 140 });
     setNodes(nodePositions);
   }, [setGraph, setNodes]);
+
+  // Restore node positions from a loaded session
+  useEffect(() => {
+    if (!pendingNodePositions) return;
+    setNodes((nds) =>
+      nds.map((n) => {
+        const pos = pendingNodePositions.find((p) => p.id === n.id);
+        return pos ? { ...n, position: { x: pos.x, y: pos.y } } : n;
+      }),
+    );
+    setPendingNodePositions(null);
+  }, [pendingNodePositions, setNodes, setPendingNodePositions]);
 
   useEffect(() => {
     queueMicrotask(() => rf.fitView({ padding: 0.15, includeHiddenNodes: true }));

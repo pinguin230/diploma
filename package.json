@@ -2,11 +2,15 @@
   "name": "diploma",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@radix-ui/react-tooltip": "^1.2.8",
@@ -16,6 +20,7 @@
     "comlink": "^4.4.2",
     "debug": "^4.4.3",
     "fft.js": "^4.0.4",
+    "html-to-image": "^1.11.13",
     "katex": "^0.16.45",
     "leva": "^0.10.1",
     "lucide-react": "^0.563.0",

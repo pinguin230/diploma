@@ -1,0 +1,70 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  margin-left: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  color: var(--accent-on);
+  font-size: 9px;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+.logScroll {
+  max-height: 220px;
+  overflow-y: auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.5;
+  background: var(--bg-sunken);
+}
+
+.entry {
+  display: grid;
+  grid-template-columns: 56px 36px 1fr;
+  gap: 4px;
+  padding: 3px var(--space-3);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  overflow: hidden;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: var(--bg-surface);
+  }
+}
+
+.time {
+  color: var(--fg-muted);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.kind {
+  font-weight: 700;
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  align-self: center;
+}
+
+.label {
+  color: var(--fg-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Per-kind coloring */
+.fire .kind {
+  color: var(--warn);
+}
+
+.output .kind {
+  color: var(--success);
+}

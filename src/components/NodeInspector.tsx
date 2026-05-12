@@ -16,12 +16,15 @@ import { Dft4ButterflyDiagram, TwiddleDiagram } from '@/components/node-diagram'
 import p from '@/styles/panels.module.scss';
 import ui from '@/styles/ui.module.scss';
 
-type Tab = 'values' | 'formula' | 'trace' | 'complexity';
+type Tab = 'values' | 'formula' | 'trace' | 'complexity' | 'params';
 
 export default function NodeInspector() {
   const { visible, nodeId, kind, twiddle, baModel } = useSimStore((s) => s.inspector);
   const setBaModel = useSimStore((s) => s.setBaModel);
   const close = useSimStore((s) => s.closeInspector);
+  const graph = useSimStore((s) => s.graph);
+  const updateNodeLatency = useSimStore((s) => s.updateNodeLatency);
+  const updateEdgeDelay = useSimStore((s) => s.updateEdgeDelay);
 
   const nodeData = useSimStore((s) => (nodeId ? s.nodeDataCache[nodeId] : null));
   const inputs = nodeData?.inputs;
@@ -126,6 +129,13 @@ export default function NodeInspector() {
             onClick={() => setTab('complexity')}
           >
             Complexity
+          </button>
+          <button
+            type="button"
+            className={clsx(tab === 'params' && p.active)}
+            onClick={() => setTab('params')}
+          >
+            Params
           </button>
         </div>
 
@@ -241,6 +251,50 @@ export default function NodeInspector() {
             )}
           </>
         )}
+        {tab === 'params' && (() => {
+          const nodeSpec = graph.nodes.find((n) => n.id === nodeId);
+          const outEdges = graph.edges.filter((e) => e.from.node === nodeId);
+          return (
+            <div className={p.portGrid} style={{ flexDirection: 'column', gap: 10 }}>
+              <div className={p.portColumn}>
+                <div className={p.portColumnTitle}>Node latency (ms)</div>
+                <div className={p.portRow}>
+                  <span>latency</span>
+                  <input
+                    type="number"
+                    min={0}
+                    step={50}
+                    defaultValue={nodeSpec?.latency ?? 0}
+                    key={nodeId}
+                    style={{ width: 80, background: 'var(--bg-input, #1e293b)', color: 'var(--fg)', border: '1px solid #334155', borderRadius: 4, padding: '2px 6px', fontSize: 12 }}
+                    onBlur={(e) => {
+                      if (nodeId) updateNodeLatency(nodeId, Number(e.target.value));
+                    }}
+                  />
+                </div>
+              </div>
+              {outEdges.length > 0 && (
+                <div className={p.portColumn}>
+                  <div className={p.portColumnTitle}>Outgoing edge delays (ms)</div>
+                  {outEdges.map((edge) => (
+                    <div key={edge.id} className={p.portRow}>
+                      <span style={{ fontSize: 11 }}>{edge.from.port} → {edge.to.node}:{edge.to.port}</span>
+                      <input
+                        type="number"
+                        min={0}
+                        step={50}
+                        defaultValue={edge.delay ?? 0}
+                        key={edge.id}
+                        style={{ width: 80, background: 'var(--bg-input, #1e293b)', color: 'var(--fg)', border: '1px solid #334155', borderRadius: 4, padding: '2px 6px', fontSize: 12 }}
+                        onBlur={(e) => updateEdgeDelay(edge.id, Number(e.target.value))}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })()}
       </div>
     </section>
   );

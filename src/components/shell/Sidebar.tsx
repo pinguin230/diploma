@@ -8,6 +8,7 @@ import NodeInspector from '@/components/NodeInspector';
 import SpectrumView from '@/components/SpectrumView';
 import Metrics from '@/components/Metrics';
 import TerminalOutput from '@/components/TerminalOutput';
+import EventLog from '@/components/EventLog';
 import s from '@/styles/app.module.scss';
 import ui from '@/styles/ui.module.scss';
 
@@ -39,6 +40,7 @@ export default function Sidebar() {
         <NodeInspector />
         <SpectrumView />
         <Metrics />
+        <EventLog />
         <TerminalOutput />
       </div>
     </aside>

@@ -6,6 +6,7 @@ import type { Complex, Graph } from '@/core/types';
 export type CompareResult = {
   ref: Complex[];
   mismatches: Record<string, boolean>;
+  maxDeviation: { value: number; k: number } | null;
 };
 
 export function compareWithFFT(
@@ -39,6 +40,8 @@ export function compareWithFFT(
 
   // прочитаємо фактичні значення з Sink-ів у порядку snk0..snkN-1
   const mismatches: Record<string, boolean> = {};
+  let maxDeviation: { value: number; k: number } | null = null;
+
   for (let k = 0; k < N; k++) {
     const sid = `snk${k}`;
     const s = sinks[sid];
@@ -57,8 +60,13 @@ export function compareWithFFT(
 
     const dRe = Math.abs(got.re - ref[k]!.re);
     const dIm = Math.abs(got.im - ref[k]!.im);
+    const dev = Math.sqrt(dRe * dRe + dIm * dIm);
     mismatches[sid] = dRe > eps || dIm > eps;
+
+    if (maxDeviation === null || dev > maxDeviation.value) {
+      maxDeviation = { value: dev, k };
+    }
   }
 
-  return { ref, mismatches };
+  return { ref, mismatches, maxDeviation };
 }

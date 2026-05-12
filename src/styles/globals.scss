@@ -175,6 +175,11 @@ textarea {
   stroke: var(--border-strong);
 }
 
+/* Critical-path node highlight */
+.react-flow__node.cp-node {
+  filter: drop-shadow(0 0 6px var(--warn)) drop-shadow(0 0 2px var(--warn));
+}
+
 .tooltip-content {
   z-index: 9999;
   padding: 4px 8px;

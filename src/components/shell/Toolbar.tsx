@@ -1,16 +1,22 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import {
   Play,
   Pause,
   StepForward,
+  RotateCcw,
   Move,
   Gauge,
   GitCompare,
   Maximize,
   Settings2,
   Zap,
+  ImageDown,
+  Route,
+  Save,
+  FolderOpen,
+  Link2,
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@radix-ui/react-tooltip';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -19,6 +25,7 @@ import clsx from 'clsx';
 import { useShallow } from 'zustand/react/shallow';
 import { useSimStore } from '@/store/simStore';
 import { compareWithFFT } from '@/utils/compare';
+import { setPresetHash, copyShareUrl } from '@/hooks/useUrlSync';
 import s from '@/styles/app.module.scss';
 import ui from '@/styles/ui.module.scss';
 
@@ -34,17 +41,19 @@ const BUILTIN_PRESETS = [
   { id: 'sin1', label: 'sin k=1' },
   { id: 'sin3', label: 'sin k=3' },
   { id: 'sin1+3', label: 'sin k=1 + k=3' },
+  { id: 'noise', label: 'White noise' },
 ] as const;
 
 export default function Toolbar({ onOpenPresets, onToast }: ToolbarProps) {
   const rf = useReactFlow();
 
-  const { running, start, stop, step, mode, setMode, speed, setSpeed } = useSimStore(
+  const { running, start, stop, step, reset, mode, setMode, speed, setSpeed } = useSimStore(
     useShallow((st) => ({
       running: st.running,
       start: st.start,
       stop: st.stop,
       step: st.step,
+      reset: st.reset,
       mode: st.mode,
       setMode: st.setMode,
       speed: st.speed,
@@ -58,6 +67,10 @@ export default function Toolbar({ onOpenPresets, onToast }: ToolbarProps) {
   const setNodesDraggable = useSimStore((st) => st.setNodesDraggable);
   const customPresets = useSimStore((st) => st.customPresets);
   const setMismatches = useSimStore((st) => st.setMismatches);
+  const showCriticalPath = useSimStore((st) => st.showCriticalPath);
+  const toggleCriticalPath = useSimStore((st) => st.toggleCriticalPath);
+  const setPendingNodePositions = useSimStore((st) => st.setPendingNodePositions);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const toggleRun = useCallback(() => {
     if (useSimStore.getState().running) stop();
@@ -66,21 +79,103 @@ export default function Toolbar({ onOpenPresets, onToast }: ToolbarProps) {
 
   const doCompare = useCallback(() => {
     const st = useSimStore.getState();
-    const { mismatches } = compareWithFFT(st.graph, st.lastInput, st.sinks, 1e-9);
+    const { mismatches, maxDeviation } = compareWithFFT(st.graph, st.lastInput, st.sinks, 1e-9);
     setMismatches(mismatches);
-    const count = Object.keys(mismatches).length;
-    onToast?.(count === 0 ? '✓ Spectrum matches reference FFT' : `⚠ ${count} bins differ`);
+    const bad = Object.values(mismatches).filter(Boolean).length;
+    if (bad === 0) {
+      const dev = maxDeviation ? maxDeviation.value.toExponential(2) : '0';
+      onToast?.(`✓ Spectrum matches — max |ΔX| = ${dev}`);
+    } else {
+      const dev = maxDeviation ? maxDeviation.value.toExponential(2) : '?';
+      onToast?.(`⚠ ${bad} bins differ — max |ΔX| = ${dev} at k=${maxDeviation?.k ?? '?'}`);
+    }
   }, [setMismatches, onToast]);
 
   const doFit = useCallback(() => {
     rf.fitView({ padding: 0.15, duration: 300 });
   }, [rf]);
 
+  const doSaveSession = useCallback(() => {
+    const st = useSimStore.getState();
+    const rfNodes = rf.getNodes();
+    const session = {
+      version: 1,
+      savedAt: new Date().toISOString(),
+      customPresets: st.customPresets,
+      nodePositions: rfNodes.map((n) => ({ id: n.id, x: n.position.x, y: n.position.y })),
+      settings: {
+        mode: st.mode,
+        speed: st.speed,
+        spectrumScale: st.spectrumScale,
+        pauseOnFire: st.pauseOnFire,
+        nodesDraggable: st.nodesDraggable,
+      },
+    };
+    const blob = new Blob([JSON.stringify(session, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `dft-session-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    onToast?.('Session saved');
+  }, [rf, onToast]);
+
+  const doLoadSession = useCallback((file: File) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const raw = ev.target?.result as string;
+        const session = JSON.parse(raw);
+        if (session.version !== 1) throw new Error('Unknown session version');
+        const st = useSimStore.getState();
+        if (session.customPresets) st.setCustomPresets(session.customPresets);
+        if (session.nodePositions) setPendingNodePositions(session.nodePositions);
+        if (session.settings) {
+          const s = session.settings;
+          if (s.mode) st.setMode(s.mode);
+          if (typeof s.speed === 'number') st.setSpeed(s.speed);
+          if (s.spectrumScale) st.setSpectrumScale(s.spectrumScale);
+          if (typeof s.pauseOnFire === 'boolean') st.setPauseOnFire(s.pauseOnFire);
+          if (typeof s.nodesDraggable === 'boolean') st.setNodesDraggable(s.nodesDraggable);
+        }
+        onToast?.('Session loaded');
+      } catch {
+        onToast?.('Failed to load session');
+      }
+    };
+    reader.readAsText(file);
+  }, [setPendingNodePositions, onToast]);
+
+  const doExport = useCallback(async () => {
+    const el = document.querySelector<HTMLElement>('.react-flow');
+    if (!el) { onToast?.('Graph element not found'); return; }
+    try {
+      const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg-app').trim() || '#f6f7fb';
+      const { toPng } = await import('html-to-image');
+      const url = await toPng(el, { backgroundColor: bg, pixelRatio: 2 });
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `dft-graph-${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      onToast?.('Graph exported as PNG');
+    } catch {
+      onToast?.('Export failed');
+    }
+  }, [onToast]);
+
   const hkOpts = { enableOnFormTags: false as const };
   useHotkeys('space', (e) => { e.preventDefault(); toggleRun(); }, hkOpts, [toggleRun]);
   useHotkeys('s', () => step(), hkOpts, [step]);
+  useHotkeys('x', () => reset(), hkOpts, [reset]);
   useHotkeys('r', doFit, hkOpts, [doFit]);
   useHotkeys('c', doCompare, hkOpts, [doCompare]);
+  useHotkeys('e', doExport, hkOpts, [doExport]);
+  useHotkeys('k', toggleCriticalPath, hkOpts, [toggleCriticalPath]);
   useHotkeys('m', () => setMode(useSimStore.getState().mode === 'run' ? 'single-fire' : 'run'), hkOpts, [setMode]);
   useHotkeys('p', onOpenPresets, hkOpts, [onOpenPresets]);
 
@@ -88,6 +183,7 @@ export default function Toolbar({ onOpenPresets, onToast }: ToolbarProps) {
     const st = useSimStore.getState();
     if (BUILTIN_PRESETS.some((p) => p.id === id)) {
       st.applyPreset(id as any);
+      setPresetHash(id);
       onToast?.(`Preset applied: ${BUILTIN_PRESETS.find((p) => p.id === id)?.label}`);
     } else if (id.startsWith('custom:')) {
       const cid = id.slice('custom:'.length);
@@ -96,6 +192,11 @@ export default function Toolbar({ onOpenPresets, onToast }: ToolbarProps) {
       onToast?.(`Preset applied: ${name}`);
     }
   };
+
+  const doShare = useCallback(async () => {
+    await copyShareUrl();
+    onToast?.('Link copied to clipboard');
+  }, [onToast]);
 
   return (
     <div className={s.toolbar}>
@@ -126,6 +227,17 @@ export default function Toolbar({ onOpenPresets, onToast }: ToolbarProps) {
           </TooltipTrigger>
           <TooltipContent sideOffset={6} className="tooltip-content">
             Advance one activation <kbd>S</kbd>
+          </TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button type="button" className={ui.btn} onClick={reset}>
+              <RotateCcw size={14} /> Reset
+            </button>
+          </TooltipTrigger>
+          <TooltipContent sideOffset={6} className="tooltip-content">
+            Reset simulation to initial state <kbd>X</kbd>
           </TooltipContent>
         </Tooltip>
       </div>
@@ -207,6 +319,17 @@ export default function Toolbar({ onOpenPresets, onToast }: ToolbarProps) {
             Open preset manager <kbd>P</kbd>
           </TooltipContent>
         </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button type="button" className={clsx(ui.btn, ui.btnIcon)} onClick={doShare} aria-label="Copy share link">
+              <Link2 size={14} />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent sideOffset={6} className="tooltip-content">
+            Copy shareable link (preset is encoded in URL)
+          </TooltipContent>
+        </Tooltip>
       </div>
 
       {/* Speed */}
@@ -218,7 +341,7 @@ export default function Toolbar({ onOpenPresets, onToast }: ToolbarProps) {
           type="range"
           className={ui.range}
           min={0.1}
-          max={4}
+          max={5}
           step={0.1}
           value={speed}
           onChange={(e) => setSpeed(Number(e.target.value))}
@@ -254,6 +377,65 @@ export default function Toolbar({ onOpenPresets, onToast }: ToolbarProps) {
             Verify output vs reference FFT <kbd>C</kbd>
           </TooltipContent>
         </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button type="button" className={ui.btn} onClick={doExport}>
+              <ImageDown size={14} /> Export PNG
+            </button>
+          </TooltipTrigger>
+          <TooltipContent sideOffset={6} className="tooltip-content">
+            Export graph as PNG <kbd>E</kbd>
+          </TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              className={clsx(ui.btn, showCriticalPath && ui.btnActive)}
+              onClick={toggleCriticalPath}
+            >
+              <Route size={14} /> Critical path
+            </button>
+          </TooltipTrigger>
+          <TooltipContent sideOffset={6} className="tooltip-content">
+            Highlight critical path T=3400ms <kbd>K</kbd>
+          </TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button type="button" className={ui.btn} onClick={doSaveSession}>
+              <Save size={14} /> Save
+            </button>
+          </TooltipTrigger>
+          <TooltipContent sideOffset={6} className="tooltip-content">
+            Save session (presets + layout + settings)
+          </TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button type="button" className={ui.btn} onClick={() => fileInputRef.current?.click()}>
+              <FolderOpen size={14} /> Load
+            </button>
+          </TooltipTrigger>
+          <TooltipContent sideOffset={6} className="tooltip-content">
+            Load session from JSON file
+          </TooltipContent>
+        </Tooltip>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".json"
+          style={{ display: 'none' }}
+          onChange={(ev) => {
+            const file = ev.target.files?.[0];
+            if (file) doLoadSession(file);
+            ev.target.value = '';
+          }}
+        />
       </div>
     </div>
   );

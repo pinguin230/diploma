@@ -12,6 +12,9 @@ export class DataflowRuntime {
 
   private readyAt: ReadyAt = new Map();
   private now: () => number;
+  private _seq = 0;
+
+  nextTokenId(): string { return `t${++this._seq}`; }
 
   private pickOriginT(inputs: Record<string, Token>): number {
     const first = Object.values(inputs)[0];
@@ -106,7 +109,7 @@ export class DataflowRuntime {
         const b = inputs['b']!.value as number;
         return {
           outputs: {
-            out: { id: crypto.randomUUID(), value: a + b, t: this.now(), originT },
+            out: { id: this.nextTokenId(), value: a + b, t: this.now(), originT },
           },
         };
       }
@@ -115,7 +118,7 @@ export class DataflowRuntime {
         const b = inputs['b']!.value as number;
         return {
           outputs: {
-            out: { id: crypto.randomUUID(), value: a * b, t: this.now(), originT },
+            out: { id: this.nextTokenId(), value: a * b, t: this.now(), originT },
           },
         };
       }
@@ -132,8 +135,8 @@ export class DataflowRuntime {
 
         return {
           outputs: {
-            y0: { id: crypto.randomUUID(), value: sum, t: this.now(), originT },
-            y1: { id: crypto.randomUUID(), value: y1c, t: this.now(), originT },
+            y0: { id: this.nextTokenId(), value: sum, t: this.now(), originT },
+            y1: { id: this.nextTokenId(), value: y1c, t: this.now(), originT },
           },
         };
       }
@@ -170,10 +173,10 @@ export class DataflowRuntime {
 
         return {
           outputs: {
-            out0: { id: crypto.randomUUID(), value: X0, t: this.now(), originT },
-            out1: { id: crypto.randomUUID(), value: X1, t: this.now(), originT },
-            out2: { id: crypto.randomUUID(), value: X2, t: this.now(), originT },
-            out3: { id: crypto.randomUUID(), value: X3, t: this.now(), originT },
+            out0: { id: this.nextTokenId(), value: X0, t: this.now(), originT },
+            out1: { id: this.nextTokenId(), value: X1, t: this.now(), originT },
+            out2: { id: this.nextTokenId(), value: X2, t: this.now(), originT },
+            out3: { id: this.nextTokenId(), value: X3, t: this.now(), originT },
           },
         };
       }
@@ -187,7 +190,7 @@ export class DataflowRuntime {
 
         return {
           outputs: {
-            out: { id: crypto.randomUUID(), value: result, t: this.now(), originT },
+            out: { id: this.nextTokenId(), value: result, t: this.now(), originT },
           },
         };
       }
@@ -197,13 +200,23 @@ export class DataflowRuntime {
         if (!tok) return { outputs: {} };
         return {
           outputs: {
-            out: { id: crypto.randomUUID(), value: tok.value, t: this.now(), originT },
+            out: { id: this.nextTokenId(), value: tok.value, t: this.now(), originT },
           },
         };
       }
       default:
         return { outputs: {} };
     }
+  }
+
+  updateNodeLatency(nodeId: string, latency: number): void {
+    const node = this.graph.nodes.find((n) => n.id === nodeId);
+    if (node) (node as { latency?: number }).latency = latency;
+  }
+
+  updateEdgeDelay(edgeId: string, delay: number): void {
+    const edge = this.graph.edges.find((e) => e.id === edgeId);
+    if (edge) (edge as { delay?: number }).delay = delay;
   }
 
   getAverageQueueSize(): number {

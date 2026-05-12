@@ -5,14 +5,21 @@ import { create } from 'zustand';
 import { nanoid } from 'nanoid';
 import type { Complex, Graph, Token } from '@/core/types';
 import { DataflowRuntime } from '@/core/scheduler';
+import { computeCriticalPath } from '@/utils/criticalPath';
 
-export type TokenVis = { id: string; t0: number; delay: number };
+export type TokenVis = { id: string; t0: number; delay: number; value?: { re: number; im: number } };
 export type CustomPreset = {
   id: string;
   name: string;
   data: Record<string, { re: number; im: number }>;
 };
-type PresetName = 'impulse' | 'two-impulses' | 'sin1' | 'sin3' | 'sin1+3' | 'ramp';
+export type EventLogEntry = {
+  id: string;
+  kind: 'fire' | 'output';
+  label: string;
+  simTime: number;
+};
+type PresetName = 'impulse' | 'two-impulses' | 'sin1' | 'sin3' | 'sin1+3' | 'ramp' | 'noise';
 type BaModel = '4M2A' | '3M5A';
 type InspectorState = {
   visible: boolean;
@@ -44,6 +51,9 @@ type SimState = {
   start: () => void;
   stop: () => void;
   step: () => void;
+  reset: () => void;
+  updateNodeLatency: (nodeId: string, latency: number) => void;
+  updateEdgeDelay: (edgeId: string, delay: number) => void;
 
   inspector: InspectorState;
   openInspector: (p: Partial<InspectorState>) => void;
@@ -54,7 +64,7 @@ type SimState = {
   setN: (n: number) => void;
 
   tokensByEdge: Record<string, TokenVis[]>;
-  addEdgeToken: (edgeId: string, delay: number, id: string) => void;
+  addEdgeToken: (edgeId: string, delay: number, id: string, value?: { re: number; im: number }) => void;
   removeEdgeToken: (edgeId: string, id: string) => void;
 
   setLastInput: (id: string, v: Complex) => void;
@@ -104,6 +114,18 @@ type SimState = {
   bumpActivity: (nodeId: string) => void;
 
   fireCounter: number;
+
+  eventLog: EventLogEntry[];
+  addEventLog: (e: Omit<EventLogEntry, 'id'>) => void;
+  clearEventLog: () => void;
+
+  criticalPathNodeIds: string[];
+  criticalPathEdgeIds: string[];
+  showCriticalPath: boolean;
+  toggleCriticalPath: () => void;
+
+  pendingNodePositions: { id: string; x: number; y: number }[] | null;
+  setPendingNodePositions: (p: { id: string; x: number; y: number }[] | null) => void;
 
   metrics: {
     // пропускна здатність (онлайн-підрахунок за simTime-вікном)
@@ -160,6 +182,10 @@ const makePreset = (N: number, kind: PresetName): Record<string, { re: number; i
         v = { re: n, im: 0 };
         break;
       }
+      case 'noise': {
+        v = { re: Math.random() * 2 - 1, im: Math.random() * 2 - 1 };
+        break;
+      }
     }
     out[`src${n}`] = v;
   }
@@ -198,6 +224,23 @@ export const useSimStore = create<SimState>()(
       nodesDraggable: false,
       setNodesDraggable: (v) => set({ nodesDraggable: v }),
       nodeDataCache: {},
+
+      eventLog: [],
+      addEventLog: (e) =>
+        set((s) => {
+          const entry: EventLogEntry = { ...e, id: nanoid(6) };
+          const log = s.eventLog.length >= 200 ? s.eventLog.slice(-199) : s.eventLog;
+          return { eventLog: [...log, entry] };
+        }),
+      clearEventLog: () => set({ eventLog: [] }),
+
+      criticalPathNodeIds: [],
+      criticalPathEdgeIds: [],
+      showCriticalPath: false,
+      toggleCriticalPath: () => set((s) => ({ showCriticalPath: !s.showCriticalPath })),
+
+      pendingNodePositions: null,
+      setPendingNodePositions: (p) => set({ pendingNodePositions: p }),
 
 
       lastInput: {},
@@ -320,7 +363,7 @@ export const useSimStore = create<SimState>()(
           const nodeId = `src${i}`;
           const value = vec[nodeId] ?? { re: 0, im: 0 };
           runtime.emitFrom(nodeId, 'out', {
-            id: crypto.randomUUID(),
+            id: runtime.nextTokenId(),
             value,
             t: now,
             originT: now,
@@ -373,11 +416,11 @@ export const useSimStore = create<SimState>()(
         set({ mismatches: m });
       },
 
-      addEdgeToken(edgeId, delay, id) {
+      addEdgeToken(edgeId, delay, id, value) {
         const t0 = get().simTime; // ← єдиний годинник
         set((state) => {
           const arr = state.tokensByEdge[edgeId] ?? [];
-          return { tokensByEdge: { ...state.tokensByEdge, [edgeId]: [...arr, { id, t0, delay }] } };
+          return { tokensByEdge: { ...state.tokensByEdge, [edgeId]: [...arr, { id, t0, delay, value }] } };
         });
       },
       removeEdgeToken(edgeId, id) {
@@ -393,13 +436,19 @@ export const useSimStore = create<SimState>()(
             gg,
             {
               onToken: (edge, token) => {
-                get().addEdgeToken(edge.id, edge.delay ?? 0, token.id);
+                const v = token.value as { re?: number; im?: number } | undefined;
+                const complex =
+                  typeof v?.re === 'number' && typeof v?.im === 'number'
+                    ? (v as { re: number; im: number })
+                    : undefined;
+                get().addEdgeToken(edge.id, edge.delay ?? 0, token.id, complex);
               },
               onFire: (node) => {
                 get().onNodeFireForMetrics();
                 get().bumpActivity(node.id);
                 set((s) => ({ firesTotal: s.firesTotal + 1 }));
                 get().setActiveNode(node.id);
+                get().addEventLog({ kind: 'fire', label: `${node.kind} · ${node.id}`, simTime: get().simTime });
                 if (get().pauseOnFire && get().running) {
                   get().stop();
                 }
@@ -456,6 +505,7 @@ export const useSimStore = create<SimState>()(
                 }));
 
                 get().onTokenReachedSinkForMetrics(); // ← тут рахуємо throughput
+                get().addEventLog({ kind: 'output', label: `${node.id} ← ${JSON.stringify(first.value)}`, simTime: get().simTime });
 
                 const val = JSON.stringify(first.value);
                 get().setSinkValue(node.id, val);
@@ -467,7 +517,18 @@ export const useSimStore = create<SimState>()(
             },
             () => get().simTime,
           );
-        set({ graph: g, runtime: mkRuntime(g), mismatches: {}, tokensByEdge: {}, sinks: {}, nodeDataCache: {} });
+        const cp = computeCriticalPath(g);
+        set({
+          graph: g,
+          runtime: mkRuntime(g),
+          mismatches: {},
+          tokensByEdge: {},
+          sinks: {},
+          nodeDataCache: {},
+          criticalPathNodeIds: cp.nodeIds,
+          criticalPathEdgeIds: cp.edgeIds,
+          eventLog: [],
+        });
       },
 
       addEdgeToGraph(p) {
@@ -508,6 +569,33 @@ export const useSimStore = create<SimState>()(
         const dt = 16 * get().speed;
         set((s) => ({ simTime: s.simTime + dt })); // ← посунути логічний час
         get().runtime?.tick(dt);
+      },
+
+      reset() {
+        get().stop();
+        get().setGraph(get().graph);
+        set({ simTime: 0, firesTotal: 0, nodeActivity: {}, lastWall: null });
+        get().resetMetrics();
+      },
+
+      updateNodeLatency(nodeId, latency) {
+        get().runtime?.updateNodeLatency(nodeId, latency);
+        set((s) => ({
+          graph: {
+            ...s.graph,
+            nodes: s.graph.nodes.map((n) => (n.id === nodeId ? { ...n, latency } : n)),
+          },
+        }));
+      },
+
+      updateEdgeDelay(edgeId, delay) {
+        get().runtime?.updateEdgeDelay(edgeId, delay);
+        set((s) => ({
+          graph: {
+            ...s.graph,
+            edges: s.graph.edges.map((e) => (e.id === edgeId ? { ...e, delay } : e)),
+          },
+        }));
       },
     }),
     { name: 'dataflow-sim' },
