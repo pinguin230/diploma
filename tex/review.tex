@@ -101,7 +101,7 @@
 (OFDM-модуляція у LTE, 5G, Wi-Fi, обробка мови, радіолокація,
 спектральний аналіз) і одночасно --- наявністю системного розриву
 між математичним описом алгоритму, його формальною моделлю потоку
-даних та виробничими реалізаціями.
+даних та виробничими реалізаціями~[1][2].
 
 \textbf{Формальна постановка задачі.}
 Нехай задано комплекснозначну вхідну послідовність
@@ -118,7 +118,7 @@ $\{x_n\}_{n=0}^{N-1}$ довжиною $N = 16$, подану у подвійн�
 формалізує процес обчислення у вигляді орієнтованого графа потоку
 даних (DFG, англ.\ \textit{Data Flow Graph}) і забезпечує його
 інтерактивну візуалізацію з анімованим рухом токенів, метриками та
-числовою верифікацією.
+числовою верифікацією~[3][4].
 
 \textbf{Вхідні дані симулятора:} 16~комплексних відліків сигналу
 (задаються користувачем або генеруються вбудованим джерелом ---
@@ -209,29 +209,30 @@ GPU-прискорювачі, системи автоматичної генер
 програмування добирає оптимальну рекурсивну факторизацію під
 конкретну апаратну платформу. Архітектура побудована на
 кеш-незалежній (\textit{cache-oblivious}) рекурсії «розділяй і
-володарюй».
+володарюй»~[8].
 
 \textbf{ARM CMSIS-DSP} --- стандартизований пакет цифрової обробки
 сигналів (ЦОС) для мікроконтролерів ARM Cortex-M. Надає жорстко
 оптимізовані реалізації radix-4 для розмірів $N = 16, 64, 256, 1024,
 4096$ із SIMD-оптимізацією NEON, але не переноситься на інші
-архітектури.
+архітектури~[9].
 
 \textbf{NVIDIA CuFFT} та \textbf{OpenCL FFT} --- адаптації ШПФ для
 графічних процесорів. Стандарт OpenCL забезпечує функціональну
 портативність, проте не гарантує продуктивності: ядро, оптимізоване
 під одну архітектуру GPU, демонструє низьку ефективність на іншій
-через відмінності в ієрархії пам'яті та механізмах планування потоків.
+через відмінності в ієрархії пам'яті та механізмах планування
+потоків~[10].
 
 \textbf{SPIRAL} (Carnegie Mellon University) --- генератор коду,
 що створює платформо-залежну реалізацію безпосередньо з математичних
 формул факторизації, описаних мовою SPL (Signal Processing Language).
 Пошук оптимального графа зводиться до задачі пошуку у просторі
-еквівалентних матричних розкладів.
+еквівалентних матричних розкладів~[11].
 
 \textbf{Intel IPP} (Integrated Performance Primitives) --- жорстко
 оптимізовані примітиви ШПФ під векторні інструкції SSE/AVX/AVX-512
-процесорів Intel.
+процесорів Intel~[12].
 
 \subsubsection*{Методи візуального моделювання}
 
@@ -246,14 +247,15 @@ GPU-прискорювачі, системи автоматичної генер
 кожним вузлом за одну активацію, є фіксованою і відомою на етапі
 статичного аналізу, що дозволяє виконувати статичне планування без
 ризику взаємних блокувань. Алгоритм ШПФ із фіксованою довжиною
-$N = 16$ є природним прикладом SDF-графа.
+$N = 16$ є природним прикладом SDF-графа~[5][6][7].
 
 \textbf{Сигнальні графи і butterfly-діаграми} формалізують зв'язок
-між матричною факторизацією та графом алгоритму, але є статичними і
-не моделюють динаміку виконання. У вітчизняній науковій традиції
-аналогічний підхід застосовувався у роботах ОКБ~ЕІВТ (1970-ті~рр.)
-та у Фізико-механічному інституті ім.~Г.~В.~Карпенка НАН~України, де
-було розроблено векторний спецпроцесор ШПФ на основі dataflow-парадигми.
+між матричною факторизацією та графом алгоритму~[4], але є
+статичними і не моделюють динаміку виконання. У вітчизняній науковій
+традиції аналогічний підхід застосовувався у роботах ОКБ~ЕІВТ
+(1970-ті~рр.) та у Фізико-механічному інституті ім.~Г.~В.~Карпенка
+НАН~України, де було розроблено векторний спецпроцесор ШПФ на основі
+dataflow-парадигми~[2].
 
 \subsubsection*{Порівняльний аналіз існуючих рішень}
 
@@ -698,5 +700,67 @@ $\varepsilon$.
 Отримані результати утворюють повне технічне завдання для
 безпосередньої реалізації симулятора, що складатиме практичну
 частину БКР.
+
+% =============================================================
+\section*{Список використаних джерел}
+\addcontentsline{toc}{section}{Список використаних джерел}
+
+\begin{enumerate}
+  \item Nussbaumer~H.~J. Fast Fourier Transform and Convolution
+        Algorithms. --- 2nd corr. and updated ed. --- Vol.~2. ---
+        Springer Series in Information Sciences. --- Berlin~;
+        Heidelberg : Springer-Verlag, 1982. --- 276~p.
+
+  \item Процько~І.~О., Теслюк~В.~М., Дунець~Р.~Б. Швидкому
+        перетворенню Фур'є --- 60~років // Ukrainian Journal of
+        Information Technology. --- 2025. --- Vol.~7, No.~1. --- P.~1--1.
+
+  \item Cooley~J.~W., Tukey~J.~W. An Algorithm for the Machine
+        Calculation of Complex Fourier Series // Mathematics of
+        Computation. --- 1965. --- Vol.~19, No.~90. --- P.~297--301. ---
+        \url{https://doi.org/10.1090/S0025-5718-1965-0178586-1}.
+
+  \item Burrus~C.~S., Parks~T.~W. DFT/FFT and Convolution Algorithms:
+        Theory and Implementation. --- New York : John Wiley \& Sons,
+        1985. --- 240~p.
+
+  \item Dennis~J.~B. First Version of a Data Flow Procedure Language //
+        Programming Symposium. Lecture Notes in Computer Science. ---
+        1974. --- Vol.~19. --- P.~362--376. ---
+        \url{https://doi.org/10.1007/3-540-06859-7_145}.
+
+  \item Dennis~J.~B., Misunas~D.~P. A Preliminary Architecture for a
+        Basic Data-Flow Processor // Proceedings of the 2nd Annual
+        Symposium on Computer Architecture. --- 1975. --- P.~126--132.
+
+  \item Veen~A.~H. Dataflow Machine Architecture // ACM Computing
+        Surveys. --- 1986. --- Vol.~18, No.~4. --- P.~365--396. ---
+        \url{https://doi.org/10.1145/27633.28055}.
+
+  \item Frigo~M., Johnson~S.~G. The Design and Implementation of
+        FFTW3 // Proceedings of the IEEE. --- 2005. --- Vol.~93,
+        No.~2. --- P.~216--231. ---
+        \url{https://doi.org/10.1109/JPROC.2004.840301}.
+
+  \item ARM Limited. CMSIS-DSP Software Library : Technical Reference
+        Manual. --- Cambridge : ARM Limited, 2023.
+
+  \item Du~P., Weber~R., Luszczek~P., Tomov~S., Peterson~G.,
+        Dongarra~J. From CUDA to OpenCL: Towards a Performance-Portable
+        Solution for Multi-Platform GPU Programming // Parallel
+        Computing. --- 2012. --- Vol.~38, No.~8. --- P.~391--407. ---
+        \url{https://doi.org/10.1016/j.parco.2011.10.002}.
+
+  \item P\"uschel~M., Moura~J.~M.~F., Singer~B. et al. SPIRAL: A
+        Generator for Platform-Adapted Libraries of Signal Processing
+        Algorithms // International Journal of High Performance
+        Computing Applications. --- 2004. --- Vol.~18, No.~1. ---
+        P.~21--45. ---
+        \url{https://doi.org/10.1177/1094342004041291}.
+
+  \item Intel Corporation. Intel Integrated Performance Primitives
+        (Intel IPP) : Developer Guide and Reference. --- Santa Clara :
+        Intel Corporation, 2021.
+\end{enumerate}
 
 \end{document}
