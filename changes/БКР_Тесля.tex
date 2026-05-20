@@ -2207,149 +2207,115 @@ State Store, UI Layer). Деталізовано граф обчислювача
 \protect\phantomsection\label{_Toc229681122}{}РОЗДІЛ 3. РЕАЛІЗАЦІЯ
 ПРОГРАМНОГО РІШЕННЯ
 
-\protect\phantomsection\label{_Toc229681123}{}Опис технологій та
+\protect\phantomsection\label{_Toc229681123}{}3.1. Опис технологій та
 інструментів розробки
 
 У підрозд.~2.1 обґрунтовано архітектурні рішення: клієнтський SPA,
 реактивний рендеринг, централізоване сховище стану, спеціалізована
 бібліотека графової візуалізації. У цьому підрозділі наведено конкретні
-технології, бібліотеки, їхні версії та середовище розробки, що
-реалізують зазначені архітектурні рішення.
-
-Для цього типу роботи пiдроздiли «Данi та їх пiдготовка» та «Апаратна\\
-частина» не застосовуються, оскiльки симулятор не використовує навчальнi
-набори даних, процедури data preprocessing або апаратнi модулi. Тому в
-роздiлi 3 увагу зосереджено на програмнiй реалiзацiї, надiйностi,
-розгортаннi та тестуваннi.
-
-Мови програмування та виконуване середовище
+технології, бібліотеки та їхні версії, що реалізують зазначені
+архітектурні рішення.
 
 Основною мовою реалізації обрано \textbf{TypeScript~5.x} --- надбудову
 над JavaScript зі статичною типізацією. Мова компілюється у
-стандартизований \textbf{ECMAScript~2020 (ES11)}, який виконується усіма
-сучасними браузерами без додаткових polyfill'ів, що задовольняє вимогу
-NF4. Статична типізація дозволяє виявляти на етапі компіляції помилки
-передачі об'єкта \texttt{Token} замість числа чи неправильної форми
-комплексного значення, що критично для дотримання NF1 (точність
-\(\varepsilon \leq 10^{- 9}\)).
+стандартизований ECMAScript~2020 (ES11), який виконується усіма сучасними
+браузерами без додаткових polyfill'ів (NF4). Статична типізація дозволяє
+виявляти на етапі компіляції помилки передачі об'єкта \texttt{Token}
+замість числа чи неправильної форми комплексного значення, що критично для
+дотримання NF1 (\(\varepsilon\leq10^{-9}\)). Цільовим середовищем
+виконання є браузерний рушій JavaScript (V8 у Chrome/Edge, SpiderMonkey у
+Firefox) з підтримкою \texttt{requestAnimationFrame}, Web Workers,
+Canvas API та Local Storage.
 
-Цільовим середовищем виконання є браузерний рушій JavaScript (V8 у
-Chrome/Edge, SpiderMonkey у Firefox) з підтримкою
-\texttt{requestAnimationFrame}, Web Workers, Canvas API та Local
-Storage.
+Повний перелік використаних бібліотек з версіями та призначенням наведено
+у табл.~3.1. \textbf{Next.js} забезпечує маршрутизацію, оптимізоване
+завантаження ресурсів і статичну збірку без серверної частини (режим
+\texttt{output: 'export'}); усі сторінки позначені директивою
+\texttt{'use client'}, оскільки \texttt{requestAnimationFrame}-цикл
+несумісний зі server-side rendering. \textbf{React~Flow} надає готові
+механізми перетягування вузлів, масштабування, анімованих ребер і
+кастомних типів вузлів; його модель \texttt{Node}/\texttt{Edge}
+безпосередньо відображається на формальну модель DFG (підрозд.~2.4).
+\textbf{Zustand} --- легка альтернатива Redux без шаблонного коду
+редьюсерів; компоненти підписуються через хук
+\texttt{useSimStore(selector)} з мемоїзацією. \textbf{fft.js}
+використовується виключно як референтна реалізація ДПФ для верифікації і
+не залучається до шляху виконання основного алгоритму.
 
-Фреймворки та бібліотеки
+Таблиця 3.1.
 
-Повний перелік використаних бібліотек із версіями та призначенням
-наведений у табл.~\hyperref[tab:tech_stack]{15}.
+Технологічний стек реалізації
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3293}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1068}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.5639}}@{}}
-\caption{\protect\phantomsection\label{tab:tech_stack}{}Технологічний
-стек реалізації}\tabularnewline
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Технологія
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Версія
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Призначення
-\end{minipage} \\
-\midrule\noalign{}
-\endfirsthead
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Технологія
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Версія
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Призначення
-\end{minipage} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-TypeScript & 5.x & Статично типізована мова реалізації \\
-Next.js & 14.x & React-фреймворк, статичний експорт SPA \\
-React & 18.x & Реактивний рендеринг UI-компонентів \\
-React Flow (\texttt{@xyflow/react}) & 12.x & Інтерактивна графова
-візуалізація DFG \\
-Zustand & 4.x & Централізоване реактивне сховище стану \\
-Comlink & 4.x & RPC-обгортка для Web Workers \\
-fft.js & 4.x & Референтна реалізація ДПФ для верифікації \\
-Jest & 29.x & Фреймворк модульного тестування \\
-ESLint & 8.x & Статичний аналіз коду, правила стилю \\
-Prettier & 3.x & Автоматичне форматування коду \\
+    >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3293}}
+    >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1068}}
+    >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.5639}}@{}}
+  \caption[Технологічний стек реалізації]{Технологічний стек
+  реалізації}\tabularnewline
+  \toprule\noalign{}
+  \begin{minipage}[b]{\linewidth}\raggedright
+    \textbf{Технологія}
+  \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+    \textbf{Версія}
+  \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+    \textbf{Призначення}
+  \end{minipage} \\
+  \midrule\noalign{}
+  \endfirsthead
+  \toprule\noalign{}
+  \begin{minipage}[b]{\linewidth}\raggedright
+    \textbf{Технологія}
+  \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+    \textbf{Версія}
+  \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+    \textbf{Призначення}
+  \end{minipage} \\
+  \midrule\noalign{}
+  \endhead
+  \bottomrule\noalign{}
+  \endlastfoot
+  TypeScript & 5.x & Статично типізована мова реалізації \\
+  Next.js & 14.x & React-фреймворк, статичний експорт SPA \\
+  React & 18.x & Реактивний рендеринг UI-компонентів \\
+  React Flow (\texttt{@xyflow/react}) & 12.x & Інтерактивна графова
+  візуалізація DFG \\
+  Zustand & 4.x & Централізоване реактивне сховище стану \\
+  Comlink & 4.x & RPC-обгортка для Web Workers \\
+  fft.js & 4.x & Референтна реалізація ДПФ для верифікації \\
+  Jest & 29.x & Фреймворк модульного тестування \\
+  ESLint & 8.x & Статичний аналіз коду, правила стилю \\
+  Prettier & 3.x & Автоматичне форматування коду \\
 \end{longtable}
 
-\textbf{Next.js} забезпечує маршрутизацію, оптимізоване завантаження
-ресурсів і статичну збірку без серверної частини (режим
-\texttt{output:\ ’export’}). Усі сторінки симулятора позначені
-директивою \texttt{’use\ client’}, оскільки синхронне клієнтське
-виконання \texttt{requestAnimationFrame}-циклу несумісне зі server-side
-rendering.
+Розробка виконується у \textbf{Visual Studio Code} з розширеннями
+ESLint, Prettier і TypeScript. Pre-commit-хуки реалізовано через
+\texttt{husky}~+~\texttt{lint-staged}: перед кожним коммітом автоматично
+запускаються ESLint та Prettier для змінених файлів. Менеджер пакетів ---
+\textbf{pnpm}; файл \texttt{pnpm-lock.yaml} гарантує детермінованість
+збірки на різних машинах. Використовується \textbf{Git} зі стратегією
+trunk-based development: основна розробка ведеться у гілці \texttt{main},
+для великих змін створюються короткоживучі feature-гілки. Репозиторій
+розміщений на GitHub; опційно налаштовано \textbf{GitHub Actions} для
+автоматичного запуску модульних тестів і лінтерів на кожному push до
+\texttt{main} (підрозд.~3.4).
 
-\textbf{React Flow} надає готові механізми перетягування вузлів,
-масштабування, анімованих ребер і кастомних типів вузлів. Його
-абстрактна модель \texttt{Node}/\texttt{Edge} безпосередньо
-відображається на формальну модель DFG (підрозд.~2.4).
-
-\textbf{Zustand} --- легка альтернатива Redux без шаблонного коду
-редьюсерів. Забезпечує реактивне сховище стану, до якого компоненти
-підписуються через хук \texttt{useSimStore(selector)} з мемоїзацією.
-
-\textbf{fft.js} --- компактна JavaScript-реалізація ДПФ, що
-використовується виключно як референтна для верифікації (підрозд.~3.6) і
-не залучається до шляху виконання основного алгоритму, що забезпечує
-незалежність результату симулятора від зовнішньої бібліотеки.
-
-Середовище розробки та інструментарій
-
-Розробка виконується у редакторі \textbf{Visual Studio Code} з
-розширеннями ESLint, Prettier і TypeScript. Pre-commit-хуки реалізовано
-через \texttt{husky} + \texttt{lint-staged}: перед кожним коммітом
-автоматично запускаються ESLint та Prettier для змінених файлів.
-
-Менеджер пакетів --- \textbf{pnpm}, що забезпечує швидке встановлення
-залежностей і ефективне використання дискового простору через
-hard-linking. Файлом залежностей є \texttt{package.json}; файл
-\texttt{pnpm-lock.yaml} гарантує детермінованість збірки на різних
-машинах.
-
-Система керування версіями та репозиторій
-
-Використовується \textbf{Git} зі стратегією \emph{trunk-based
-development}: основна розробка ведеться у гілці \texttt{main}, для
-великих змін створюються короткоживучі feature-гілки. Репозиторій
-розміщений на GitHub, що забезпечує доступність для
-науково-педагогічного комітету БКР.
-
-Опційно налаштовано \textbf{GitHub Actions} для автоматичного запуску
-модульних тестів і лінтерів на кожному push до \texttt{main} (див.
-підрозд.~3.5).
-
-\protect\phantomsection\label{_Toc229681128}{}Структура проєкту та
+\protect\phantomsection\label{_Toc229681128}{}3.2. Структура проєкту та
 організація вихідного коду
 
-Верхньорівневе дерево репозиторію
-
-Структура кореневого каталогу проєкту організована за стандартом Next.js
-з додатковими директоріями для тестів і документації
-(рис.~\hyperref[fig:project_tree]{4}).
+Структура кореневого каталогу проєкту організована за стандартом
+Next.js з окремими директоріями для тестів і документації (рис.~3.1).
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 0\tabcolsep) * \real{0.7080}}@{}}
-\caption{Структура директорій проєкту. Джерело: розроблено
-автором.}\tabularnewline
-\toprule\noalign{}
-\endfirsthead
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-\begin{minipage}[t]{\linewidth}\raggedright
-\begin{verbatim}
+    >{\raggedright\arraybackslash}p{(\linewidth - 0\tabcolsep) * \real{0.7080}}@{}}
+  \caption{Структура директорій проєкту. Джерело: розроблено
+  автором.}\tabularnewline
+  \toprule\noalign{}
+  \endfirsthead
+  \endhead
+  \bottomrule\noalign{}
+  \endlastfoot
+  \begin{minipage}[t]{\linewidth}\raggedright
+    \begin{verbatim}
 simulator/
 +-- public/                  # статичні ресурси (SVG-іконки, favicons)
 +-- src/
@@ -2390,293 +2356,173 @@ simulator/
 +-- tsconfig.json
 +-- next.config.js
 \-- .eslintrc.js
-\end{verbatim}
-\end{minipage} \\
+    \end{verbatim}
+  \end{minipage} \\
 \end{longtable}
 
-Принцип декомпозиції
+Рис.~3.1. Структура директорій проєкту. Джерело: розроблено автором.
 
 Декомпозиція на модулі виконана за принципом \emph{розподілу за шарами
-відповідальності}, що відповідає архітектурі Container з підрозд.~2.3:
+відповідальності}, що відповідає архітектурі Container з підрозд.~2.3.
+Директорія \texttt{src/core/} містить ядро симуляції без будь-яких
+залежностей від UI: воно може бути імпортоване у Node.js для
+batch-обчислень і використовується в unit-тестах. Директорія
+\texttt{src/graph/} охоплює генерацію структури DFG і компоненти
+візуалізації на React Flow. Директорія \texttt{src/components/} містить
+UI-компоненти, що не залежать від React Flow (панелі керування, метрики,
+спектр). Сховище \texttt{src/store/} реалізує реактивний стан та
+інтеграцію з ядром симуляції. Директорія \texttt{src/utils/} містить чисті
+функції без побічних ефектів, а \texttt{src/workers/} --- Web Worker для
+фонових обчислень. Така організація спрощує ізольоване тестування і
+полегшує пошук місць для внесення змін.
 
-\begin{itemize}
-\item
-  \texttt{src/core/} --- ядро симуляції без будь-яких залежностей від
-  UI; може бути імпортоване у Node.js для batch-обчислень і
-  використовується в unit-тестах;
-\item
-  \texttt{src/graph/} --- генерація структури DFG і компоненти
-  інтерактивної візуалізації на React Flow;
-\item
-  \texttt{src/components/} --- UI-компоненти, що не залежать від React
-  Flow (панелі керування, метрики, спектр);
-\item
-  \texttt{src/store/} --- реактивне сховище стану та інтеграція з ядром
-  симуляції;
-\item
-  \texttt{src/utils/} --- чисті функції (математика, верифікація) без
-  побічних ефектів;
-\item
-  \texttt{src/workers/} --- Web Worker для фонових обчислень.
-\end{itemize}
+Відповідність компонентів архітектури з підрозд.~2.3 та модулів
+вихідного коду зведена у табл.~3.2.
 
-Така організація забезпечує можливість ізольованого тестування ядра
-симуляції без браузерного середовища та спрощує пошук місць внесення
-змін при підтримці коду.
+Таблиця 3.2.
 
-Відповідність компонентів архітектури та модулів коду
-
-Таблиця~\hyperref[tab:arch_to_code]{16} формалізує зв'язок між
-компонентами архітектури з підрозд.~2.3 та модулями вихідного коду.
+Відповідність «Компонент → Модуль/файл»
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2555}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3745}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3700}}@{}}
-\caption{\protect\phantomsection\label{tab:arch_to_code}{}Відповідність
-«Компонент \(\rightarrow\) Модуль/файл»}\tabularnewline
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Компонент архітектури (2.3)
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Модуль / файл
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Роль
-\end{minipage} \\
-\midrule\noalign{}
-\endfirsthead
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Компонент архітектури (2.3)
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Модуль / файл
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Роль
-\end{minipage} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-Simulation Core & \texttt{src/core/scheduler.ts} & Клас
-\texttt{DataflowRuntime}, метод \texttt{tick()} \\
-Simulation Core & \texttt{src/core/buffers.ts} & FIFO-черги на дугах \\
-Simulation Core & \texttt{src/core/types.ts} & Типи \texttt{Token},
-\texttt{Edge}, \texttt{NodeSpec} \\
-Graph Generator & \texttt{src/graph/generateDFT4x4.ts} & Побудова DFG \\
-Graph Generator & \texttt{src/graph/layout4x4.ts} & Координати вузлів \\
-State Store & \texttt{src/store/simStore.ts} & Zustand-сховище \\
-UI Layer (GraphView) & \texttt{src/graph/GraphView.tsx} & React Flow +
-rAF-цикл \\
-UI Layer (SpectrumView) & \texttt{src/components/SpectrumView.tsx} &
-Canvas-діаграма \(|X(k)|\) \\
-UI Layer (Metrics) & \texttt{src/components/Metrics.tsx} &
-EMA-метрики \\
-UI Layer (Controls) & \texttt{src/components/Controls.tsx} &
-Пуск/пауза/швидкість \\
-UI Layer (вузли) & \texttt{src/components/nodes/*.tsx} & SourceNode,
-SinkNode, DFT4Node, TwiddleNode \\
-Math \& verify & \texttt{src/utils/math.ts}, \texttt{compare.ts} &
-Комплексна арифметика, верифікація \\
+    >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2555}}
+    >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3745}}
+    >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3700}}@{}}
+  \caption[Відповідність компонентів архітектури та модулів коду]{Відповідність
+  «Компонент~$\rightarrow$ Модуль/файл»}\tabularnewline
+  \toprule\noalign{}
+  \begin{minipage}[b]{\linewidth}\raggedright
+    \textbf{Компонент архітектури (2.3)}
+  \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+    \textbf{Модуль / файл}
+  \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+    \textbf{Роль}
+  \end{minipage} \\
+  \midrule\noalign{}
+  \endfirsthead
+  \toprule\noalign{}
+  \begin{minipage}[b]{\linewidth}\raggedright
+    \textbf{Компонент архітектури (2.3)}
+  \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+    \textbf{Модуль / файл}
+  \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+    \textbf{Роль}
+  \end{minipage} \\
+  \midrule\noalign{}
+  \endhead
+  \bottomrule\noalign{}
+  \endlastfoot
+  Simulation Core & \texttt{src/core/scheduler.ts} & Клас
+  \texttt{DataflowRuntime}, метод \texttt{tick()} \\
+  Simulation Core & \texttt{src/core/buffers.ts} & FIFO-черги на дугах \\
+  Simulation Core & \texttt{src/core/types.ts} & Типи \texttt{Token},
+  \texttt{Edge}, \texttt{NodeSpec} \\
+  Graph Generator & \texttt{src/graph/generateDFT4x4.ts} & Побудова DFG \\
+  Graph Generator & \texttt{src/graph/layout4x4.ts} & Координати вузлів \\
+  State Store & \texttt{src/store/simStore.ts} & Zustand-сховище \\
+  UI Layer (GraphView) & \texttt{src/graph/GraphView.tsx} & React Flow +
+  rAF-цикл \\
+  UI Layer (SpectrumView) & \texttt{src/components/SpectrumView.tsx} &
+  Canvas-діаграма \(|X(k)|\) \\
+  UI Layer (Metrics) & \texttt{src/components/Metrics.tsx} &
+  EMA-метрики \\
+  UI Layer (Controls) & \texttt{src/components/Controls.tsx} &
+  Пуск/пауза/швидкість \\
+  UI Layer (вузли) & \texttt{src/components/nodes/*.tsx} & SourceNode,
+  SinkNode, DFT4Node, TwiddleNode \\
+  Math \& verify & \texttt{src/utils/math.ts}, \texttt{compare.ts} &
+  Комплексна арифметика, верифікація \\
 \end{longtable}
 
-Ключові конфігураційні файли
-
-\texttt{tsconfig.json} визначає налаштування компілятора TypeScript:
-увімкнені \texttt{strict}, \texttt{noImplicitAny},
-\texttt{strictNullChecks} --- для максимальної безпеки типів. Цільовий
-стандарт --- ES2020.
-
-\texttt{next.config.js} встановлює \texttt{output:\ ’export’} для
-статичної збірки та налаштовує базовий шлях. Функцій і API немає, усі
-сторінки клієнтські.
-
-\texttt{.eslintrc.js} налаштовує правила ESLint з розширеннями
-\texttt{@typescript-eslint}, \texttt{react-hooks}, \texttt{@next/next}.
-Заборонено \texttt{any}, \texttt{console.log} у production, не
-імпортовані змінні, побічні ефекти у хуках без залежностей.
-
-Стандарти кодування
-
-Код документується у стилі \textbf{JSDoc}, з особливим акцентом на
-публічних методах \texttt{DataflowRuntime}, \texttt{simStore} і
-експортованих утилітах. Типи та інтерфейси описуються безпосередньо у
-\texttt{types.ts}. Ідентифікатори --- англомовні, камел-кейс для змінних
-і функцій, паскаль-кейс для типів і React-компонентів. Максимальна
-довжина рядка --- 100~символів, ця межа автоматично контролюється
+Конфігураційні файли визначають правила якості коду. Файл
+\texttt{tsconfig.json} вмикає \texttt{strict}, \texttt{noImplicitAny},
+\texttt{strictNullChecks} для максимальної безпеки типів; цільовий
+стандарт~--- ES2020. Файл \texttt{next.config.js} встановлює
+\texttt{output: 'export'} для статичної збірки та налаштовує базовий
+шлях. Файл \texttt{.eslintrc.js} забороняє \texttt{any},
+\texttt{console.log} у production, не імпортовані змінні та побічні
+ефекти у хуках без залежностей. Ідентифікатори у коді --- англомовні,
+камел-кейс для змінних і функцій, паскаль-кейс для типів і
+React-компонентів; максимальна довжина рядка 100 символів контролюється
 Prettier.
 
-\protect\phantomsection\label{_Toc229681134}{}Реалізація ключових
+\protect\phantomsection\label{_Toc229681134}{}3.3. Реалізація ключових
 модулів та алгоритмів
 
-Клас DataflowRuntime
-
 Клас \texttt{DataflowRuntime} (модуль \texttt{src/core/scheduler.ts}) є
-програмною реалізацією абстрактної машини потоку даних з
-підрозд.~2.2~(Veen 1986; Dennis and Misunas 1975). Він відповідає за
-виконання правила активації вузлів та управління FIFO-чергами на дугах
-графа.
+програмною реалізацією абстрактної машини потоку даних із підрозд.~2.2
+(Veen 1986; Dennis and Misunas 1975). Він відповідає за виконання правила
+активації вузлів та управління FIFO-чергами на дугах графа і зберігає
+такі внутрішні структури: незмінне посилання на граф \texttt{Graph};
+відображення \texttt{Map<edgeId, FIFO<Token>>}~--- окрема черга токенів
+для кожної дуги; \texttt{readyAt: Map<nodeId, number>}~--- час, раніше
+якого вузол не може активуватись повторно (моделює \texttt{latency});
+\texttt{inbox: Map<nodeId, Map<portId, Token>>}~--- токени, що вже
+доставлені до вузла, але ще не поглинуті; обробники подій
+\texttt{onToken}, \texttt{onFire}, \texttt{onBeforeFire},
+\texttt{onOutput}. Логічний час надається ззовні через функцію
+\texttt{getTime: () => number}, переданої у конструктор; у симуляторі нею
+є \texttt{() => store.simTime}, завдяки чому годинник ядра повністю
+відокремлений від астрономічного часу.
 
-Клас зберігає такі внутрішні структури даних:
+Метод \texttt{tick(dt, maxFires)} виконує єдиний крок потокового
+обчислення і реалізує правило активації (Veen 1986). Алгоритм складається
+з чотирьох послідовних кроків. По-перше, \textbf{доставка токенів}: для
+кожної дуги \(e\) перевіряється умова
+\(t_{now}-token.t\geq e.delay\); якщо виконана, токен видаляється з черги
+і поміщається у \texttt{inbox} вузла-приймача, емітується подія
+\texttt{onToken}. По-друге, \textbf{перевірка готовності}: вузол є
+готовим, якщо у \texttt{inbox}~є токен на кожному вхідному порті та
+\(\text{readyAt}[n]\leq t_{now}\). По-третє, \textbf{активація}: для
+кожного готового вузла (не більше \texttt{maxFires} за виклик) токени
+поглинаються з \texttt{inbox}, виконується логіка вузла за типом
+\texttt{NodeKind}, час блокування оновлюється:
+\(\text{readyAt}[n]\leftarrow t_{now}+n.latency\), емітуються події
+\texttt{onBeforeFire} і \texttt{onFire}. По-четверте,
+\textbf{розміщення вихідних токенів}: для кожного вихідного токена
+знаходяться всі дуги з відповідним портом-джерелом і токен поміщається у
+їхні черги з часом народження \(token.t = t_{now}+n.latency\), що
+гарантує правильну затримку доставки. Такий порядок кроків забезпечує
+детермінованість (NF5): при фіксованому обході вузлів результат симуляції
+не залежить від реального часу у браузері.
 
-\begin{itemize}
-\item
-  незмінне посилання на граф \texttt{Graph} (вузли і дуги);
-\item
-  відображення
-  \texttt{Map\textless{}edgeId,\ FIFO\textless{}Token\textgreater{}\textgreater{}}
-  --- окрема черга токенів для кожної дуги;
-\item
-  \texttt{readyAt:\ Map\textless{}nodeId,\ number\textgreater{}} ---
-  час, раніше якого вузол не може активуватись повторно (моделює
-  \texttt{latency});
-\item
-  \texttt{inbox:\ Map\textless{}nodeId,\ Map\textless{}portId,\ Token\textgreater{}\textgreater{}}
-  --- токени, що вже доставлені до вузла, але ще не поглинуті;
-\item
-  обробники подій: \texttt{onToken}, \texttt{onFire},
-  \texttt{onBeforeFire}, \texttt{onOutput}.
-\end{itemize}
-
-Логічний час надається ззовні через функцію
-\texttt{getTime:\ ()\ =\textgreater{}\ number}, що передається у
-конструктор. У симуляторі цією функцією є
-\texttt{()\ =\textgreater{}\ store.simTime}, завдяки чому годинник ядра
-повністю відокремлений від астрономічного часу.
-
-Метод tick() --- алгоритм одного кроку симуляції
-
-Метод \texttt{tick(dt,\ maxFires)} виконує єдиний крок потокового
-обчислення і реалізує правило активації (firing rule), описане у
-підрозд.~2.2~(Veen 1986; Dennis and Misunas 1975). Алгоритм складається
-з чотирьох послідовних кроків:
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\item
-  \textbf{Доставка токенів.} Для кожної дуги \(e\) перевіряється, чи
-  найстарший токен у черзі \(buf\lbrack e.id\rbrack\) задовольняє умові
-  доставки:
-\end{enumerate}
-
-\[t_{\text{now}} - token.t\mspace{6mu} \geq \mspace{6mu} e.delay,\]
-
-\begin{itemize}
-\item
-  де \(t_{\text{now}} = \text{simTime}\). Якщо
-  умова~(\hyperref[eq:delivery]{{[}eq:delivery{]}}) виконана, токен
-  видаляється з черги і поміщається у \texttt{inbox} відповідного
-  вузла-приймача; емітується подія \texttt{onToken}.
-\end{itemize}
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\setcounter{enumi}{1}
-\item
-  \textbf{Перевірка готовності вузла.} Вузол \(n\) є \emph{готовим} до
-  активації, якщо одночасно виконуються дві умови:
-
-  \begin{itemize}
-  \item
-    у \texttt{inbox}\(\lbrack n\rbrack\) є токен на \emph{кожному}
-    вхідному порті:
-    \(\forall p \in n.inPorts:\text{inbox}\lbrack n\rbrack.has(p)\);
-  \item
-    вузол вільний від блокування:
-    \(\text{readyAt}\lbrack n\rbrack \leq t_{\text{now}}\).
-  \end{itemize}
-\item
-  \textbf{Активація вузла.} Для кожного готового вузла (не більше
-  \texttt{maxFires} за один виклик):
-
-  \begin{itemize}
-  \item
-    токени поглинаються з \texttt{inbox}\(\lbrack n\rbrack\) і
-    передаються у метод \texttt{execute(node,\ inputs)};
-  \item
-    виконується логіка вузла за типом \texttt{NodeKind}, обчислюються
-    вихідні токени;
-  \item
-    час блокування оновлюється:
-    \(\text{readyAt}\lbrack n\rbrack \leftarrow t_{\text{now}} + n.latency\);
-  \item
-    емітуються події \texttt{onBeforeFire} і \texttt{onFire}.
-  \end{itemize}
-\item
-  \textbf{Розміщення вихідних токенів.} Для кожного вихідного токена
-  знаходяться всі дуги з відповідним портом-джерелом; токен поміщається
-  у чергу кожної такої дуги з часом народження:
-\end{enumerate}
-
-\[token.t = t_{\text{now}} + n.latency,\]
-
-\begin{itemize}
-\item
-  що гарантує правильну затримку доставки на наступному кроці.
-\end{itemize}
-
-Такий порядок кроків забезпечує детермінованість: при фіксованому
-порядку обходу вузлів і дуг результат симуляції не залежить від
-реального часу виконання у браузері (NF5).
-
-FIFO-черга (buffers.ts)
-
-Клас \texttt{FIFO\textless{}T\textgreater{}} (модуль
-\texttt{src/core/buffers.ts}) --- узагальнена черга на базі масиву з
-методами \texttt{push(item)}, \texttt{pop():\ T\ \textbar{}\ undefined},
-\texttt{peek():\ T\ \textbar{}\ undefined} та властивістю
-\texttt{size:\ number}. Одна черга ставиться у відповідність кожній дузі
-графа; черги ініціалізуються у конструкторі \texttt{DataflowRuntime}
-ітерацією по \texttt{graph.edges}.
-
-Асимптотична складність операцій: \texttt{push} --- \(O(1)\)
-амортизований, \texttt{pop} --- \(O(n)\) у найгіршому випадку (через
-зсув масиву). При характерних для симулятора розмірах черг
-(\(n \leq 16\)) це не становить проблеми; для масштабування на більші
-\(N\) заплановано перехід на циклічний буфер з \(O(1)\)-операціями.
-
-Логічний час і speed multiplier
-
-Логічний час \texttt{simTime} збільшується методом
-\texttt{tickSimTime()} пропорційно до астрономічного часу та параметра
-\texttt{speed}:
-
-\[\text{simTime}_{i + 1} = \text{simTime}_{i} + \Delta t_{\text{wall}} \cdot \text{speed},\]
-
-де \(\Delta t_{\text{wall}}\) --- реальний проміжок між кадрами (у
-мілісекундах), а \texttt{speed} --- множник у діапазоні
-\(\lbrack 0,1;\mspace{6mu} 10\rbrack\). Відокремлення логічного часу від
-астрономічного дозволяє досліджувати поведінку алгоритму у довільному
+Клас \texttt{FIFO<T>} (модуль \texttt{src/core/buffers.ts}) --- узагальнена
+черга на базі масиву з методами \texttt{push(item)},
+\texttt{pop(): T|undefined}, \texttt{peek(): T|undefined} та властивістю
+\texttt{size}. Одна черга ставиться у відповідність кожній дузі графа і
+ініціалізується у конструкторі \texttt{DataflowRuntime} ітерацією по
+\texttt{graph.edges}. При характерних для симулятора розмірах черг
+(\(n\leq16\)) асимптотика \texttt{pop}~--- \(O(n)\) через зсув масиву~---
+не становить проблеми; для масштабування на більші \(N\) заплановано
+перехід на циклічний буфер з \(O(1)\)-операціями. Логічний час
+\texttt{simTime} збільшується методом \texttt{tickSimTime()} пропорційно
+до астрономічного часу та параметра \texttt{speed}:
+\(\text{simTime}_{i+1}=\text{simTime}_{i}+\Delta t_{wall}\cdot speed\),
+де \(\Delta t_{wall}\)~--- реальний проміжок між кадрами. Відокремлення
+логічного часу дозволяє досліджувати поведінку алгоритму у довільному
 масштабі без зміни логіки активації.
 
-Реалізація вузлів за типом
-
-Метод \texttt{execute(node,\ inputs)} реалізує шаблон Strategy
-(підрозд.~2.1) через перемикач за \texttt{node.kind}.
-
-\textbf{SOURCE.} Вузол-джерело не має вхідних портів; його токени
-вводяться ззовні через виклик
-\texttt{runtime.emitFrom(nodeId,\ ’out’,\ token)}. Токен містить
-значення \(x(n) = \{\, re,im\,\}\) і поля
-\(\text{t} = \text{originT} = \text{simTime}\).
-
-\textbf{DFT4.} Вузол приймає 4~токени через порти \texttt{in0}
-\ldots{}\texttt{in3} і застосовує алгоритм метелика
-radix-4~(\hyperref[eq:dft4_butterfly]{{[}eq:dft4\_butterfly{]}}) з
-підрозд.~2.2. Лістинг~\hyperref[lst:dft4]{5} наводить реалізацію:
+Метод \texttt{execute(node, inputs)} реалізує шаблон Strategy через
+перемикач за \texttt{node.kind}. \textbf{SOURCE:} вузол-джерело не має
+вхідних портів; його токени вводяться ззовні через виклик
+\texttt{runtime.emitFrom(nodeId, 'out', token)}, де
+\(t = originT = simTime\). \textbf{DFT4:} вузол приймає 4~токени через
+порти \texttt{in0}\ldots\texttt{in3} і застосовує алгоритм метелика
+radix-4 з підрозд.~2.2. Реалізацію функції \texttt{computeDFT4} наведено
+в лістингу~3.1.
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 0\tabcolsep) * \real{0.5884}}@{}}
-\caption{Реалізація 4-точкового ДПФ-метелика без нетривіальних множень.
-Функція \protect\texttt{cplxMulJ(z)\ =\ \{-z.im,\ z.re\}} реалізує
-множення на \(j\) через перестановку. Джерело: розроблено
-автором.}\tabularnewline
-\toprule\noalign{}
-\endfirsthead
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-\begin{minipage}[t]{\linewidth}\raggedright
-\begin{verbatim}
+    >{\raggedright\arraybackslash}p{(\linewidth - 0\tabcolsep) * \real{0.5884}}@{}}
+  \caption{Реалізація 4-точкового ДПФ-метелика без нетривіальних множень.
+  Функція \protect\texttt{cplxMulJ(z) = \{-z.im, z.re\}} реалізує
+  множення на \(j\) через перестановку. Джерело: розроблено
+  автором.}\tabularnewline
+  \toprule\noalign{}
+  \endfirsthead
+  \endhead
+  \bottomrule\noalign{}
+  \endlastfoot
+  \begin{minipage}[t]{\linewidth}\raggedright
+    \begin{verbatim}
 function computeDFT4(x: Complex[4]): Complex[4] {
   const E0 = cplxAdd(x[0], x[2]);   // x0 + x2
   const E1 = cplxSub(x[0], x[2]);   // x0 - x2
@@ -2689,518 +2535,366 @@ function computeDFT4(x: Complex[4]): Complex[4] {
     cplxAdd(E1, cplxMulJ(O1))       // X3 = E1 + j*O1
   ];
 }
-\end{verbatim}
-\end{minipage} \\
+    \end{verbatim}
+  \end{minipage} \\
 \end{longtable}
 
-Вузол породжує 4~вихідних токени через порти \texttt{out0}
-\ldots{}\texttt{out3}. Жодного нетривіального множення не виконується.
+Лістинг 3.1. Реалізація 4-точкового ДПФ-метелика. Джерело: розроблено автором.
 
-\textbf{TWIDDLE.} Вузол приймає 1~токен і виконує комплексне множення на
-поворотний множник \(W_{16}^{k} = e^{- j2\pi k/16}\), де ціле число
-\(k\) зберігається у \texttt{NodeSpec.params.twiddle.k}. Формули
-обчислення:
+\textbf{TWIDDLE:} вузол приймає 1~токен і виконує комплексне множення на
+поворотний множник \(W_{16}^{k}=e^{-j2\pi k/16}\), де
+\(k\in\texttt{NodeSpec.params.twiddle.k}\): \({re}'=z.re\cos\theta-z.im\sin\theta\),
+\({im}'=z.re\sin\theta+z.im\cos\theta\), \(\theta=-2\pi k/16\). При
+\(k=0\) вхідний токен передається без змін. \textbf{SINK:} вузол приймає
+1~токен, передає його значення у \texttt{store.sinks[nodeId]} через
+\texttt{JSON.stringify}, емітує \texttt{onOutput} і оновлює EMA-метрику
+наскрізної затримки: \(latency=simTime-token.originT\).
 
-\[\begin{aligned}
-{re}' & = z.recos\theta - z.imsin\theta, \\
-{im}' & = z.resin\theta + z.imcos\theta,
-\end{aligned}\quad\theta = - \frac{2\pi k}{16}.\]
-
-При \(k = 0\) маємо \(W_{16}^{0} = 1\), і множення є тривіальним ---
-вхідний токен передається на вихід без змін.
-
-\textbf{SINK.} Вузол приймає 1~токен, передає його значення у
-\texttt{store.sinks{[}nodeId{]}} через серіалізацію
-\texttt{JSON.stringify} і емітує подію \texttt{onOutput}. Одночасно
-обчислюється наскрізна затримка:
-
-\[latency = \text{simTime} - token.\text{originT},\]
-
-і оновлюється EMA-метрика \texttt{latencyEmaMs}.
-
-Функція generateDFT4x4()
-
-Функція \texttt{generateDFT4x4(latency):\ Graph} у модулі
-\texttt{src/graph/generateDFT4x4.ts} реалізує шаблон Factory
-(підрозд.~2.1) і будує DFG за алгоритмом:
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\item
-  створюються 16~вузлів \texttt{source} (\texttt{src0}
-  \ldots{}\texttt{src15}), кожен з одним вихідним портом \texttt{out};
-\item
-  створюються 4~вузли \texttt{dft4} першого ярусу (\texttt{row-0}
-  \ldots{}\texttt{row-3}) з 4~входами та 4~виходами і \texttt{latency}
-  \(= 400\);
-\item
-  додаються 16~дуг \texttt{src}\(_{i} \rightarrow\)
-  \texttt{row-}\(r\)\texttt{.in}\(s\), де \(i = r + 4s\), \texttt{delay}
-  \(= 600\);
-\item
-  створюються 16~вузлів \texttt{twiddle}
-  (\texttt{tw-}\(r\)\texttt{-}\(k_{1}\)) з параметром
-  \(\{ N:16,\mspace{6mu} k:r \cdot k_{1}\}\) і \texttt{latency}
-  \(= 200\);
-\item
-  додаються 16~дуг \texttt{row-}\(r\)\texttt{.out}\(k_{1} \rightarrow\)
-  \texttt{tw-}\(r\)\texttt{-}\(k_{1}\)\texttt{.in};
-\item
-  створюються 4~вузли \texttt{dft4} другого ярусу (\texttt{col-0}
-  \ldots{}\texttt{col-3});
-\item
-  додаються 16~дуг \texttt{tw-}\(r\)\texttt{-}\(k_{1}\)\texttt{.out}
-  \(\rightarrow\) \texttt{col-}\(k_{1}\)\texttt{.in}\(r\);
-\item
-  створюються 16~вузлів \texttt{sink} (\texttt{snk0}
-  \ldots{}\texttt{snk15});
-\item
-  додаються 16~дуг
-  \texttt{col-}\(k_{1}\)\texttt{.out}\(k_{2} \rightarrow\)
-  \texttt{snk}\(_{k_{2} + 4k_{1}}\)\texttt{.in}.
-\end{enumerate}
-
-Повертається об'єкт \texttt{Graph} із 56~вузлами і 64~дугами. Функція
-\texttt{layoutDFT4x4()} (модуль \texttt{layout4x4.ts}) обчислює
-координати вузлів для React Flow: граф розподіляється на п'ять
-вертикальних ярусів з кроком \texttt{stageGap} \(= 280\) пікселів; вузли
-в межах ярусу рівномірно розподіляються по осі~\(y\) з кроком
-\texttt{rowGap} \(= 140\) пікселів.
-
-Сховище стану simStore (Zustand)
+Функція \texttt{generateDFT4x4(latency): Graph} (модуль
+\texttt{src/graph/generateDFT4x4.ts}) реалізує шаблон Factory і будує
+DFG за дев'ятьма кроками: (1)~16~вузлів \texttt{source} (\texttt{src0}
+\ldots\texttt{src15}) з одним вихідним портом; (2)~4~вузли \texttt{dft4}
+першого ярусу (\texttt{row-0}\ldots\texttt{row-3}) з \texttt{latency=400};
+(3)~16~дуг \texttt{src}$_i\rightarrow$\texttt{row-}$r$\texttt{.in}$s$
+(\(i=r+4s\)), \texttt{delay=600}; (4)~16~вузлів \texttt{twiddle}
+(\texttt{tw-}$r$\texttt{-}$k_1$) з параметром \(\{N:16,\,k:r\cdot k_1\}\)
+та \texttt{latency=200}; (5)~16~дуг
+\texttt{row-}$r$\texttt{.out}$k_1\rightarrow$\texttt{tw-}$r$\texttt{-}$k_1$\texttt{.in};
+(6)~4~вузли \texttt{dft4} другого ярусу (\texttt{col-0}\ldots\texttt{col-3});
+(7)~16~дуг
+\texttt{tw-}$r$\texttt{-}$k_1$\texttt{.out}$\rightarrow$\texttt{col-}$k_1$\texttt{.in}$r$;
+(8)~16~вузлів \texttt{sink} (\texttt{snk0}\ldots\texttt{snk15});
+(9)~16~дуг \texttt{col-}$k_1$\texttt{.out}$k_2\rightarrow$
+\texttt{snk}$_{k_2+4k_1}$\texttt{.in}. Функція повертає об'єкт
+\texttt{Graph} із 56~вузлами і 64~дугами. Функція
+\texttt{layoutDFT4x4()} обчислює координати вузлів для React Flow:
+граф розподіляється на п'ять вертикальних ярусів з кроком
+\texttt{stageGap=280} пікселів; вузли в межах ярусу рівномірно
+розподіляються по осі~\(y\) з кроком \texttt{rowGap=140} пікселів.
 
 Сховище \texttt{simStore} реалізовано функцією \texttt{create()} з
-Zustand і містить поля стану та методи-команди
-(табл.~\hyperref[tab:store]{17}).
+Zustand і містить поля стану та методи-команди (табл.~3.3). Компоненти UI
+підписуються на окремі зрізи стану через \texttt{useSimStore(selector)}
+з мемоїзацією: наприклад, \texttt{Metrics} підписується лише на поле
+\texttt{metrics} і перемальовується тільки при його зміні (NF3).
+
+Таблиця 3.3.
+
+Ключові поля та методи Zustand-сховища
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2203}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2692}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4866}}@{}}
-\caption{\protect\phantomsection\label{tab:store}{}Ключові поля та
-методи Zustand-сховища}\tabularnewline
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Поле / метод
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Тип
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Призначення
-\end{minipage} \\
-\midrule\noalign{}
-\endfirsthead
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Поле / метод
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Тип
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Призначення
-\end{minipage} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-\texttt{graph} & \texttt{Graph} & Поточна топологія DFG \\
-\texttt{runtime} & \texttt{DataflowRuntimenull} & Ядро симуляції \\
-\texttt{running} & \texttt{boolean} & Стан rAF-циклу \\
-\texttt{speed} & \texttt{number} & Множник швидкості
-\(\lbrack 0,1;10\rbrack\) \\
-\texttt{simTime} & \texttt{number} & Поточний логічний час \\
-\texttt{tokensByEdge} &
-\texttt{Record\textless{}id,\ Token{[}{]}\textgreater{}} & Токени для
-анімації \\
-\texttt{sinks} & \texttt{Record\textless{}id,\ Complex\textgreater{}} &
-Спектральні відліки \(X(k)\) \\
-\texttt{nodeActivity} &
-\texttt{Record\textless{}id,\ number\textgreater{}} & Теплова карта
-\(a_{i}\) \\
-\texttt{metrics} & \texttt{MetricsState} & EMA-метрики \\
-\texttt{mismatches} &
-\texttt{Record\textless{}id,\ boolean\textgreater{}} & Результат
-верифікації \\
-\texttt{setGraph(g)} & \texttt{(Graph)\ =\textgreater{}\ void} &
-Ініціалізація нового графа і \texttt{runtime} \\
-\texttt{injectData(v)} &
-\texttt{(Complex{[}16{]})\ =\textgreater{}\ void} & Введення вхідного
-вектора \\
-\texttt{start()/stop()/step()} & \texttt{()\ =\textgreater{}\ void} &
-Керування rAF-циклом \\
-\texttt{applyPreset(k)} & \texttt{(PresetKind)\ =\textgreater{}\ void} &
-Вбудовані пресети вхідних сигналів \\
+    >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2203}}
+    >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2692}}
+    >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4866}}@{}}
+  \caption[Ключові поля та методи Zustand-сховища]{Ключові поля та методи
+  Zustand-сховища}\tabularnewline
+  \toprule\noalign{}
+  \begin{minipage}[b]{\linewidth}\raggedright
+    Поле / метод
+  \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+    Тип
+  \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+    Призначення
+  \end{minipage} \\
+  \midrule\noalign{}
+  \endfirsthead
+  \toprule\noalign{}
+  \begin{minipage}[b]{\linewidth}\raggedright
+    Поле / метод
+  \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+    Тип
+  \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+    Призначення
+  \end{minipage} \\
+  \midrule\noalign{}
+  \endhead
+  \bottomrule\noalign{}
+  \endlastfoot
+  \texttt{graph} & \texttt{Graph} & Поточна топологія DFG \\
+  \texttt{runtime} & \texttt{DataflowRuntime|null} & Ядро симуляції \\
+  \texttt{running} & \texttt{boolean} & Стан rAF-циклу \\
+  \texttt{speed} & \texttt{number} & Множник швидкості \([0{,}1;\,10]\) \\
+  \texttt{simTime} & \texttt{number} & Поточний логічний час \\
+  \texttt{tokensByEdge} & \texttt{Record<id, Token[]>} & Токени для
+  анімації \\
+  \texttt{sinks} & \texttt{Record<id, Complex>} & Спектральні відліки
+  \(X(k)\) \\
+  \texttt{nodeActivity} & \texttt{Record<id, number>} & Теплова карта
+  \(a_i\) \\
+  \texttt{metrics} & \texttt{MetricsState} & EMA-метрики \\
+  \texttt{mismatches} & \texttt{Record<id, boolean>} & Результат
+  верифікації \\
+  \texttt{setGraph(g)} & \texttt{(Graph) => void} & Ініціалізація нового
+  графа і \texttt{runtime} \\
+  \texttt{injectData(v)} & \texttt{(Complex[16]) => void} & Введення
+  вхідного вектора \\
+  \texttt{start()/stop()/step()} & \texttt{() => void} & Керування
+  rAF-циклом \\
+  \texttt{applyPreset(k)} & \texttt{(PresetKind) => void} & Вбудовані
+  пресети вхідних сигналів \\
 \end{longtable}
-
-Компоненти UI підписуються на окремі зрізи стану через хук
-\texttt{useSimStore(selector)} з мемоїзацією: наприклад, компонент
-\texttt{Metrics} підписується лише на поле \texttt{metrics} і
-перемальовується тільки при його зміні, що забезпечує стабільні 60~fps
-(NF3).
-
-Анімація токенів (TokenEdge)
 
 Компонент \texttt{TokenEdge} (модуль \texttt{src/graph/TokenEdge.tsx})
 відображає кожну дугу як анімовану стрілку з кружечками-токенами. Для
-кожного токена у \texttt{store.tokensByEdge{[}edgeId{]}} обчислюється
-відносний прогрес руху:
-
-\[progress = \frac{\text{simTime} - token.t_{0}}{token.\text{delay}} \in \lbrack 0,1\rbrack,\]
-
-де \(t_{0}\) --- момент виникнення токена на дузі. Поточна координата
-визначається лінійною інтерполяцією між центрами вузлів-кінців:
-
-\[\mathbf{r}(progress) = (1 - progress) \cdot \mathbf{r}_{\text{src}} + progress \cdot \mathbf{r}_{\text{tgt}}.\]
-
-Колір кружечка кодує тип вузла-джерела, значення \(\{ re,im\}\)
-виводиться всередині кружечка для прозорого спостереження.
-
-Теплова карта активності вузлів
-
-Теплова карта реалізується у \texttt{simStore} через механізм
-експоненціального
-затухання~(\hyperref[eq:heat_decay]{{[}eq:heat\_decay{]}}) з
-підрозд.~2.6. Функція \texttt{bumpActivity(nodeId)} викликається з
-обробника події \texttt{onFire} та інкрементує лічильник відповідного
-вузла. У кожному кадрі анімаційного циклу викликається
-\texttt{decayActivity()}, що множить усі лічильники на
-\(\alpha = 0,92\). Поточне значення \(a_{i}\) відображається як
-яскравість заливки відповідного вузла через CSS-клас, що обирається у
-модулі \texttt{\_shared.ts}.
-
-Асинхронні обчислення у Web Worker
-
-Для уникнення блокування головного потоку при масштабуванні на більші
-\(N\) реалізовано Web Worker у файлі \texttt{src/workers/fft.worker.ts}.
-Через бібліотеку Comlink функція \texttt{applyTwiddle(tokens,\ factors)}
-приймає масив токенів і масив поворотних множників, виконує пакетне
-комплексне множення у фоновому потоці та повертає результат. У базовій
-конфігурації \(N = 16\) Web Worker не задіяний; він зарезервований для
-подальшого розширення.
-
-Цикл requestAnimationFrame у GraphView
+кожного токена у \texttt{store.tokensByEdge[edgeId]} обчислюється
+відносний прогрес руху
+\(progress=(simTime-token.t_0)/token.delay\in[0,1]\) і поточна
+координата лінійною інтерполяцією:
+\(\mathbf{r}(p)=(1-p)\cdot\mathbf{r}_{src}+p\cdot\mathbf{r}_{tgt}\).
+Колір кружечка кодує тип вузла-джерела; значення \(\{re,im\}\)
+виводиться всередині кружечка. Теплова карта активності реалізується у
+\texttt{simStore} через механізм експоненціального затухання з
+підрозд.~2.6: функція \texttt{bumpActivity(nodeId)} викликається з
+обробника \texttt{onFire} та інкрементує відповідний лічильник; у кожному
+кадрі \texttt{decayActivity()} множить усі лічильники на
+\(\alpha=0{,}92\).
 
 Головний анімаційний цикл запускається у хуку \texttt{useEffect}
-компонента \texttt{GraphView} після ініціалізації \texttt{runtime}. На
-кожному кадрі:
+компонента \texttt{GraphView}. На кожному кадрі: якщо
+\texttt{store.running=true}, викликається \texttt{tickSimTime()}, потім
+\texttt{runtime.tick(dt, maxFires)} (у режимі \texttt{'single-fire'}
+\texttt{maxFires=1}, у режимі \texttt{'run'}~--- \texttt{Infinity}); потім
+\texttt{sampleQueues()} і \texttt{decayActivity()} для оновлення метрик і
+теплової карти; щосекунди агрегуються лічильники \texttt{firesInWindow}
+для обчислення пропускної здатності. Для уникнення блокування головного
+потоку при масштабуванні на більші~\(N\) реалізовано Web Worker у файлі
+\texttt{src/workers/fft.worker.ts}: через бібліотеку Comlink функція
+\texttt{applyTwiddle(tokens, factors)} виконує пакетне комплексне
+множення у фоновому потоці. У базовій конфігурації \(N=16\) Web Worker
+не задіяний; він зарезервований для подальшого розширення.
 
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\item
-  якщо \texttt{store.running\ =\ true}, викликається
-  \texttt{tickSimTime()}, потім \texttt{runtime.tick(dt,\ maxFires)}; у
-  режимі \texttt{’single-fire’} \texttt{maxFires} \(= 1\), у режимі
-  \texttt{’run’} --- \texttt{Infinity};
-\item
-  викликаються \texttt{sampleQueues()} та \texttt{decayActivity()} для
-  оновлення метрик і теплової карти;
-\item
-  щосекунди агрегуються лічильники \texttt{firesInWindow} для обчислення
-  пропускної здатності;
-\item
-  цикл перезапускається через \texttt{requestAnimationFrame}.
-\end{enumerate}
-
-Такий дизайн гарантує, що ядро симуляції виконує один детермінований
-крок на один кадр браузера, а UI оновлюється з частотою 60~Гц.
-
-\protect\phantomsection\label{_Toc229681146}{}Обробка виняткових
+\protect\phantomsection\label{_Toc229681146}{}3.4. Обробка виняткових
 ситуацій та забезпечення надійності
 
 Оскільки симулятор не взаємодіє з мережею, серверами чи файловою
-системою, класичні джерела збоїв (мережеві тайм-аути, транзакційні
-відмови, I/O-помилки) для нього не характерні. Водночас існують
-специфічні категорії помилок, пов'язаних з валідацією вхідних даних,
-цілісністю графа симуляції та обмеженнями браузерного середовища.
+системою, класичні джерела збоїв (мережеві тайм-аути, I/O-помилки) для
+нього не характерні. Натомість існують специфічні категорії помилок,
+пов'язані з валідацією вхідних даних, цілісністю графа та обмеженнями
+браузерного середовища.
 
-Виклики пiд час розроблення та прийнятi рiшення
+Під час реалізації симулятора виникли три практичні труднощі. Висока
+частота оновлення інтерфейсу при великій кількості подій вимагала
+чіткого розмежування обчислювального ядра і UI: стан було централізовано
+у \texttt{simStore}, а компоненти переведено на селективні підписки. Для
+коректної демонстрації алгоритму необхідно було відокремити логічний час
+симуляції від астрономічного часу браузера; це вирішено введенням змінної
+\texttt{simTime} і множника \texttt{speed}. Нарешті, для збереження
+відтворюваності результатів у різних браузерах усі критичні обчислення
+виконуються у фіксованому порядку обходу вузлів без мережевих викликів
+у циклі симуляції.
 
-Пiд час реалiзацiї симулятора виникли три практичнi труднощi. По-перше,
-висока частота оновлення iнтерфейсу при великiй кiлькостi подiй вимагала
-чiткого\\
-розмежування обчислювального ядра i UI, тому стан було централiзовано у
-sim- Store, а компоненти переведено на селективнi пiдписки. По-друге,
-для коректної демонстрацiї алгоритму потрiбно було вiдокремити логiчний
-час симуляцiї вiд\\
-астрономiчного часу браузера; це вирiшено введенням змiнної simTime i
-множника speed. По-третє, необхiдно було зберегти вiдтворюванiсть
-результатiв у рiзних браузерах, тому всi критичнi обчислення виконуються
-у фiксованому порядку обходу вузлiв i без мережевих викликiв у циклi
-симуляцiї.
+Помилки, що можуть виникнути у симуляторі, зведено у табл.~3.4.
 
-Класифікація типових помилок
+Таблиця 3.4.
 
-Помилки, що можуть виникнути у симуляторі, зведено у
-табл.~\hyperref[tab:errors]{18}.
+Класифікація помилок симулятора та підходи до їх обробки
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1729}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4115}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4157}}@{}}
-\caption{\protect\phantomsection\label{tab:errors}{}Класифікація помилок
-симулятора та підходи до їх обробки}\tabularnewline
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Категорія
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Приклади
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Обробка
-\end{minipage} \\
-\midrule\noalign{}
-\endfirsthead
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Категорія
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Приклади
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Обробка
-\end{minipage} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-Валідаційні & Введення не-числового значення у \texttt{SourceNode},
-множник швидкості поза \(\lbrack 0,1;10\rbrack\) & Clamp до допустимого
-діапазону, підсвічування червоним \\
-Транзієнтні & Пропуск кадру при перевантаженні CPU & \texttt{maxFires}
-обмежує кількість активацій за один \texttt{tick()} \\
-Структурні & Відсутність вхідного токена на порті вузла & Вузол не
-активується (правило готовності); статичний аналіз графа виключає
-deadlock \\
-Чисельні & Втрата точності при \(|X(k)| > 10^{12}\) & Використання IEEE
-754 double; попередження при виході за рамки \\
-Браузерні & Відсутність Web Worker API & Graceful degradation:
-обчислення у головному потоці \\
+    >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1729}}
+    >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4115}}
+    >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4157}}@{}}
+  \caption[Класифікація помилок симулятора]{Класифікація помилок симулятора
+  та підходи до їх обробки}\tabularnewline
+  \toprule\noalign{}
+  \begin{minipage}[b]{\linewidth}\raggedright
+    Категорія
+  \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+    Приклади
+  \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+    Обробка
+  \end{minipage} \\
+  \midrule\noalign{}
+  \endfirsthead
+  \toprule\noalign{}
+  \begin{minipage}[b]{\linewidth}\raggedright
+    Категорія
+  \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+    Приклади
+  \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+    Обробка
+  \end{minipage} \\
+  \midrule\noalign{}
+  \endhead
+  \bottomrule\noalign{}
+  \endlastfoot
+  Валідаційні & Введення не-числового значення у \texttt{SourceNode},
+  множник швидкості поза \([0{,}1;\,10]\) & Clamp до допустимого
+  діапазону, підсвічування червоним \\
+  Транзієнтні & Пропуск кадру при перевантаженні CPU & \texttt{maxFires}
+  обмежує кількість активацій за один \texttt{tick()} \\
+  Структурні & Відсутність вхідного токена на порті вузла & Вузол не
+  активується (правило готовності); статичний аналіз графа виключає
+  deadlock \\
+  Чисельні & Втрата точності при \(|X(k)|>10^{12}\) & Використання IEEE
+  754 double; попередження при виході за рамки \\
+  Браузерні & Відсутність Web Worker API & Graceful degradation:
+  обчислення у головному потоці \\
 \end{longtable}
 
-Валідація вхідних даних
+Компонент \texttt{SourceNode} використовує повзунки з межами
+\([-10;\,10]\) для \texttt{re} та \texttt{im}, що виключає введення
+нечислових значень. Компонент \texttt{Controls} обмежує \texttt{speed}
+діапазоном \([0{,}1;\,10]\) через \texttt{Math.max(0.1, Math.min(10,
+  value))}. Параметри \texttt{latency} і \texttt{delay} валідуються на
+додатність і цілочисельність; у разі порушення викидається виняток
+\texttt{InvalidGraphError} з описовою причиною. Оскільки граф симулятора
+є статичним DAG з детермінованою SDF-семантикою (підрозд.~1.2), ризик
+deadlock принципово відсутній: відсутність циклів гарантує, що готовність
+вузлів поступово поширюється від \texttt{source} до \texttt{sink}. Ця
+властивість перевіряється на етапі побудови функцією
+\texttt{validateDAG(graph)} через топологічне сортування методом Кана.
 
-Компонент \texttt{SourceNode} використовує повзунки з фіксованими межами
-\(\lbrack - 10;10\rbrack\) для \texttt{re} та \texttt{im}, що виключає
-введення нечислових значень. Компонент \texttt{Controls} аналогічно
-обмежує множник \texttt{speed} діапазоном \(\lbrack 0,1;10\rbrack\) за
-допомогою \texttt{Math.max(0.1,\ Math.min(10,\ value))}. Параметри
-затримок \texttt{latency} і \texttt{delay} валідуються на додатність і
-цілочисельність; у разі порушення викидається виняток
-\texttt{InvalidGraphError} з описовою причиною.
+Усі значущі події ядра акумулюються у \texttt{store.eventLog} із
+часовими мітками \texttt{simTime} і \texttt{performance.now()}.
+Компонент \texttt{TerminalOutput} відображає журнал у реальному часі з
+фільтрацією за типом події; експорт у CSV/JSON реалізований через
+\texttt{Blob + URL.createObjectURL} без передачі на сервер. Рівні
+логування (\texttt{debug}, \texttt{info}, \texttt{warn}, \texttt{error})
+налаштовуються через \texttt{store.logLevel}; у production-збірці рівень
+\texttt{debug} вимкнений за замовчуванням. При відсутності Web Workers
+функція \texttt{applyTwiddle()} виконується синхронно у головному потоці
+без впливу на частоту кадрів при \(N=16\). Селектори Zustand мемоїзовані
+функцією \texttt{shallow}, а важкі розрахунки координат токенів на
+ребрах виконуються лише для видимої області через
+\texttt{ReactFlow.viewportBounds}. Середня тривалість одного кроку
+\texttt{tick()} для \(N=16\) становить \(<1\)~мс, що залишає понад
+15~мс запасу у бюджеті кадру (16,67~мс при 60~fps).
 
-Відсутність ризику deadlock у DFG
-
-Оскільки граф симулятора є статичним орієнтованим ациклічним графом
-(DAG) з детермінованою SDF-семантикою (підрозд.~1.2), ризик взаємного
-блокування принципово відсутній: відсутність циклів гарантує, що
-готовність вузлів поступово поширюється від \texttt{source} до
-\texttt{sink}. Ця властивість перевіряється на етапі побудови графа
-функцією \texttt{validateDAG(graph)} через топологічне сортування
-методом Кана.
-
-Логування та трасування
-
-Усі значущі події ядра (\texttt{onToken}, \texttt{onFire},
-\texttt{onOutput}) акумулюються у \texttt{store.eventLog} із часовими
-мітками \texttt{simTime} та \texttt{performance.now()}. Компонент
-\texttt{TerminalOutput} відображає журнал у реальному часі з можливістю
-фільтрації за типом події. Експорт журналу у файл (CSV/JSON)
-реалізований через Web API \texttt{Blob\ +\ URL.createObjectURL} без
-передачі на сервер.
-
-Рівні логування (\texttt{debug}, \texttt{info}, \texttt{warn},
-\texttt{error}) налаштовуються через прапорець \texttt{store.logLevel};
-у production-збірці рівень \texttt{debug} вимкнений за замовчуванням.
-
-Graceful degradation та оптимізація
-
-\textbf{Fallback при відсутності Web Worker.} Якщо браузер не підтримує
-Web Workers, функція \texttt{applyTwiddle()} виконується синхронно у
-головному потоці; для \(N = 16\) це не впливає на частоту кадрів.
-
-\textbf{Оптимізація перерендерингу.} Селектори Zustand мемоїзовані
-функцією \texttt{shallow}, що запобігає зайвим перемалюванням
-компонентів при зміні несуттєвих полів сховища. Важкі розрахунки
-(наприклад, обчислення координат токенів на ребрах) виконуються лише для
-видимої області через перевірку \texttt{ReactFlow.viewportBounds}.
-
-\textbf{Профілювання.} Для розробника у режимі debug доступна панель з
-часовими показниками: тривалість \texttt{tick()}, тривалість рендеру
-React, інтервали між кадрами. Середня тривалість одного кроку
-\texttt{tick()} для \(N = 16\) становить \(< 1\)~мс, що залишає понад
-15~мс запасу у бюджеті кадру (16.67~мс при 60~fps).
-
-\protect\phantomsection\label{_Toc229681152}{}Розгортання системи
+\protect\phantomsection\label{_Toc229681152}{}3.5. Розгортання системи
 
 Розгортання симулятора спрощене порівняно з класичними веб-застосунками
 завдяки відсутності серверної частини та бази даних. Зібраний статичний
 бандл може бути розміщений на будь-якому файловому хостингу, що віддає
-статичні ресурси.
+статичні ресурси. Цільовим середовищем є статичний веб-хостинг: GitHub
+Pages, Vercel (статичний режим), Netlify або локальний HTTP-сервер
+розробника. Серверна інфраструктура, бази даних, сесійне сховище та
+автентифікація не застосовуються.
 
-Середовище розгортання
-
-Цільовим середовищем є \textbf{статичний веб-хостинг}: GitHub Pages,
-Vercel (статичний режим), Netlify або локальний HTTP-сервер розробника.
-Серверна інфраструктура, бази даних, сесійне сховище та автентифікація
-не застосовуються.
-
-Процедура збірки
-
-Збірка виконується стандартною командою Next.js:
+Збірка виконується стандартними командами Next.js (лістинг~3.2). У
+результаті у директорії \texttt{out/} формується статичний бандл:
+HTML-сторінка, JavaScript-бандл (Turbopack/webpack із tree-shaking і
+minification) та CSS-файли; розмір gzip-бандла становить орієнтовно
+250~КБ.
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 0\tabcolsep) * \real{0.5586}}@{}}
-\caption{Команди збірки та перевірки проєкту. Джерело: розроблено
-автором.}\tabularnewline
-\toprule\noalign{}
-\endfirsthead
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-\begin{minipage}[t]{\linewidth}\raggedright
-\begin{verbatim}
+    >{\raggedright\arraybackslash}p{(\linewidth - 0\tabcolsep) * \real{0.5586}}@{}}
+  \caption{Команди збірки та перевірки проєкту. Джерело: розроблено
+  автором.}\tabularnewline
+  \toprule\noalign{}
+  \endfirsthead
+  \endhead
+  \bottomrule\noalign{}
+  \endlastfoot
+  \begin{minipage}[t]{\linewidth}\raggedright
+    \begin{verbatim}
 $ pnpm install            # встановлення залежностей
 $ pnpm run build          # next build -> .next/
 $ pnpm run export         # next export -> out/
 $ pnpm run lint           # ESLint
 $ pnpm test               # Jest-тести
-\end{verbatim}
-\end{minipage} \\
+    \end{verbatim}
+  \end{minipage} \\
 \end{longtable}
 
-У результаті у директорії \texttt{out/} формується статичний бандл:
-HTML-сторінка, JavaScript-бандл із коду застосунку (через
-Turbopack/webpack із оптимізаціями tree-shaking і minification) та
-CSS-файли. Розмір gzip-бандла становить орієнтовно 250~КБ.
+Лістинг 3.2. Команди збірки та перевірки проєкту. Джерело: розроблено автором.
 
-CI/CD-пайплайн (опційно)
-
-Для автоматизації перевірок на кожному push до основної гілки
-налаштовано GitHub Actions із workflow
-\texttt{.github/workflows/ci.yml}:
-
-\begin{itemize}
-\item
-  job \texttt{lint} --- запуск ESLint і TypeScript-компіляції у режимі
-  \texttt{-\/-noEmit} (перевірка типів без генерації файлів);
-\item
-  job \texttt{test} --- запуск Jest-тестів з генерацією звіту про
-  покриття;
-\item
-  job \texttt{build} --- перевірка, що збірка проходить без помилок.
-\end{itemize}
-
-Стратегія релізу --- \emph{rolling}: нова статична збірка замінює
-попередню при успішному проходженні CI. Оскільки застосунок не має
-сесійного стану, жодних процедур міграції бази даних чи інвалідації кешу
-не потрібно.
-
-Контейнеризацiя, оркестрацiя, iнфраструктура як код та процедури\\
-резервного копiювання бази даних для цього проєкту не застосовуються,
-оскiльки система розгортається як статичний клiєнтський застосунок без
-серверної логiки та без окремого сховища даних. Це спрощує експлуатацiю,
-а масштабування досягається використанням CDN або будь-якого
-масштабованого статичного хостингу.
-
-Резервне копіювання та відтворюваність
+Для автоматизації перевірок налаштовано GitHub Actions із workflow
+\texttt{.github/workflows/ci.yml}: job \texttt{lint} запускає ESLint і
+TypeScript-компіляцію у режимі \texttt{--noEmit}; job \texttt{test}
+запускає Jest з генерацією звіту про покриття; job \texttt{build}
+перевіряє, що збірка проходить без помилок. Стратегія релізу ---
+\emph{rolling}: нова статична збірка замінює попередню при успішному
+проходженні CI. Оскільки застосунок не має сесійного стану, жодних
+процедур міграції бази даних чи інвалідації кешу не потрібно.
+Контейнеризація, оркестрація та резервне копіювання бази даних для цього
+проєкту не застосовуються, оскільки система розгортається як статичний
+клієнтський застосунок без серверної логіки.
 
 Оскільки вихідний код є єдиним артефактом, що підлягає збереженню,
 резервне копіювання реалізоване через Git: повна історія зберігається у
 віддаленому репозиторії GitHub. Детермінованість збірки гарантується
-файлом \texttt{pnpm-lock.yaml}, що фіксує точні версії всіх залежностей.
-Будь-який виконавець може відтворити продуктову збірку командою
-\texttt{pnpm\ install\ \&\&\ pnpm\ run\ build} на машині з Node.js
-\(\geq 18\).
+файлом \texttt{pnpm-lock.yaml}. Будь-який виконавець може відтворити
+продуктову збірку командою \texttt{pnpm install \&\& pnpm run build} на
+машині з Node.js~\(\geq18\).
 
-\protect\phantomsection\label{_Toc229681157}{}Тестування програмного
+\protect\phantomsection\label{_Toc229681157}{}3.6. Тестування програмного
 забезпечення
 
 Тестування на етапі розробки охоплює модульні тести найкритичніших
-компонентів і базові інтеграційні сценарії. Комплексне тестування
-готової системи, порівняння з еталонними результатами та аналіз
-продуктивності розглядаються у розділі~4.
+компонентів і базові інтеграційні сценарії. Комплексне тестування готової
+системи і аналіз продуктивності розглядаються у розділі~4.
 
-Фреймворк тестування
+Для модульного тестування використовується \textbf{Jest~29.x} з
+конфігурацією у файлі \texttt{jest.config.ts}: середовище \texttt{node}
+для модулів \texttt{core/} і \texttt{utils/} та \texttt{jsdom} для
+UI-тестів; трансформатор \texttt{ts-jest} з \texttt{tsconfig.test.json};
+поріг покриття --- не менше 70~\% тверджень, віток і функцій у
+\texttt{src/core/} та \texttt{src/utils/}.
 
-Для модульного тестування використовується \textbf{Jest~29.x} ---
-загальновживаний фреймворк JavaScript/TypeScript-тестів з вбудованим
-runner'ом, матчерами та покриттям. Конфігурація винесена у файл
-\texttt{jest.config.ts}, де налаштовано:
+Реалізовані тест-сьюти та цільові модулі наведено у табл.~3.5.
+Лістинг~3.3 наводить приклад тесту коректності функції
+\texttt{computeDFT4} для імпульсного входу \((1,0,0,0)\): очікуваний
+результат --- \((1,1,1,1)\), оскільки всі поворотні множники у сумі
+дають одиничні коефіцієнти.
 
-\begin{itemize}
-\item
-  середовище --- \texttt{node} (для модулів \texttt{core/} та
-  \texttt{utils/}) та \texttt{jsdom} (для UI-тестів);
-\item
-  трансформатор --- \texttt{ts-jest} з \texttt{tsconfig.test.json};
-\item
-  поріг покриття --- не менше 70~\% для тверджень, віток і функцій у
-  директоріях \texttt{src/core/} та \texttt{src/utils/}.
-\end{itemize}
+Таблиця 3.5.
 
-Перелік тест-сьютів
-
-Реалізовані тест-сьюти та цільові модулі наведено у
-табл.~\hyperref[tab:tests]{19}.
+Модульні тести симулятора
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1885}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2904}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.5212}}@{}}
-\caption{\protect\phantomsection\label{tab:tests}{}Модульні тести
-симулятора}\tabularnewline
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Тест-файл
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Цільовий модуль
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Сценарії
-\end{minipage} \\
-\midrule\noalign{}
-\endfirsthead
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Тест-файл
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Цільовий модуль
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Сценарії
-\end{minipage} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-\texttt{math.test.ts} & \texttt{utils/math.ts} & Коректність
-\texttt{cplxAdd}, \texttt{cplxSub}, \texttt{cplxMulJ}; правильність
-\texttt{computeDFT4} на референтних входах \\
-\texttt{buffers.test.ts} & \texttt{core/buffers.ts} & FIFO-порядок,
-поведінка \texttt{peek} на пустій черзі, розмір \\
-\texttt{scheduler.test.ts} & \texttt{core/scheduler.ts} & Правило
-активації, коректність \texttt{tick()}, дотримання \texttt{maxFires},
-детермінованість \\
-\texttt{generate.test.ts} & \texttt{graph/generateDFT4x4.ts} & Кількість
-вузлів (56) і дуг (64), коректність з'єднань \\
-\texttt{compare.test.ts} & \texttt{utils/compare.ts} & Збіг симулятора з
-fft.js на імпульсі та синусоїді з \(\varepsilon \leq 10^{- 9}\) \\
-\texttt{store.test.ts} & \texttt{store/simStore.ts} & Скидання стану,
-\texttt{injectData}, \texttt{applyPreset} \\
+    >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1885}}
+    >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2904}}
+    >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.5212}}@{}}
+  \caption[Модульні тести симулятора]{Модульні тести симулятора}\tabularnewline
+  \toprule\noalign{}
+  \begin{minipage}[b]{\linewidth}\raggedright
+    Тест-файл
+  \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+    Цільовий модуль
+  \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+    Сценарії
+  \end{minipage} \\
+  \midrule\noalign{}
+  \endfirsthead
+  \toprule\noalign{}
+  \begin{minipage}[b]{\linewidth}\raggedright
+    Тест-файл
+  \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+    Цільовий модуль
+  \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+    Сценарії
+  \end{minipage} \\
+  \midrule\noalign{}
+  \endhead
+  \bottomrule\noalign{}
+  \endlastfoot
+  \texttt{math.test.ts} & \texttt{utils/math.ts} & Коректність
+  \texttt{cplxAdd}, \texttt{cplxSub}, \texttt{cplxMulJ}; правильність
+  \texttt{computeDFT4} на референтних входах \\
+  \texttt{buffers.test.ts} & \texttt{core/buffers.ts} & FIFO-порядок,
+  поведінка \texttt{peek} на пустій черзі, розмір \\
+  \texttt{scheduler.test.ts} & \texttt{core/scheduler.ts} & Правило
+  активації, коректність \texttt{tick()}, дотримання \texttt{maxFires},
+  детермінованість \\
+  \texttt{generate.test.ts} & \texttt{graph/generateDFT4x4.ts} & Кількість
+  вузлів (56) і дуг (64), коректність з'єднань \\
+  \texttt{compare.test.ts} & \texttt{utils/compare.ts} & Збіг симулятора з
+  fft.js на імпульсі та синусоїді з \(\varepsilon\leq10^{-9}\) \\
+  \texttt{store.test.ts} & \texttt{store/simStore.ts} & Скидання стану,
+  \texttt{injectData}, \texttt{applyPreset} \\
 \end{longtable}
 
-Приклад тест-кейса
-
-Лістинг~\hyperref[lst:test_example]{7} наводить приклад тесту
-коректності функції \texttt{computeDFT4} для імпульсного входу
-\((1,0,0,0)\): очікуваний результат --- \((1,1,1,1)\), оскільки всі
-поворотні множники в сумі дають одиничні коефіцієнти.
-
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 0\tabcolsep) * \real{0.5817}}@{}}
-\caption{Приклад модульного тесту функції \protect\texttt{computeDFT4}.
-Джерело: розроблено автором.}\tabularnewline
-\toprule\noalign{}
-\endfirsthead
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-\begin{minipage}[t]{\linewidth}\raggedright
-\begin{verbatim}
+    >{\raggedright\arraybackslash}p{(\linewidth - 0\tabcolsep) * \real{0.5817}}@{}}
+  \caption{Приклад модульного тесту функції \protect\texttt{computeDFT4}.
+  Джерело: розроблено автором.}\tabularnewline
+  \toprule\noalign{}
+  \endfirsthead
+  \endhead
+  \bottomrule\noalign{}
+  \endlastfoot
+  \begin{minipage}[t]{\linewidth}\raggedright
+    \begin{verbatim}
 describe('computeDFT4', () => {
   it('returns (1,1,1,1) for unit impulse (1,0,0,0)', () => {
     const input: Complex[] = [
@@ -3214,93 +2908,64 @@ describe('computeDFT4', () => {
     }
   });
 });
-\end{verbatim}
-\end{minipage} \\
+    \end{verbatim}
+  \end{minipage} \\
 \end{longtable}
 
-Рівень покриття коду
+Лістинг 3.3. Приклад модульного тесту функції \texttt{computeDFT4}. Джерело: розроблено автором.
 
-Поточний рівень покриття, отриманий командою
-\texttt{pnpm\ test\ -\/-coverage}, становить:
+Поточний рівень покриття, отриманий командою \texttt{pnpm test
+--coverage}, становить: \texttt{src/core/}~--- 85~\% statements,
+78~\% branches, 92~\% functions; \texttt{src/utils/}~--- 91~\%
+statements, 84~\% branches, 100~\% functions;
+\texttt{src/graph/generateDFT4x4.ts}~--- 100~\% statements. Усі
+значення перевищують цільовий поріг 70~\%. UI-компоненти
+(\texttt{src/components/}) охоплені лише дим-тестами на монтування і
+не враховуються у покритті, оскільки їх коректність підтверджується
+ручним тестуванням у розділі~4. Тести автоматично виконуються у GitHub
+Actions на кожному push до \texttt{main}; звіт у форматі HTML
+публікується як артефакт збірки.
 
-\begin{itemize}
-\item
-  \texttt{src/core/} --- 85~\% statements, 78~\% branches, 92~\%
-  functions;
-\item
-  \texttt{src/utils/} --- 91~\% statements, 84~\% branches, 100~\%
-  functions;
-\item
-  \texttt{src/graph/generateDFT4x4.ts} --- 100~\% statements.
-\end{itemize}
-
-Значення перевищують цільовий поріг 70~\%, визначений у
-\texttt{jest.config.ts}. UI-компоненти (\texttt{src/components/})
-охоплені лише дим-тестами на монтування та не враховуються у обчисленні
-покриття, оскільки їх коректність підтверджується ручним тестуванням у
-розділі~4.
-
-Автоматизоване виконання тестів у CI (опційно)
-
-Тести автоматично виконуються у GitHub Actions на кожному push до
-\texttt{main} або pull request. Конфігурація workflow
-\texttt{.github/workflows/ci.yml} містить кроки установлення
-залежностей, компіляції TypeScript, запуску ESLint і Jest. Звіт про
-покриття у форматі HTML публікується як артефакт збірки; у README додано
-badge з поточним відсотком покриття.
-
-\protect\phantomsection\label{_Toc229681163}{}Висновки до розділу~3
+\protect\phantomsection\label{_Toc229681163}{}3.7. Висновки до розділу~3
 
 У третьому розділі подано програмну реалізацію симулятора, що відповідає
 архітектурі, спроєктованій у розділі~2.
 
-\emph{Описано технологічний стек:} TypeScript~5 як статично типізована
-мова реалізації, Next.js~14 як фреймворк статичної SPA, React~18 і React
-Flow~12 для реактивного UI та графової візуалізації, Zustand~4 для
-централізованого сховища стану, Jest~29 для модульних тестів,
-ESLint/Prettier для забезпечення стилю. Усі обрані бібліотеки мають
-відкриті ліцензії MIT або Apache~2.0, що задовольняє вимогу NF6.
+Описано технологічний стек: TypeScript~5 як статично типізована мова,
+Next.js~14 як фреймворк статичної SPA, React~18 і React Flow~12 для
+реактивного UI та графової візуалізації, Zustand~4 для сховища стану,
+Jest~29 для модульних тестів, ESLint/Prettier для забезпечення стилю.
+Усі бібліотеки мають відкриті ліцензії MIT або Apache~2.0 (NF6).
 
-\emph{Організовано вихідний код} за принципом розподілу за шарами
-відповідальності: ядро симуляції (\texttt{src/core/}) без залежностей
-від UI, генерація та візуалізація графа (\texttt{src/graph/}),
+Організовано вихідний код за принципом розподілу за шарами
+відповідальності: ядро симуляції (\texttt{src/core/}) без залежностей від
+UI, генерація та візуалізація графа (\texttt{src/graph/}),
 UI-компоненти (\texttt{src/components/}), сховище стану
 (\texttt{src/store/}), утиліти (\texttt{src/utils/}) та Web Workers
-(\texttt{src/workers/}). Повну відповідність архітектурних компонентів з
-підрозд.~2.3 до модулів коду подано у
-табл.~\hyperref[tab:arch_to_code]{16}.
+(\texttt{src/workers/}). Повну відповідність архітектурних компонентів
+до модулів коду подано у табл.~3.2.
 
-\emph{Реалізовано ключові алгоритми:} клас \texttt{DataflowRuntime} з
-методом \texttt{tick()} у чотири кроки
-(доставка~(\hyperref[eq:delivery]{{[}eq:delivery{]}}) \(\rightarrow\)
-перевірка готовності \(\rightarrow\) активація \(\rightarrow\)
-розміщення вихідних
-токенів~(\hyperref[eq:emit_time]{{[}eq:emit\_time{]}})); функція
-\texttt{generateDFT4x4()} як Factory для побудови DFG із 56~вузлів і
-64~дуг; сховище \texttt{simStore} на Zustand із підпискою UI на окремі
-зрізи стану; компоненти \texttt{TokenEdge} та теплової карти з
-інтерполяцією~(\hyperref[eq:progress]{{[}eq:progress{]}})--(\hyperref[eq:lerp]{{[}eq:lerp{]}})
-і експоненціальним затуханням активності.
+Реалізовано ключові алгоритми: клас \texttt{DataflowRuntime} з методом
+\texttt{tick()} у чотири кроки (доставка \(\rightarrow\) перевірка
+готовності \(\rightarrow\) активація \(\rightarrow\) розміщення вихідних
+токенів); функція \texttt{generateDFT4x4()} як Factory для побудови DFG
+із 56~вузлів і 64~дуг; сховище \texttt{simStore} на Zustand із
+підпискою UI на окремі зрізи стану; компоненти \texttt{TokenEdge} та
+теплової карти з інтерполяцією і експоненціальним затуханням активності.
 
-\emph{Розглянуто обробку виняткових ситуацій:} класифікацію помилок за
+Розглянуто обробку виняткових ситуацій: класифіковано помилки за
 категоріями (валідаційні, транзієнтні, структурні, чисельні, браузерні),
-підхід до валідації вхідних даних через обмеження UI, доведено
-відсутність ризику deadlock у DAG-структурі симулятора, описано
-механізми логування та graceful degradation при відсутності Web Worker
-API.
-
-\emph{Визначено процедуру розгортання} як статичної SPA на довільному
-файловому хостингу з підтримкою HTTPS. Налаштовано (опційно) GitHub
-Actions для автоматичної перевірки типів, лінтера та тестів на кожному
-push.
-
-\emph{Проведено модульне тестування} у Jest з покриттям 85~\% для
+доведено відсутність ризику deadlock у DAG-структурі, описано механізми
+логування, graceful degradation та оптимізації перерендерингу. Визначено
+процедуру розгортання як статичної SPA на довільному файловому хостингу;
+налаштовано GitHub Actions для автоматичної перевірки типів, лінтера та
+тестів. Проведено модульне тестування у Jest з покриттям 85~\% для
 \texttt{src/core/} та 91~\% для \texttt{src/utils/}, що перевищує
-цільовий поріг 70~\%. Реалізовано шість тест-сьютів, що охоплюють
+цільовий поріг 70~\%; реалізовано шість тест-сьютів, що охоплюють
 комплексну арифметику, FIFO-черги, планувальник, генератор графа,
 верифікацію та сховище стану. Комплексна експериментальна оцінка якості
-роботи системи --- точність відносно еталонного fft.js, продуктивність,
-аналіз критичного шляху --- виноситься до розділу~4.
+--- точність відносно еталонного fft.js, продуктивність, аналіз
+критичного шляху --- виноситься до розділу~4.
 
 \protect\phantomsection\label{_Toc229681164}{}РОЗДІЛ 4. ЕКСПЕРИМЕНТАЛЬНІ
 ДОСЛІДЖЕННЯ ТА АНАЛІЗ РЕЗУЛЬТАТІВ
