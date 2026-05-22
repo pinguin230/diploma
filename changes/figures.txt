@@ -1,0 +1,521 @@
+idef0-context
+
+@startuml
+title IDEF0: A0 — Візуальне моделювання роботи обчислювача ШПФ
+
+left to right direction
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor #F8FAFC
+  BorderColor #334155
+  RoundCorner 12
+}
+skinparam ArrowColor #334155
+
+rectangle "Входи\n\n• x(n), n=0..15\n• пресет або власний сигнал\n• latency/delay\n• режим Run/Step" as I #DBEAFE
+rectangle "Керування\n\n• вимоги F1--F9\n• NF1--NF8\n• методичні вимоги БКР\n• модель radix-4" as C #FEF3C7
+rectangle "A0\n\nЗмоделювати потокове\nвиконання 16-точкового ШПФ\nта візуалізувати DFG" as A0 #DCFCE7
+rectangle "Механізми\n\n• radix-4 FFT\n• DataflowRuntime.tick()\n• React Flow\n• State Store\n• SpectrumView" as M #EDE9FE
+rectangle "Виходи\n\n• X(k), k=0..15\n• рух токенів\n• event log\n• метрики latency/throughput\n• порівняння з еталоном" as O #FFE4E6
+
+I --> A0 : вхідні дані
+C -down-> A0 : обмеження / правила
+M -up-> A0 : засоби реалізації
+A0 --> O : результати моделювання
+@enduml
+
+///////////////////////////////////////////////////
+
+use-case-uml
+
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "Студент" as S
+actor "Викладач" as T
+
+rectangle "Веб-симулятор потокового\nобчислювача ШПФ" {
+  usecase "Завантажити\nготовий сценарій" as UC1
+  usecase "Задати власний\nвхідний сигнал" as UC2
+  usecase "Запустити\nсимуляцію" as UC3
+  usecase "Керувати темпом\nсимуляції" as UC4
+  usecase "Спостерігати\nрух токенів" as UC5
+  usecase "Переглянути\nспектр результату" as UC6
+  usecase "Порівняти\nз еталоном" as UC7
+  usecase "Змінити параметри\nзатримок" as UC8
+  usecase "Експортувати\nжурнал подій" as UC9
+
+  note "Альтернативи\nпідготовки входу" as N1
+  UC1 .. N1
+  N1 .. UC2
+}
+
+S --> UC1
+S --> UC2
+S --> UC3
+S --> UC4
+S --> UC5
+S --> UC6
+S --> UC7
+
+T --> UC1
+T --> UC3
+T --> UC7
+T --> UC8
+T --> UC9
+
+UC3 .> UC5 : <<include>>
+UC7 .> UC3 : <<extend>>
+@enduml
+
+//////////////////////////////////////////
+
+c4-context
+
+@startuml
+title C4 Context — веб-симулятор потокового обчислювача ШПФ
+
+left to right direction
+skinparam shadowing false
+skinparam componentStyle rectangle
+
+actor "Користувач\n(студент або викладач)" as User
+
+node "Сучасний браузер\nChrome / Edge / Firefox" as Browser {
+  rectangle "Веб-симулятор ШПФ\nSPA: Next.js + React\n\nМоделює radix-4 FFT\nта анімує DFG" as System #DCFCE7
+}
+
+database "Local Storage\n\nпресети сигналів,\nналаштування затримок" as LS #EDE9FE
+cloud "Статичний хостинг\n\nHTML + JS + CSS bundle" as Hosting #DBEAFE
+
+User --> System : запускає, керує,\nаналізує результат
+Hosting --> Browser : одноразове\nзавантаження застосунку
+System <--> LS : читання / запис\nлокальних параметрів
+
+note right of System
+Серверна частина відсутня.
+Усі обчислення виконуються
+локально у браузері.
+end note
+@enduml
+
+///////////////////////////////////////////
+
+
+c4-container
+
+@startuml
+title C4 Container — архітектура веб-симулятора
+
+left to right direction
+skinparam shadowing false
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+
+actor "Користувач" as User
+
+frame "Браузер користувача" {
+  package "SPA Web App" {
+    rectangle "UI Layer\n\nGraphView\nSpectrumView\nControls\nMetricsPanel" as UI #DBEAFE
+    rectangle "State Store\n\nZustand store\nsingle source of truth" as Store #FEF3C7
+    rectangle "Simulation Core\n\nDataflowRuntime\nFIFO queues\ntick()" as Core #DCFCE7
+    rectangle "Graph Generator\n\ngenerateDFT4x4()\nlayout4x4()" as Gen #EDE9FE
+    database "Local Storage\n\npresets\nsettings" as LS #FCE7F3
+  }
+}
+
+User --> UI : команди Run / Step / Pause
+UI --> Store : dispatch actions\nread selectors
+Store --> Core : start / tick /\nreset / configure
+Core --> Store : onToken\nonFire\nonOutput
+Gen --> Store : Graph: 56 nodes,\n64 edges
+Store <--> LS : persist presets\nand delays
+Store --> UI : reactive state update
+@enduml
+
+
+////////////////////////////////////////////
+
+radix4-decomposition
+
+@startuml
+title Тристадійна radix-4 декомпозиція для N = 16
+
+left to right direction
+skinparam shadowing false
+skinparam rectangle {
+  RoundCorner 14
+  BorderColor #334155
+}
+skinparam ArrowColor #334155
+
+rectangle "Вхідний сигнал\nx(n), n=0..15" as X #DBEAFE
+rectangle "Індексне\nвідображення\n\nn = 4s + r\nk = 4k2 + k1" as Map #FEF3C7
+rectangle "Матриця A[r][s]\n\nA[r][s] = x(4s+r)" as A #E0F2FE
+rectangle "Стадія 1\n\n4 паралельні\nрядкові DFT4\nG_r(k1)" as R #DCFCE7
+rectangle "Стадія 2\n\n16 множень\nна W16^(r·k1)\nH_r(k1)" as T #EDE9FE
+rectangle "Стадія 3\n\n4 паралельні\nстовпцеві DFT4" as C #DCFCE7
+rectangle "Вихідний спектр\nX(k), k=0..15\n\nk = 4k2 + k1" as Y #FFE4E6
+
+X --> Map
+Map --> A
+A --> R
+R --> T
+T --> C
+C --> Y
+
+note bottom of T
+7 множень тривіальні,
+9 — нетривіальні.
+end note
+@enduml
+
+/////////////////////////////////////////////////////
+
+dfg-16-point
+
+@startuml
+title DFG 16-точкового ШПФ radix-4: 56 вузлів, 64 дуги
+
+left to right direction
+skinparam shadowing false
+skinparam linetype ortho
+skinparam rectangle {
+  RoundCorner 8
+  BorderColor #334155
+}
+
+package "Source: x(n)" {
+  rectangle "src0\nx0" as src0
+  rectangle "src1\nx1" as src1
+  rectangle "src2\nx2" as src2
+  rectangle "src3\nx3" as src3
+  rectangle "src4\nx4" as src4
+  rectangle "src5\nx5" as src5
+  rectangle "src6\nx6" as src6
+  rectangle "src7\nx7" as src7
+  rectangle "src8\nx8" as src8
+  rectangle "src9\nx9" as src9
+  rectangle "src10\nx10" as src10
+  rectangle "src11\nx11" as src11
+  rectangle "src12\nx12" as src12
+  rectangle "src13\nx13" as src13
+  rectangle "src14\nx14" as src14
+  rectangle "src15\nx15" as src15
+}
+
+package "Stage 1: row DFT4" {
+  rectangle "row-0\nDFT4" as row0 #DCFCE7
+  rectangle "row-1\nDFT4" as row1 #DCFCE7
+  rectangle "row-2\nDFT4" as row2 #DCFCE7
+  rectangle "row-3\nDFT4" as row3 #DCFCE7
+}
+
+package "Stage 2: twiddle" {
+  rectangle "tw-0-0\nW16^0" as tw00 #EDE9FE
+  rectangle "tw-0-1\nW16^0" as tw01 #EDE9FE
+  rectangle "tw-0-2\nW16^0" as tw02 #EDE9FE
+  rectangle "tw-0-3\nW16^0" as tw03 #EDE9FE
+  rectangle "tw-1-0\nW16^0" as tw10 #EDE9FE
+  rectangle "tw-1-1\nW16^1" as tw11 #EDE9FE
+  rectangle "tw-1-2\nW16^2" as tw12 #EDE9FE
+  rectangle "tw-1-3\nW16^3" as tw13 #EDE9FE
+  rectangle "tw-2-0\nW16^0" as tw20 #EDE9FE
+  rectangle "tw-2-1\nW16^2" as tw21 #EDE9FE
+  rectangle "tw-2-2\nW16^4" as tw22 #EDE9FE
+  rectangle "tw-2-3\nW16^6" as tw23 #EDE9FE
+  rectangle "tw-3-0\nW16^0" as tw30 #EDE9FE
+  rectangle "tw-3-1\nW16^3" as tw31 #EDE9FE
+  rectangle "tw-3-2\nW16^6" as tw32 #EDE9FE
+  rectangle "tw-3-3\nW16^9" as tw33 #EDE9FE
+}
+
+package "Stage 3: column DFT4" {
+  rectangle "col-0\nDFT4" as col0 #DCFCE7
+  rectangle "col-1\nDFT4" as col1 #DCFCE7
+  rectangle "col-2\nDFT4" as col2 #DCFCE7
+  rectangle "col-3\nDFT4" as col3 #DCFCE7
+}
+
+package "Sink: X(k)" {
+  rectangle "snk0\nX0" as snk0
+  rectangle "snk1\nX1" as snk1
+  rectangle "snk2\nX2" as snk2
+  rectangle "snk3\nX3" as snk3
+  rectangle "snk4\nX4" as snk4
+  rectangle "snk5\nX5" as snk5
+  rectangle "snk6\nX6" as snk6
+  rectangle "snk7\nX7" as snk7
+  rectangle "snk8\nX8" as snk8
+  rectangle "snk9\nX9" as snk9
+  rectangle "snk10\nX10" as snk10
+  rectangle "snk11\nX11" as snk11
+  rectangle "snk12\nX12" as snk12
+  rectangle "snk13\nX13" as snk13
+  rectangle "snk14\nX14" as snk14
+  rectangle "snk15\nX15" as snk15
+}
+
+src0 --> row0
+src4 --> row0
+src8 --> row0
+src12 --> row0
+src1 --> row1
+src5 --> row1
+src9 --> row1
+src13 --> row1
+src2 --> row2
+src6 --> row2
+src10 --> row2
+src14 --> row2
+src3 --> row3
+src7 --> row3
+src11 --> row3
+src15 --> row3
+
+row0 --> tw00
+row0 --> tw01
+row0 --> tw02
+row0 --> tw03
+row1 --> tw10
+row1 --> tw11
+row1 --> tw12
+row1 --> tw13
+row2 --> tw20
+row2 --> tw21
+row2 --> tw22
+row2 --> tw23
+row3 --> tw30
+row3 --> tw31
+row3 --> tw32
+row3 --> tw33
+
+tw00 --> col0
+tw10 --> col0
+tw20 --> col0
+tw30 --> col0
+tw01 --> col1
+tw11 --> col1
+tw21 --> col1
+tw31 --> col1
+tw02 --> col2
+tw12 --> col2
+tw22 --> col2
+tw32 --> col2
+tw03 --> col3
+tw13 --> col3
+tw23 --> col3
+tw33 --> col3
+
+col0 --> snk0
+col0 --> snk4
+col0 --> snk8
+col0 --> snk12
+col1 --> snk1
+col1 --> snk5
+col1 --> snk9
+col1 --> snk13
+col2 --> snk2
+col2 --> snk6
+col2 --> snk10
+col2 --> snk14
+col3 --> snk3
+col3 --> snk7
+col3 --> snk11
+col3 --> snk15
+@enduml
+
+//////////////////////////////////////////////////////
+
+ui-layout
+
+@startuml
+title Макет інтерфейсу веб-симулятора ШПФ
+
+skinparam shadowing false
+skinparam rectangle {
+  RoundCorner 12
+  BorderColor #334155
+}
+skinparam ArrowColor #64748B
+
+rectangle "Controls\n\nPreset: sin1 | ramp | impulse\nInput editor\nRun | Pause | Step | Reset\nSpeed: 0.1x ... 10x" as Controls #DBEAFE
+
+rectangle "GraphView\n\nReact Flow canvas\n56 вузлів DFG\n64 дуги\ntoken animation\nnode heatmap" as Graph #DCFCE7
+
+rectangle "SpectrumView\n\n|X(k)| bars\nRe/Im values\nreference comparison" as Spectrum #FEF3C7
+
+rectangle "MetricsPanel\n\nsimTime\nfpsEma\ntickTimeMs\nthroughput\nqueue sizes" as Metrics #EDE9FE
+
+rectangle "TerminalOutput\n\nevent log:\nonToken / onFire / onOutput" as Terminal #F8FAFC
+
+Controls -down-> Graph
+Graph -right-> Spectrum
+Spectrum -down-> Metrics
+Graph -down-> Terminal
+@enduml
+
+///////////////////////////////////////////////////////
+
+project-structure
+
+@startwbs
+* simulator/
+** public/
+*** svg-icons
+*** favicon
+** src/
+*** app/
+**** layout.tsx
+**** page.tsx
+*** core/
+**** types.ts
+**** scheduler.ts
+**** buffers.ts
+*** graph/
+**** generateDFT4x4.ts
+**** layout4x4.ts
+**** GraphView.tsx
+**** TokenEdge.tsx
+*** components/
+**** SpectrumView.tsx
+**** Metrics.tsx
+**** Controls.tsx
+**** TerminalOutput.tsx
+**** nodes/
+***** SourceNode.tsx
+***** SinkNode.tsx
+***** DFT4Node.tsx
+***** TwiddleNode.tsx
+*** store/
+**** simStore.ts
+*** utils/
+**** math.ts
+**** compare.ts
+*** workers/
+**** fft.worker.ts
+** tests/
+*** math.test.ts
+*** scheduler.test.ts
+*** compare.test.ts
+** package.json
+** tsconfig.json
+** next.config.js
+** .eslintrc.js
+@endwbs
+
+/////////////////////////////////////////////////////////
+
+token-lifecycle
+
+@startuml
+title Життєвий цикл токена у DataflowRuntime
+
+skinparam shadowing false
+skinparam state {
+  BackgroundColor #F8FAFC
+  BorderColor #334155
+}
+
+[*] --> Queued : push(edge.queue)
+
+Queued : токен очікує\nна дузі DFG
+Queued --> Delivered : t_now - token.t >= edge.delay\n/onToken
+
+Delivered : токен доставлено\nдо вузла-приймача
+Delivered --> Inbox : inbox[nodeId][portId] = token
+
+Inbox : токен очікує\nінших вхідних портів
+Inbox --> Ready : усі порти заповнені\nreadyAt[node] <= t_now
+
+Ready : вузол готовий\nдо активації
+Ready --> Fired : consume inputs\n/onBeforeFire + onFire
+
+Fired : виконання compute(node.kind)
+Fired --> Emitted : token.t = t_now + node.latency
+
+Emitted : вихідні токени\nстворено
+Emitted --> Queued : push(outgoing edge.queue)
+
+Fired --> Sinked : якщо вузол sink\n/onOutput
+Sinked --> [*]
+@enduml
+
+/////////////////////////////////////////////////////////
+
+activation-timeline
+
+@startuml
+title Часова діаграма активацій вузлів DFG при N = 16
+
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #334155
+  LifeLineBorderColor #64748B
+  ParticipantBorderColor #334155
+  ParticipantBackgroundColor #F8FAFC
+}
+
+participant "source\n16 вузлів" as Source
+participant "дуги\nsource→row" as E1
+participant "row DFT4\n4 вузли" as Row
+participant "дуги\nrow→twiddle" as E2
+participant "twiddle\n16 вузлів" as Tw
+participant "дуги\ntwiddle→col" as E3
+participant "col DFT4\n4 вузли" as Col
+participant "дуги\ncol→sink" as E4
+participant "sink\n16 вузлів" as Sink
+
+== τ = 0 ==
+Source -> E1 : emit x(n)
+
+== τ = 600 ==
+E1 -> Row : deliver 16 tokens
+activate Row
+Row -> E2 : emit G_r(k1)\nτ = 1000
+
+== τ = 1600 ==
+E2 -> Tw : deliver 16 tokens
+activate Tw
+Tw -> E3 : emit H_r(k1)\nτ = 1800
+
+== τ = 2400 ==
+E3 -> Col : deliver 16 tokens
+activate Col
+Col -> E4 : emit partial X(k)\nτ = 2800
+
+== τ = 3400 ==
+E4 -> Sink : deliver 16 outputs
+Sink -> Sink : collect X(0)..X(15)
+@enduml
+
+/////////////////////////////////////////////////////////
+
+ui-screenshot-overview
+
+@startuml
+title Робочий екран симулятора під час виконання сценарію sin1
+
+skinparam shadowing false
+skinparam rectangle {
+  RoundCorner 10
+  BorderColor #334155
+}
+
+rectangle "Controls\nPreset: sin1   Speed: 1x\n[Run] [Pause] [Step] [Reset]" as Top #DBEAFE
+
+rectangle "GraphView\n\nsource → row DFT4 → twiddle → col DFT4 → sink\n\n● активні токени на дугах\nпідсвічені вузли: row-0, row-1, row-2, row-3" as Graph #DCFCE7
+
+rectangle "SpectrumView\n\nk=1 має найбільшу амплітуду\nінші стовпчики ≈ 0\n\nCompare with reference: OK" as Spec #FEF3C7
+
+rectangle "MetricsPanel\n\nsimTime: 1600\nfpsEma: 60\ntickTimeMs < 3 ms\nqueueSizeEma: stable" as Metrics #EDE9FE
+
+rectangle "TerminalOutput\n\n[onToken] src→row\n[onFire] row-0\n[onFire] row-1\n[onOutput] pending..." as Log #F8FAFC
+
+Top -down-> Graph
+Graph -right-> Spec
+Spec -down-> Metrics
+Graph -down-> Log
+@enduml

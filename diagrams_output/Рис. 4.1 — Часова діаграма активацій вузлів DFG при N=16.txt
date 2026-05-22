@@ -1,0 +1,58 @@
+@startuml
+title Рис. 4.1 — Часова діаграма активацій вузлів DFG при N = 16
+caption Критичний шлях T_kr = 600+400+600+200+600+400+600 = 3400 у.о.; T_ps = 6400; K_p ≈ 1.88
+
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+
+concise "source · 16" as S
+concise "дуги source→dft4" as A
+concise "dft4 ярус 1 · 4" as R
+concise "дуги dft4→twiddle" as B
+concise "twiddle · 16" as T
+concise "дуги twiddle→dft4" as C
+concise "dft4 ярус 2 · 4" as D
+concise "дуги dft4→sink" as E
+concise "sink · 16" as K
+
+@0
+S is "емісія x(n)"
+A is "передача"
+R is "очікує"
+B is "очікує"
+T is "очікує"
+C is "очікує"
+D is "очікує"
+E is "очікує"
+K is "очікує"
+
+@600
+S is "очікує"
+A is "очікує"
+R is "ДПФ-4 ×4"
+
+@1000
+R is "очікує"
+B is "передача"
+
+@1600
+B is "очікує"
+T is "× W₁₆ ×16"
+
+@1800
+T is "очікує"
+C is "передача"
+
+@2400
+C is "очікує"
+D is "ДПФ-4 ×4"
+
+@2800
+D is "очікує"
+E is "передача"
+
+@3400
+E is "очікує"
+K is "збір X(k)"
+
+@enduml

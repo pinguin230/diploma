@@ -1,0 +1,43 @@
+@startuml
+title Рис. 3.2 — Життєвий цикл токена у DataflowRuntime
+
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam state {
+  BackgroundColor #F8FAFC
+  BorderColor #334155
+  FontColor #0F172A
+}
+
+[*] --> ВЧерзіДуги : emitFrom() (source)\nабо активація вузла породжує токен\nt = t_now + node.latency → push у FIFO\n/ onToken
+
+state "У черзі дуги (FIFO)" as ВЧерзіДуги
+ВЧерзіДуги : токен очікує доставки\nна дузі e ∈ E
+
+ВЧерзіДуги --> ДоставленийUInbox : t_now − token.t ≥ edge.delay\npop() → inbox[node][port]
+
+state "Доставлений (inbox вузла)" as ДоставленийUInbox
+ДоставленийUInbox : токен у inbox приймача,\nочікує заповнення інших портів
+
+ДоставленийUInbox --> Готовий : усі inPorts заповнені\nі readyAt[node] ≤ t_now
+
+state "Готовий до активації" as Готовий
+Готовий --> Активований : execute(node.kind)\nспоживання входів\n/ onBeforeFire, onFire\nreadyAt[node] = t_now + latency
+
+state "Активований (fire)" as Активований
+Активований : обчислення за типом вузла\n(dft4 / twiddle / sink)
+
+Активований --> ВЧерзіДуги : вихідні токени → дуги-нащадки\n(для source / dft4 / twiddle)
+
+Активований --> Поглинутий : вузол kind = sink\n/ onOutput\nlatency = t_now − originT
+
+state "Поглинутий (sink зібрав X(k))" as Поглинутий
+Поглинутий --> [*]
+
+note right of ВЧерзіДуги
+  Реалізація: DataflowRuntime.tick(dt, maxFires)
+  крок 1 — доставка з FIFO у inbox (edge.delay)
+  крок 2 — fire готових вузлів (node.latency)
+  Логічний час t_now = store.simTime
+end note
+@enduml

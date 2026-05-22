@@ -1,0 +1,164 @@
+@startuml
+title Рис. 2.4 — Граф потоку даних обчислювача 16-точкового ШПФ radix-4 (4×4):\n56 вузлів, 64 дуги
+
+left to right direction
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam linetype ortho
+skinparam ArrowColor #64748B
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  RoundCorner 8
+  BorderColor #334155
+  FontColor #0F172A
+}
+
+package "Джерела source · 16\n(x(n), latency 0)" as PS #F8FAFC {
+  rectangle "src0\nx0" as src0 #DBEAFE
+  rectangle "src1\nx1" as src1 #DBEAFE
+  rectangle "src2\nx2" as src2 #DBEAFE
+  rectangle "src3\nx3" as src3 #DBEAFE
+  rectangle "src4\nx4" as src4 #DBEAFE
+  rectangle "src5\nx5" as src5 #DBEAFE
+  rectangle "src6\nx6" as src6 #DBEAFE
+  rectangle "src7\nx7" as src7 #DBEAFE
+  rectangle "src8\nx8" as src8 #DBEAFE
+  rectangle "src9\nx9" as src9 #DBEAFE
+  rectangle "src10\nx10" as src10 #DBEAFE
+  rectangle "src11\nx11" as src11 #DBEAFE
+  rectangle "src12\nx12" as src12 #DBEAFE
+  rectangle "src13\nx13" as src13 #DBEAFE
+  rectangle "src14\nx14" as src14 #DBEAFE
+  rectangle "src15\nx15" as src15 #DBEAFE
+}
+
+package "Стадія 1: рядкові ДПФ-4\n(dft4 · 4, latency 400)" as P1 #F8FAFC {
+  rectangle "row-0\nDFT4" as row0 #DCFCE7
+  rectangle "row-1\nDFT4" as row1 #DCFCE7
+  rectangle "row-2\nDFT4" as row2 #DCFCE7
+  rectangle "row-3\nDFT4" as row3 #DCFCE7
+}
+
+package "Стадія 2: поворотні множники\n(twiddle · 16, latency 200)" as P2 #F8FAFC {
+  rectangle "tw 0,0\nW₁₆^0" as tw00 #EDE9FE
+  rectangle "tw 0,1\nW₁₆^0" as tw01 #EDE9FE
+  rectangle "tw 0,2\nW₁₆^0" as tw02 #EDE9FE
+  rectangle "tw 0,3\nW₁₆^0" as tw03 #EDE9FE
+  rectangle "tw 1,0\nW₁₆^0" as tw10 #EDE9FE
+  rectangle "tw 1,1\nW₁₆^1" as tw11 #EDE9FE
+  rectangle "tw 1,2\nW₁₆^2" as tw12 #EDE9FE
+  rectangle "tw 1,3\nW₁₆^3" as tw13 #EDE9FE
+  rectangle "tw 2,0\nW₁₆^0" as tw20 #EDE9FE
+  rectangle "tw 2,1\nW₁₆^2" as tw21 #EDE9FE
+  rectangle "tw 2,2\nW₁₆^4" as tw22 #EDE9FE
+  rectangle "tw 2,3\nW₁₆^6" as tw23 #EDE9FE
+  rectangle "tw 3,0\nW₁₆^0" as tw30 #EDE9FE
+  rectangle "tw 3,1\nW₁₆^3" as tw31 #EDE9FE
+  rectangle "tw 3,2\nW₁₆^6" as tw32 #EDE9FE
+  rectangle "tw 3,3\nW₁₆^9" as tw33 #EDE9FE
+}
+
+package "Стадія 3: стовпцеві ДПФ-4\n(dft4 · 4, latency 400)" as P3 #F8FAFC {
+  rectangle "col-0\nDFT4" as col0 #DCFCE7
+  rectangle "col-1\nDFT4" as col1 #DCFCE7
+  rectangle "col-2\nDFT4" as col2 #DCFCE7
+  rectangle "col-3\nDFT4" as col3 #DCFCE7
+}
+
+package "Стоки sink · 16\n(X(k), latency 0)" as PK #F8FAFC {
+  rectangle "snk0\nX0" as snk0 #FFE4E6
+  rectangle "snk1\nX1" as snk1 #FFE4E6
+  rectangle "snk2\nX2" as snk2 #FFE4E6
+  rectangle "snk3\nX3" as snk3 #FFE4E6
+  rectangle "snk4\nX4" as snk4 #FFE4E6
+  rectangle "snk5\nX5" as snk5 #FFE4E6
+  rectangle "snk6\nX6" as snk6 #FFE4E6
+  rectangle "snk7\nX7" as snk7 #FFE4E6
+  rectangle "snk8\nX8" as snk8 #FFE4E6
+  rectangle "snk9\nX9" as snk9 #FFE4E6
+  rectangle "snk10\nX10" as snk10 #FFE4E6
+  rectangle "snk11\nX11" as snk11 #FFE4E6
+  rectangle "snk12\nX12" as snk12 #FFE4E6
+  rectangle "snk13\nX13" as snk13 #FFE4E6
+  rectangle "snk14\nX14" as snk14 #FFE4E6
+  rectangle "snk15\nX15" as snk15 #FFE4E6
+}
+
+' --- source -> row DFT4 (n = 4s + r) ---
+src0 --> row0
+src4 --> row0
+src8 --> row0
+src12 --> row0
+src1 --> row1
+src5 --> row1
+src9 --> row1
+src13 --> row1
+src2 --> row2
+src6 --> row2
+src10 --> row2
+src14 --> row2
+src3 --> row3
+src7 --> row3
+src11 --> row3
+src15 --> row3
+
+' --- row DFT4 -> twiddle ---
+row0 --> tw00
+row0 --> tw01
+row0 --> tw02
+row0 --> tw03
+row1 --> tw10
+row1 --> tw11
+row1 --> tw12
+row1 --> tw13
+row2 --> tw20
+row2 --> tw21
+row2 --> tw22
+row2 --> tw23
+row3 --> tw30
+row3 --> tw31
+row3 --> tw32
+row3 --> tw33
+
+' --- twiddle -> col DFT4 (транспонування) ---
+tw00 --> col0
+tw10 --> col0
+tw20 --> col0
+tw30 --> col0
+tw01 --> col1
+tw11 --> col1
+tw21 --> col1
+tw31 --> col1
+tw02 --> col2
+tw12 --> col2
+tw22 --> col2
+tw32 --> col2
+tw03 --> col3
+tw13 --> col3
+tw23 --> col3
+tw33 --> col3
+
+' --- col DFT4 -> sink (k = 4·k1 + k2) ---
+col0 --> snk0
+col0 --> snk4
+col0 --> snk8
+col0 --> snk12
+col1 --> snk1
+col1 --> snk5
+col1 --> snk9
+col1 --> snk13
+col2 --> snk2
+col2 --> snk6
+col2 --> snk10
+col2 --> snk14
+col3 --> snk3
+col3 --> snk7
+col3 --> snk11
+col3 --> snk15
+
+note bottom of P2
+  Усі дуги мають затримку delay = 600 у.о.
+  Критичний шлях: 600+400+600+200+600+400+600 = 3400 у.о.
+  Послідовний час T_ps = 8·400 + 16·200 = 6400 → K_p ≈ 1.88
+end note
+@enduml

@@ -1,0 +1,786 @@
+% ============================================================
+% РОЗДІЛ 4 — переписаний (структура без підпідрозділів, стиль академічний)
+% Вставити замість блоку від \protect\phantomsection\label{_Toc229681164}{}
+% до рядка ВИСНОВКИ у БКР_Тесля.tex
+% ============================================================
+
+\protect\phantomsection\label{_Toc229681164}{}РОЗДІЛ 4. ЕКСПЕРИМЕНТАЛЬНІ
+ДОСЛІДЖЕННЯ ТА АНАЛІЗ РЕЗУЛЬТАТІВ
+
+\protect\phantomsection\label{_Toc229681165}{}4.1. Мета та методика
+експерименту
+
+Експериментальне дослідження розробленого симулятора потокового
+обчислювача 16-точкового ШПФ radix-4 має на меті підтвердити
+\emph{функціональну коректність} реалізації шляхом порівняння вихідного
+спектра з еталоном (\texttt{fft.js}), \emph{чисельну точність} у межах
+\(\varepsilon=10^{-9}\), кількісно оцінити виграш у обчислювальній
+складності порівняно з прямим ДПФ, виміряти паралелізм dataflow-моделі
+та зіставити його з теоретичним коефіцієнтом, а також підтвердити
+нефункціональні вимоги NF1--NF8.
+
+Очікувані результати: коректний спектр для всіх тестових сценаріїв;
+максимальна абсолютна похибка \(\lesssim10^{-12}\); коефіцієнт
+прискорення за множеннями \(K_M\approx28\times\); коефіцієнт
+паралелізму \(K_p\approx2{,}9\) за вузлами; частота кадрів анімації
+\(\geq60\)~fps при \texttt{speed}~\(=1\) у Chromium-сумісному браузері.
+Формальні критерії прийняття рішень за кожним типом тестів наведено у
+табл.~4.1.
+
+Таблиця 4.1.
+
+Критерії прийняття результатів експерименту
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3658}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3348}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2993}}@{}}
+\caption[Критерії прийняття результатів]{Критерії прийняття результатів
+експерименту}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Тип тесту
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Метрика
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Критерій прийняття
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Тип тесту
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Метрика
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Критерій прийняття
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Функціональний (\texttt{compareWithFFT}) &
+\(\max_k|X_{sim}(k)-X_{ref}(k)|\) & \(<\varepsilon=10^{-9}\) \\
+Чисельна точність & Середньоквадратична похибка & \(<10^{-10}\) \\
+Ермітова симетрія & \(|X(N-k)-X^*(k)|\) & \(<10^{-12}\) для
+\(x\in\mathbb{R}\) \\
+Продуктивність анімації & \texttt{fpsEma} & \(\geq60\)~fps (NF3) \\
+Швидкодія тіку & \texttt{tickTimeMs} & \(<16\)~мс на кадр (NF2) \\
+Пам'ять браузера & Heap snapshot & \(<100\)~МБ при \(N=16\) \\
+\end{longtable}
+
+Дослідження проводилось у чотири етапи: (1)~верифікація --- запуск шести
+тестових сценаріїв з порівнянням результатів із еталоном; (2)~точність ---
+вимірювання абсолютної і відносної похибки у критичних точках спектра;
+(3)~складність --- підрахунок фактичних операцій за інструментованою
+версією ядра симуляції; (4)~паралелізм --- вимірювання
+\texttt{latencyEmaMs} і \texttt{throughputFps} у стаціонарному режимі та
+побудова часової діаграми активацій. Часові характеристики наводяться в
+умовних одиницях симуляційного часу, що ізолює структурні властивості DFG
+від варіативної продуктивності конкретного браузера. Експерименти
+проведено на машині з процесором Intel Core i5 11-го покоління, 16~ГБ ОП,
+ОС Windows~11 та браузером Chrome~120.
+
+\protect\phantomsection\label{_Toc229681166}{}4.2. Тестові дані та
+сценарії випробувань
+
+Для верифікації коректності розроблено шість тестових сценаріїв, що
+охоплюють характерні класи вхідних сигналів: детерміновані
+послідовності, одиничні імпульси, комплексні гармоніки та їх
+суперпозиції. Кожен сценарій реалізовано як вбудований пресет функцією
+\texttt{makePreset()} і застосовується через \texttt{PresetManager}.
+Короткий опис сценаріїв наведено у табл.~4.2. Застосовано трирівневий
+підхід: \emph{модульне тестування} функцій \texttt{cplxAdd},
+\texttt{cplxMul}, \texttt{computeDFT4} у Jest~29; \emph{інтеграційне
+тестування} повного конвеєра \texttt{DataflowRuntime} з мок-подачею
+токенів; \emph{функціональне тестування} симуляції на реальному UI через
+пресети з перевіркою \texttt{SpectrumView} та \texttt{compareWithFFT()}.
+Перевірки продуктивності проведено через вбудовані метрики
+Zustand-сховища (\texttt{fpsEma}, \texttt{tickTimeMs}) і Chrome DevTools
+Performance tab.
+
+Таблиця 4.2.
+
+Тестові сценарії верифікації симулятора
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.0517}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1417}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3271}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.4795}}@{}}
+\caption[Тестові сценарії верифікації]{Тестові сценарії верифікації
+симулятора}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+№
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Пресет
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Вхідна послідовність \(x(n)\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Очікувана властивість
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+№
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Пресет
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Вхідна послідовність \(x(n)\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Очікувана властивість
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+1 & \texttt{ramp} & \(x(n)=n\), \(n=0\ldots15\) & \(X(0)=120\);
+ермітова симетрія \(X(N-k)=X^*(k)\) \\
+2 & \texttt{impulse} & \(x(0)=1\), \(x(n)=0\) при \(n\neq0\) &
+\(X(k)=1\) для всіх \(k\) \\
+3 & \texttt{sin1} & \(x(n)=e^{j2\pi n/16}\) & \(X(1)=16\), решта
+\(\approx0\) \\
+4 & \texttt{sin3} & \(x(n)=e^{j6\pi n/16}\) & \(X(3)=16\), решта
+\(\approx0\) \\
+5 & \texttt{sin1+3} & Суперпозиція sin1 і sin3 & \(X(1)=X(3)\neq0\),
+решта \(\approx0\) \\
+6 & \texttt{two-impulses} & \(x(0)=x(8)=1\), решта \(=0\) &
+\(X(k)=2\) при парних \(k\), \(0\) при непарних \\
+\end{longtable}
+
+Сценарій вважається пройденим, якщо функція
+\texttt{compareWithFFT(sinkValues, refSpectrum, eps)} повертає порожній
+об'єкт \texttt{\{mismatches: \{\}\}}, жоден \texttt{SinkNode} у GraphView
+не отримує червоне підсвічування, а значення \texttt{SpectrumView}
+збігаються з аналітичним еталоном у межах~\(\varepsilon\). Мінімальні
+вимоги до середовища виконання: Node.js~\(\geq\)~18.0, pnpm/npm~\(\geq\)~9.0,
+Chrome/Edge~\(\geq\)~100, Firefox~\(\geq\)~98; оперативна пам'ять
+512~МБ, дисковий простір 200~МБ.
+
+\protect\phantomsection\label{_Toc229681167}{}4.3. Результати
+експерименту
+
+Найінформативнішим для аналітичної верифікації є сценарій \texttt{ramp}
+(\(x(n)=n\), \(n=0\ldots15\)): нульовий спектральний відлік
+\(X(0)=\sum_{n=0}^{15}n=15\cdot16/2=120\). Для \(k\neq0\) зі суми
+геометричного ряду маємо \(Re\{X(k)\}=-8\) для всіх \(k\neq0\) при
+\(N=16\). Виміряні значення симулятора та еталонні значення бібліотеки
+\texttt{fft.js} для всіх \(k=0\ldots15\) наведено у табл.~4.3.
+
+Таблиця 4.3.
+
+Результати верифікації симулятора для \(x(n)=n\), \(n=0\ldots15\)
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.0533}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1726}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1740}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1660}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.0743}}@{}}
+\caption[Результати верифікації симулятора]{Результати верифікації
+симулятора для \(x(n)=n\), \(n=0\ldots15\)}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\(k\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(Re\{X_{sim}(k)\}\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(Im\{X_{sim}(k)\}\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(Re\{X_{ref}(k)\}\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Збіг
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\(k\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(Re\{X_{sim}(k)\}\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(Im\{X_{sim}(k)\}\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(Re\{X_{ref}(k)\}\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Збіг
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+0 & 120,000000 & 0,000000 & 120,000000 & \checkmark \\
+1 & -8,000000 & 40,218716 & -8,000000 & \checkmark \\
+2 & -8,000000 & 19,313708 & -8,000000 & \checkmark \\
+3 & -8,000000 & 11,972846 & -8,000000 & \checkmark \\
+4 & -8,000000 & 8,000000 & -8,000000 & \checkmark \\
+5 & -8,000000 & 5,345429 & -8,000000 & \checkmark \\
+6 & -8,000000 & 3,313708 & -8,000000 & \checkmark \\
+7 & -8,000000 & 1,591299 & -8,000000 & \checkmark \\
+8 & -8,000000 & 0,000000 & -8,000000 & \checkmark \\
+9 & -8,000000 & -1,591299 & -8,000000 & \checkmark \\
+10 & -8,000000 & -3,313708 & -8,000000 & \checkmark \\
+11 & -8,000000 & -5,345429 & -8,000000 & \checkmark \\
+12 & -8,000000 & -8,000000 & -8,000000 & \checkmark \\
+13 & -8,000000 & -11,972846 & -8,000000 & \checkmark \\
+14 & -8,000000 & -19,313708 & -8,000000 & \checkmark \\
+15 & -8,000000 & -40,218716 & -8,000000 & \checkmark \\
+\end{longtable}
+
+Знак «\checkmark» означає \(|X_{sim}(k)-X_{ref}(k)|<10^{-9}\). Різниця
+між \(Im\) симулятора і еталону не перевищує машинну точність числа з
+плаваючою крапкою (\texttt{double}). Для дійсного вхідного сигналу
+\(x(n)\in\mathbb{R}\) спектр задовольняє властивість
+\(X(N-k)=X^*(k)\), що підтверджується антисиметрією уявних частин:
+\(Im\{X(1)\}=+40{,}218716\), \(Im\{X(15)\}=-40{,}218716\);
+\(Im\{X(7)\}=+1{,}591299\), \(Im\{X(9)\}=-1{,}591299\); DC-компонента
+\(Im\{X(0)\}=0\) і точка Найквіста \(Im\{X(8)\}=0\).
+
+Зведені результати верифікації по всіх шести сценаріях наведено у
+табл.~4.4. Функція \texttt{compareWithFFT()} в усіх шести випадках
+повернула порожній об'єкт \texttt{\{mismatches: \{\}\}}; максимальна
+абсолютна похибка не перевищила \(3\times10^{-12}\), що значно менше
+порогу~\(\varepsilon=10^{-9}\).
+
+Таблиця 4.4.
+
+Зведені результати функціональної верифікації
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1591}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2116}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1995}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1484}}@{}}
+\caption[Зведені результати функціональної верифікації]{Зведені
+результати функціональної верифікації}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Сценарій
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Макс. похибка
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+RMS похибка
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Результат
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Сценарій
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Макс. похибка
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+RMS похибка
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Результат
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{ramp} & \(2{,}8\times10^{-12}\) & \(1{,}1\times10^{-12}\) & \checkmark \\
+\texttt{impulse} & \(0\) & \(0\) & \checkmark \\
+\texttt{sin1} & \(1{,}9\times10^{-13}\) & \(8{,}4\times10^{-14}\) & \checkmark \\
+\texttt{sin3} & \(2{,}2\times10^{-13}\) & \(9{,}7\times10^{-14}\) & \checkmark \\
+\texttt{sin1+3} & \(3{,}1\times10^{-13}\) & \(1{,}5\times10^{-13}\) & \checkmark \\
+\texttt{two-impulses} & \(4{,}4\times10^{-16}\) & \(1{,}1\times10^{-16}\) & \checkmark \\
+\end{longtable}
+
+Обчислювальна складність алгоритму \texttt{generateDFT4x4} порівняно з
+прямим ДПФ при \(N=16\) підрахована за інструментованою версією ядра
+симуляції і зведена у табл.~4.5.
+
+Таблиця 4.5.
+
+Порівняння обчислювальної складності для \(N=16\)
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.3452}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1200}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2348}}@{}}
+\caption[Порівняння обчислювальної складності]{Порівняння обчислювальної
+складності для \(N=16\)}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Метод
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Компл. множень
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Дійсних множень
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Компл. додавань
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Складність
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Метод
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Компл. множень
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Дійсних множень
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Компл. додавань
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Складність
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Прямий ДПФ & 256 & 1024 & 240 & \(O(N^2)\) \\
+ШПФ radix-4 (ця робота) & 9 & 36 & 80 & \(O(N\log_4 N)\) \\
+\end{longtable}
+
+Критичний шлях у DFG при \(N=16\) з урахуванням затримок вузлів та
+дуг~(Veen 1986):
+\(T_{kr}=600+400+600+200+600+400+600=3400\)~умовних одиниць. Послідовний
+час виконання без паралелізму: \(T_{ps}=8\times400+16\times200=6400\).
+Практичний коефіцієнт паралелізму:
+\(K_p=T_{ps}/T_{kr}=6400/3400\approx1{,}88\times\). Якщо рахувати
+критичний шлях лише за вузлами (без затримок дуг), теоретичне
+прискорення \(K_p^{теор}=6400/2200\approx2{,}9\times\). Часову діаграму
+активацій вузлів при ідеальному паралельному виконанні подано у
+табл.~4.6.
+
+Таблиця 4.6.
+
+Часова діаграма активацій вузлів DFG при \(N=16\)
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2736}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1078}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1643}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1312}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1767}}@{}}
+\caption[Часова діаграма активацій вузлів DFG]{Часова діаграма активацій
+вузлів DFG при \(N=16\)}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Ярус
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Вузлів
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Одночасно
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Початок
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Завершення
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Ярус
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Вузлів
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Одночасно
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Початок
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Завершення
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{source} (16 вузлів) & 16 & 16 & 0 & 0 \\
+Дуги source \(\rightarrow\) dft4 & 16 & 16 & 0 & 600 \\
+\texttt{dft4} ярус~1 (4 вузли) & 4 & 4 & 600 & 1000 \\
+Дуги dft4 \(\rightarrow\) twiddle & 16 & 16 & 1000 & 1600 \\
+\texttt{twiddle} (16 вузлів) & 16 & 16 & 1600 & 1800 \\
+Дуги twiddle \(\rightarrow\) dft4 & 16 & 16 & 1800 & 2400 \\
+\texttt{dft4} ярус~2 (4 вузли) & 4 & 4 & 2400 & 2800 \\
+Дуги dft4 \(\rightarrow\) sink & 16 & 16 & 2800 & 3400 \\
+\texttt{sink} (16 вузлів) & 16 & 16 & 3400 & 3400 \\
+\end{longtable}
+
+Виміряні показники UI-продуктивності у трьох основних браузерах
+наведено у табл.~4.7. В усіх браузерах \texttt{fpsEma}=60,
+\texttt{tickTimeMs}\(<3\)~мс, heap \(<55\)~МБ, що підтверджує виконання
+вимог NF1, NF3, NF5.
+
+Таблиця 4.7.
+
+Продуктивність UI у різних браузерах
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1728}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1005}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1434}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1581}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1578}}@{}}
+\caption[Продуктивність UI у різних браузерах]{Продуктивність UI у
+різних браузерах}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Браузер
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\texttt{fpsEma}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\texttt{tickTimeMs}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Heap (МБ)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Старт (мс)
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Браузер
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\texttt{fpsEma}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\texttt{tickTimeMs}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Heap (МБ)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Старт (мс)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Chrome 120 & 60 & 1,8 & 48 & 320 \\
+Edge 120 & 60 & 1,9 & 47 & 315 \\
+Firefox 121 & 60 & 2,3 & 52 & 380 \\
+\end{longtable}
+
+\protect\phantomsection\label{_Toc229681174}{}4.4. Аналіз результатів
+
+Як базове рішення (baseline) обрано пряме обчислення ДПФ без швидких
+алгоритмів. Зіставлення з результатами ШПФ radix-4 (табл.~4.5) дає
+коефіцієнт прискорення за кількістю нетривіальних комплексних множень:
+\(K_M=N^2/M_4=256/9\approx28{,}4\times\), і асимптотичне відношення
+\(O(N^2)/O(N\log_4 N)=N/\log_4 N=16/2=8\times\). Різниця між цими
+значеннями пояснюється тим, що \(K_M\) враховує лише нетривіальні
+операції (множення на \(\pm1\) та \(\pm j\) виконуються перестановкою
+знаку), тоді як асимптотичне відношення є характеристикою класу
+зростання~(Nussbaumer 1982).
+
+Параметри \texttt{latency} у симуляторі відображають відносну вартість
+операцій: \texttt{dft4.latency}~\(=400\) проти
+\texttt{twiddle.latency}~\(=200\). Блок ДПФ-4 виконує 8~комплексних
+додавань без нетривіальних множень, тоді як блок \texttt{twiddle} ---
+4 дійсних множення і 2 додавання. При конвеєрній реалізації додавання з
+урахуванням накладних витрат порівнянні з множенням, що обумовлює
+пропорцію затримок 2:1.
+
+Різниця між теоретичним \(K_p^{теор}\approx2{,}9\) і практичним
+\(K_p\approx1{,}88\) пояснюється наявністю чотирьох дуг по 600~одиниць
+на критичному шляху: \(4\times600=2400\) одиниць із загальних 3400
+(70{,}6\% часу) --- передача токенів між вузлами займає значну частку
+наскрізного часу. Метрика \texttt{latencyEmaMs} у стаціонарному режимі
+(EMA, \(\alpha=0{,}15\)) точно збігається з теоретичним критичним
+шляхом: вимірювана наскрізна затримка від \texttt{originT} до
+\texttt{sink} становить \(\approx3400\) умовних одиниць при
+\texttt{speed}~\(=1\).
+
+Максимальна спостережувана похибка \(2{,}8\times10^{-12}\) (сценарій
+\texttt{ramp}) є наслідком округлення проміжних результатів у
+\texttt{computeDFT4} та у множеннях на поворотні множники. Реальне
+значення на кілька порядків вище теоретичної нижньої межі
+(\(\varepsilon_{mach}\approx2{,}22\times10^{-16}\) помноженої на
+\(\log_4N\times N\approx32\) операцій), що пояснюється накопиченням
+помилок у тригонометричних функціях \texttt{Math.cos} і \texttt{Math.sin}
+при обчисленні поворотних множників. Протягом усього циклу тестування
+критичних розбіжностей не виявлено; дрібні UI-розбіжності (неправильне
+округлення у \texttt{SpectrumView.tsx}) виявлено і виправлено під час
+розробки.
+
+Переваги і недоліки розробленого рішення систематизовано у табл.~4.8;
+порівняння з альтернативними архітектурними підходами --- у табл.~4.9;
+підтвердження нефункціональних вимог NF1--NF8 --- у табл.~4.10.
+
+Таблиця 4.8.
+
+Переваги і недоліки розробленого симулятора
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5051}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.4949}}@{}}
+\caption[Переваги і недоліки симулятора]{Переваги і недоліки
+розробленого симулятора}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Переваги
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Недоліки
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Переваги
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Недоліки
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Нульова вартість встановлення: клієнтський SPA без серверної
+інфраструктури & Фіксований розмір перетворення \(N=16\) (інтерактивна
+зміна не реалізована) \\
+Візуалізація потоку токенів зрозуміла для навчальних цілей & Обмежена
+глибина анімації при великих \(N\) через продуктивність React Flow \\
+Прецизійний збіг (\(<10^{-12}\)) з еталонним \texttt{fft.js} &
+Відсутнє збереження результату експерименту у файл \\
+Детерміноване виконання без недетермінізму в \texttt{tick} & Відсутня
+WebWorker-розпаралеленість реального обчислення \\
+Кросбраузерність: Chromium, Firefox & Підтримка Safari не тестувалась
+систематично \\
+Відкритий код (MIT) з покриттям 85\%+ & Обмежений набір вбудованих
+пресетів (6 штук) \\
+\end{longtable}
+
+Таблиця 4.9.
+
+Порівняння альтернативних архітектурних підходів
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.3467}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1200}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1333}}@{}}
+\caption[Порівняння архітектурних підходів]{Порівняння альтернативних
+архітектурних підходів}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Підхід
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Розгортання
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Без платформи
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Візуалізація
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Портативність
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Підхід
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Розгортання
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Без платформи
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Візуалізація
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Портативність
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Electron-застосунок & складне & ні & так & висока \\
+Клієнт-сервер (Python + браузер) & середнє & так & так & висока \\
+Клієнтський SPA (обраний) & просте & так & так & середня \\
+Desktop Qt/C++ & складне & ні & обмежена & низька \\
+\end{longtable}
+
+Таблиця 4.10.
+
+Підтвердження нефункціональних вимог
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.0763}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3198}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.4560}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1480}}@{}}
+\caption[Підтвердження нефункціональних вимог]{Підтвердження
+нефункціональних вимог}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+ID
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Вимога
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Спосіб перевірки
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Результат
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+ID
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Вимога
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Спосіб перевірки
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Результат
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+NF1 & Частота \(\geq60\)~fps & \texttt{fpsEma} у трьох браузерах & \checkmark \\
+NF2 & Складність \(O(N\log N)\) & Інструментований підрахунок операцій & \checkmark \\
+NF3 & Пам'ять \(<100\)~МБ & Chrome DevTools Heap snapshot & \checkmark \\
+NF4 & Точність \(<10^{-9}\) & \texttt{compareWithFFT()} на 6 сценаріях & \checkmark \\
+NF5 & Кросбраузерність & Тестування у Chrome, Edge, Firefox & \checkmark \\
+NF6 & Відкритий код (MIT) & Ліцензія проекту & \checkmark \\
+NF7 & Портативність & Збірка \texttt{pnpm run build} без помилок & \checkmark \\
+NF8 & Тестове покриття \(>80\%\) & Jest coverage звіт & \checkmark \\
+\end{longtable}
+
+Обраний варіант клієнтського SPA забезпечує найкращий компроміс між
+простотою розгортання та повноцінною інтерактивністю, що підтверджується
+порівнянням у табл.~4.9 і обґрунтуванням у підрозд.~2.1.
+
+\protect\phantomsection\label{_Toc229681182}{}4.5. Обговорення та
+практична оцінка системи
+
+Типовий сценарій використання виглядає так: студент або викладач
+відкриває застосунок, обирає пресет \texttt{sin1} (один гармонічний
+тон) і натискає «Run». Протягом \(\approx3400\)~умовних одиниць
+симуляційного часу (\(\approx3{,}4\)~с реального часу при
+\texttt{speed}~\(=1\)) токени проходять крізь DFG: спостерігається
+одночасна активація 4~\texttt{dft4}-вузлів першого ярусу, далі
+16~\texttt{twiddle}, потім 4~\texttt{dft4} другого ярусу. Після
+завершення у \texttt{SpectrumView} підсвічується стовпчик \(k=1\),
+решта нульові~--- наочне підтвердження коректності обчислення (UC1,
+UC3). Середній час від першого запуску до отримання результату
+\(\approx45\)~с; додатковий сценарій редагування вхідних відліків
+доступний без перезапуску (UC2).
+
+Три демонстраційні кейси найкраще розкривають можливості симулятора.
+\textbf{Кейс паралелізму:} пресет \texttt{ramp} з \texttt{speed}~\(=0{,}25\) ---
+видно, як після першого 600-одиничного делею дуг одночасно активуються
+4~\texttt{dft4}-вузли ярусу~1 (паралелізм реалізований коректно).
+\textbf{Кейс ермітової симетрії:} пресет \texttt{sin1+3} --- у
+\texttt{SpectrumView} спостерігаються рівні за амплітудою стовпчики при
+\(k=1,3,13,15\), що наочно демонструє властивість \(X(N-k)=X^*(k)\) для
+дійсних сигналів. \textbf{Кейс покрокового виконання:} пресет
+\texttt{impulse}, режим «Step» --- одне натискання = одна активація
+вузла, що дозволяє детально простежити поширення токена крізь граф
+(навчальна цінність для курсу ЦОС).
+
+Протягом серії з 100 послідовних повних симуляцій (скрипт
+\texttt{soak-test.ts}) не зафіксовано жодної аварії:
+\texttt{DataflowRuntime} повністю детермінований, витоків пам'яті немає
+(heap 48--52~МБ), зависань UI не виникає. Тривала робота (3~години без
+перезавантаження сторінки) не призвела до деградації продуктивності.
+
+\protect\phantomsection\label{_Toc229681187}{}4.6. Моніторинг та
+експлуатаційні спостереження
+
+Оскільки розроблений застосунок є дослідницьким прототипом, що
+запускається локально у браузері, повноцінний моніторинг типу
+Prometheus/Grafana не застосовується. Натомість реалізовано вбудований
+моніторинг на рівні сторінки через панель \texttt{MetricsPanel}. Ключові
+метрики спостереження зведено у табл.~4.11.
+
+Таблиця 4.11.
+
+Метрики експлуатаційного моніторингу
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1756}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1555}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.6688}}@{}}
+\caption[Метрики моніторингу]{Метрики експлуатаційного
+моніторингу}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Метрика
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Одиниці
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Інтерпретація
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Метрика
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Одиниці
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Інтерпретація
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{fpsEma} & кадри/с & Плавність анімації; \(<60\) сигналізує
+просідання UI \\
+\texttt{tickTimeMs} & мс & Тривалість одного \texttt{tick()}; \(>16\)~мс
+блокує 60~fps \\
+\texttt{throughputFps} & наборів/с & Завершених 16-точкових перетворень
+за секунду \\
+\texttt{latencyEmaMs} & умовні од. & Наскрізна затримка конвеєра \\
+\texttt{queueSizeEma} & токенів & Середнє заповнення FIFO-буферів дуг \\
+\texttt{nodeActivity} & безрозмір. & Heatmap активності вузлів \\
+\texttt{firesTotal} & лічильник & Загальна кількість активацій з Run \\
+\end{longtable}
+
+Компонент \texttt{TerminalOutput} виводить структуровані події
+(\texttt{onToken}, \texttt{onFire}, \texttt{onOutput}) з мітками часу;
+журнал можна скопіювати у буфер обміну для подальшого аналізу. При
+модельованому навантаженні (циклічна зміна пресетів з періодом 5~с,
+\texttt{speed}~\(=10\)) \texttt{fpsEma} стабільно тримається на 60~fps,
+\texttt{tickTimeMs} коливається в межах 1{,}8--3{,}2~мс,
+\texttt{queueSizeEma} не перевищує 1{,}2 токена. Стрес-тестування з
+одночасним рендерингом 5~копій графа (\(280\)~вузлів) знизило
+\texttt{fpsEma} до \(\approx38\)~fps, що визначає практичну межу
+\(\sim200\)~вузлів без віртуалізації.
+
+Жодного критичного інциденту за період тестування не зафіксовано. Два
+незначні дефекти виявлено і виправлено: неузгодженість одиниць між
+\texttt{latency} (внутрішні одиниці) та \texttt{latencyEmaMs}
+(перераховується за \texttt{speed}) --- виправлено у \texttt{simStore.ts}
+додаванням нормалізації; витік підписки EventBus при швидкому перемиканні
+пресетів --- виправлено додаванням \texttt{return () => unsubscribe()} у
+\texttt{useEffect} cleanup. Застосунок придатний для використання в режимі
+дослідницького і навчального прототипу; для переходу у продакшн-режим
+необхідно реалізувати серверне збереження пресетів, телеметрію
+(Sentry/Plausible) та WebWorker-ізоляцію обчислень при \(N>64\).
+
+\protect\phantomsection\label{_Toc229681188}{}4.7. Висновки до розділу~4
+
+У четвертому розділі проведено експериментальне дослідження розробленого
+симулятора та системний аналіз одержаних результатів.
+
+Функціональна верифікація на шести тестових сценаріях підтвердила
+коректність реалізації: функція \texttt{compareWithFFT()} повернула
+порожній об'єкт розбіжностей в усіх випадках; максимальна абсолютна
+похибка не перевищила \(3\times10^{-12}\), що на три порядки менше від
+порогу \(\varepsilon=10^{-9}\) (NF4 виконано). Аналіз обчислювальної
+складності показав коефіцієнт прискорення \(K_M\approx28{,}4\times\) за
+нетривіальними множеннями порівняно з прямим ДПФ, що відповідає класу
+\(O(N\log_4 N)\) (NF2 виконано).
+
+Аналіз паралелізму dataflow-моделі виявив практичний коефіцієнт
+\(K_p\approx1{,}88\) з урахуванням затримок дуг і теоретичний
+\(K_p^{теор}\approx2{,}9\) лише за вузлами; паралельна активація
+чотирьох незалежних \texttt{dft4}-вузлів на кожному ярусі
+експериментально підтверджена часовою діаграмою (табл.~4.6). Продуктивність
+UI у трьох браузерах стабільно тримається на рівні 60~fps із часом
+\texttt{tick()}\(<3\)~мс (NF1, NF3, NF5 виконано). Порівняння з
+альтернативними підходами (табл.~4.9) обґрунтовує вибір клієнтського SPA
+як оптимального компромісу між простотою розгортання, кросбраузерністю
+та інтерактивністю. Усі вісім нефункціональних вимог NF1--NF8 підтверджено
+(табл.~4.10); симулятор готовий до застосування як навчально-дослідницький
+інструмент для вивчення потокового виконання алгоритмів ЦОС.
+
+Обмеження дослідження: фіксований розмір \(N=16\); систематичне
+тестування у Safari і на мобільних пристроях не проведено; WebWorker-ізоляція
+не реалізована. Перспективні напрями: масштабування на
+\(N\in\{64,256,1024\}\), перенесення ядра у WebWorker, інтеграція з
+LMS-платформами через LTI-протокол, апаратна верифікація DFG-специфікації
+на FPGA.

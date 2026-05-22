@@ -1,0 +1,26 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title Рис. 2.1 — C4 Context-діаграма веб-симулятора потокового обчислювача ШПФ
+
+Person(user, "Користувач", "Студент або викладач: запускає симуляцію, керує темпом виконання, аналізує спектр і метрики")
+
+System(sim, "Веб-симулятор потокового ШПФ", "SPA (Next.js + React Flow). Виконує реальний алгоритм radix-4 для N=16 та інтерактивно анімує граф потоку даних")
+
+System_Ext(browser, "Веб-браузер", "Chrome / Edge / Firefox: рушій JS (V8 / SpiderMonkey), requestAnimationFrame, Canvas")
+SystemDb_Ext(storage, "Local Storage браузера", "Пресети вхідних сигналів та параметри latency / delay")
+System_Ext(hosting, "Статичний веб-хостинг", "Роздача бандлу HTML + JS + CSS")
+
+Rel(user, sim, "Запускає, керує, аналізує результат", "UI: Run / Pause / Step")
+Rel(hosting, browser, "Одноразове завантаження SPA", "HTTPS")
+Rel(sim, browser, "Виконується у середовищі", "rAF, Web APIs")
+Rel(sim, storage, "Зберігає / читає пресети й налаштування", "Web Storage API")
+
+note right of sim
+  Серверна частина відсутня.
+  Усі обчислення ШПФ виконуються
+  локально у браузері (вимоги NF2, NF4, NF7).
+end note
+
+LAYOUT_WITH_LEGEND()
+@enduml

@@ -1,0 +1,52 @@
+@startuml
+title Рис. 1.2 — Use Case-діаграма симулятора потокового обчислювача ШПФ
+
+left to right direction
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #DCFCE7
+  BorderColor #334155
+}
+skinparam actor {
+  BorderColor #334155
+}
+
+actor "Студент\n(первинний користувач)" as S
+actor "Викладач\n(вторинний користувач)" as T
+
+rectangle "Веб-симулятор потокового обчислювача ШПФ" {
+  usecase "UC1. Завантажити\nготовий сценарій" as UC1
+  usecase "UC2. Задати власний\nвхідний сигнал" as UC2
+  usecase "UC3. Запустити\nсимуляцію" as UC3
+  usecase "UC4. Керувати темпом\nсимуляції" as UC4
+  usecase "UC5. Спостерігати\nрух токенів" as UC5
+  usecase "UC6. Переглянути\nспектр результату" as UC6
+  usecase "UC7. Порівняти\nз еталоном" as UC7
+  usecase "UC8. Змінити параметри\nзатримок" as UC8
+  usecase "UC9. Експортувати\nжурнал подій" as UC9
+}
+
+S --> UC1
+S --> UC2
+S --> UC3
+S --> UC4
+S --> UC5
+S --> UC6
+S --> UC7
+
+T --> UC1
+T --> UC7
+T --> UC8
+T --> UC9
+
+UC3 ..> UC5 : <<include>>
+UC7 ..> UC3 : <<extend>>
+
+note bottom of UC2
+  UC1 і UC2 — взаємовиключні
+  альтернативи підготовки вхідних даних
+end note
+@enduml

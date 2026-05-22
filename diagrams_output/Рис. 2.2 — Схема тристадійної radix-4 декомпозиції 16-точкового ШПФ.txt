@@ -1,0 +1,36 @@
+@startuml
+title Рис. 2.2 — Схема тристадійної radix-4 декомпозиції 16-точкового ШПФ
+
+left to right direction
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam defaultTextAlignment center
+skinparam ArrowColor #334155
+skinparam ArrowFontColor #334155
+skinparam rectangle {
+  RoundCorner 14
+  BorderColor #334155
+  FontColor #0F172A
+}
+
+rectangle "Вхідний сигнал\nx(n), n = 0..15" as X #DBEAFE
+rectangle "Індексне відображення\n────────────\nn = 4s + r\nk = 4k₂ + k₁\nr, s, k₁, k₂ ∈ {0,1,2,3}" as MAP #FEF3C7
+rectangle "Матриця A[r][s]\n────────────\nA[r][s] = x(4s + r)\nрозмір 4×4" as A #E0F2FE
+rectangle "СТАДІЯ 1\n────────────\n4 паралельні рядкові ДПФ-4\nG_r(k₁) = Σ_s A[r][s]·W₄^{s·k₁}\n(8 додавань кожне, 0 множень)" as S1 #DCFCE7
+rectangle "СТАДІЯ 2\n────────────\n16 множень на W₁₆^{r·k₁}\nH_r(k₁) = W₁₆^{r·k₁}·G_r(k₁)\n7 тривіальних, 9 нетривіальних" as S2 #EDE9FE
+rectangle "СТАДІЯ 3\n────────────\n4 паралельні стовпцеві ДПФ-4\nX = Σ_r H_r(k₁)·W₄^{r·k₂}\n(8 додавань кожне, 0 множень)" as S3 #DCFCE7
+rectangle "Вихідний спектр\nX(k), k = 0..15" as Y #FFE4E6
+
+X --> MAP
+MAP --> A
+A --> S1
+S1 --> S2 : G_r(k₁)
+S2 --> S3 : H_r(k₁)
+S3 --> Y
+
+note bottom of S2
+  Підсумок для N = 16:
+  9 нетривіальних комплексних множень + 80 додавань
+  проти 256 множень прямого ДПФ → прискорення ≈ 28×
+end note
+@enduml

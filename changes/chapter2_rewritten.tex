@@ -1,0 +1,854 @@
+% ============================================================
+% РОЗДІЛ 2 — переписаний (структура без підпідрозділів, стиль академічний)
+% Вставити замість блоку від \protect\phantomsection\label{_Toc228121443}{}
+% до \protect\phantomsection\label{_Toc229681122}{} у БКР_Тесля.tex
+% ============================================================
+
+\protect\phantomsection\label{_Toc228121443}{}РОЗДІЛ 2. ПРОЄКТУВАННЯ
+ПРОГРАМНОГО РІШЕННЯ
+
+\protect\phantomsection\label{_Toc228121444}{}2.1. Вибір методів,
+технологій та засобів реалізації
+
+У підрозд.~1.5 сформульовано технічне завдання: розробити веб-симулятор
+потокового обчислювача 16-точкового ШПФ з інтерактивною візуалізацією
+руху токенів, числовою верифікацією та відкритим доступом. У цьому
+підрозділі обґрунтовується вибір архітектурних підходів, парадигм
+реалізації та сімейств інструментів, що покривають зазначені вимоги.
+Конкретні версії бібліотек та параметри середовища розробки наводяться
+у підрозд.~3.1.
+
+Для визначення основного архітектурного підходу розглянуто три
+альтернативи. \textbf{Варіант~А --- настільний застосунок} (Electron,
+Qt, JavaFX) забезпечує повний доступ до ресурсів хост-системи та
+багатопоточність, однак вимагає встановлення на кожну робочу станцію,
+окремих збірок під різні ОС і суперечить вимозі NF7 (робота без
+встановлення). \textbf{Варіант~Б --- клієнт-серверний веб-застосунок}
+передбачає розміщення ядра симуляції на сервері, що вносить мережеву
+затримку, несумісну з вимогою NF2 (час відгуку \(\leq 100\)~мс), і
+потребує підтримки серверної інфраструктури. \textbf{Варіант~В ---
+повністю клієнтський SPA (Single-Page Application)} обрано як основу
+архітектури: усі обчислення виконуються у браузері, серверна частина
+відсутня, застосунок завантажується одноразово як статичний пакет
+(HTML+JS+CSS) і надалі не потребує мережі. Цей варіант одночасно
+задовольняє вимоги NF2, NF4 (портативність), NF5 (детермінованість) і
+NF7.
+
+Симулятор поєднує три принципово різні підсистеми: анімована графова
+візуалізація DFG, числове ядро симуляції та панель керування і метрик.
+Для їх ефективної координації обрано поєднання \emph{реактивного
+рендерингу} та \emph{централізованого спостерігаваного сховища стану}.
+Реактивний рендеринг (React-парадигма) природно відображає стан
+симулятора на візуальні компоненти: зміна значення в одному полі сховища
+автоматично ініціює перемалювання лише тих компонентів, що підписані на
+це поле, що забезпечує стабільні 60~fps (NF3). Централізоване сховище
+стану (pattern single source of truth) гарантує, що всі панелі ---
+GraphView, SpectrumView, Metrics --- бачать один і той самий «знімок»
+стану у поточному кадрі. Альтернатива у вигляді прямого маніпулювання
+DOM (jQuery-style) відкинута через лінійне зростання складності, а
+Flux-підходи з ред'юсерами (Redux) --- через надмірний обсяг
+шаблонного коду.
+
+Для реалізації інтерактивного графа потоку даних розглянуто рендеринг
+на HTML-canvas (максимальна продуктивність, але ручна реалізація всіх
+UI-взаємодій), SVG з ручним кодуванням (простіший налагодження, але
+обмежена розширюваність) та спеціалізовану бібліотеку графової
+візуалізації React~Flow. Обрано React~Flow: бібліотека надає готові
+механізми перетягування вузлів, зума, анімованих ребер і плаваючих
+підказок, а формальна модель \texttt{Node}/\texttt{Edge} добре
+відображається на абстракцію DFG.
+
+У проєктуванні системи застосовано п'ять класичних шаблонів
+проєктування. \emph{Observer (Publisher/Subscriber)} забезпечує розсилку
+подій \texttt{onToken}, \texttt{onFire}, \texttt{onOutput}: ядро
+симуляції є видавцем, а UI-компоненти --- підписниками без прямих
+посилань на ядро. \emph{State~/ Finite State Machine} керує життєвим
+циклом симуляції:
+\texttt{IDLE}\(\rightarrow\)\texttt{RUNNING}\(\rightarrow\)\texttt{PAUSED}\(\rightarrow\)\texttt{DONE}.
+\emph{Strategy} забезпечує різні типи вузлів (\texttt{source},
+\texttt{dft4}, \texttt{twiddle}, \texttt{sink}): поведінка вузла
+інкапсулюється у функції, обраній за полем \texttt{NodeKind}. \emph{Factory}
+реалізовано через функцію \texttt{generateDFT4x4()}, що повертає готовий
+об'єкт \texttt{Graph} за параметрами \(N\) та \texttt{latency}.
+\emph{Facade} --- клас \texttt{DataflowRuntime} приховує внутрішню
+реалізацію черг і планувальника за єдиним публічним методом
+\texttt{tick(dt,~maxFires)}.
+
+Для дотримання NF1 (точність \(\varepsilon \leq 10^{-9}\)) і NF5
+(детермінованість) передбачено статичну типізацію вихідного коду, що
+унеможливлює помилки передачі аргументів неправильного типу на етапі
+компіляції. Комплексні числа подаються структурою \(\{re,\,im\}\) у
+подвійній точності IEEE~754 (\(\varepsilon_{mach} \approx 2.22 \cdot 10^{-16}\)),
+що забезпечує необхідний запас точності.
+
+Підсумкова таблиця зв'язків між вимогами підрозд.~1.5 та обраними
+архітектурними рішеннями наведена у табл.~2.1.
+
+Таблиця 2.1.
+
+Зв'язок вимог і архітектурних рішень
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2518}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3630}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3852}}@{}}
+\caption[Зв'язок вимог і архітектурних рішень]{Зв'язок вимог і
+архітектурних рішень}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\textbf{Вимога}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\textbf{Архітектурне рішення}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\textbf{Обґрунтування}
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\textbf{Вимога}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\textbf{Архітектурне рішення}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\textbf{Обґрунтування}
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+NF1 (точність) & Статична типізація + IEEE~754 double & Виключення
+помилок типів, \(\varepsilon_{mach} \approx 2.22 \cdot 10^{-16}\) \\
+NF2 (відгук \(\leq 100\)~мс) & Клієнтський SPA без серверних викликів &
+Відсутність мережевої затримки \\
+NF3 (60~fps) & Реактивний рендеринг з підпискою на окремі поля &
+Перемальовування лише змінених компонентів \\
+NF4 (портативність) & Стандарт ES2020, Web APIs & Робота у
+Chrome/Firefox/Edge без polyfill \\
+NF5 (детермінованість) & Логічний час + статичний граф & Ідентичні входи
+\(\Rightarrow\) ідентичний журнал \\
+NF6 (MIT/Apache) & Вибір лише OSS-бібліотек & React, React~Flow,
+Zustand, TypeScript \\
+NF7 (без встановлення) & SPA у статичному хостингу & Одноразове
+завантаження бандлу \\
+NF8 (зручність) & React~Flow + панелі Controls/Metrics & Двокліковий
+доступ до базових операцій \\
+\end{longtable}
+
+\protect\phantomsection\label{_Toc228121450}{}2.2. Математичне та
+алгоритмічне забезпечення
+
+У цьому підрозділі подано математичний апарат 16-точкового ШПФ з
+основою~4, що становить інтелектуальне ядро симулятора, та формалізацію
+обчислень у парадигмі потоку даних.
+
+Дискретне перетворення Фур'є (ДПФ) скінченної комплекснозначної
+послідовності \(\{x_{n}\}_{n=0}^{N-1}\) визначається як~(Nussbaumer
+1982; Процько et al. 2025):
+
+\[X_{k} = \sum_{n=0}^{N-1}x_{n}\,e^{-j2\pi nk/N} = \sum_{n=0}^{N-1}x_{n}\,W_{N}^{nk},\quad k = 0,1,\ldots,N-1,\]
+
+де \(W_{N}=e^{-j2\pi/N}\) --- поворотний множник (twiddle factor). Пряме
+обчислення потребує \(N^{2}\) комплексних множень, тобто має складність
+\(O(N^{2})\), що недостатньо для задач реального часу. Клас швидких
+алгоритмів (ШПФ) знижує складність до \(O(N\log_{2}N)\) за рахунок
+факторизації \(N=N_{1}\cdot N_{2}\). Для \(N=16\) природним вибором є
+алгоритм з основою~4 (radix-4), де \(N_{1}=N_{2}=4\)~(Cooley and
+Tukey 1965).
+
+Для двовимірної \(4\times4\) декомпозиції часовий і частотний індекси
+подаються у вигляді \(n=4s+r\), \(k=4k_{2}+k_{1}\),
+де \(r,s,k_{1},k_{2}\in\{0,1,2,3\}\). Вхідна послідовність
+\(\{x(n)\}_{n=0}^{15}\) вкладається у матрицю \(\mathbf{A}\) розміром
+\(4\times4\): \(A[r][s]=x(4s+r)\). Підстановка у формулу ДПФ із
+використанням тотожності \(W_{16}^{4(\cdot)}=W_{4}^{(\cdot)}\) дає
+тристадійну схему~(Burrus and Parks 1985):
+
+\[X(4k_{2}+k_{1}) = \sum_{r=0}^{3}W_{16}^{rk_{1}}
+\underset{G_{r}(k_{1})}{\underbrace{\Bigl(\sum_{s=0}^{3}A[r][s]\,W_{4}^{sk_{1}}\Bigr)}}
+W_{4}^{rk_{2}}.\]
+
+\textbf{Стадія~1 --- рядкові 4-точкові ДПФ.} Для кожного
+\(r\in\{0,1,2,3\}\) обчислюється 4-точкове ДПФ рядка:
+\(G_{r}(k_{1})=\sum_{s=0}^{3}A[r][s]\,W_{4}^{sk_{1}}\). Чотири ці
+перетворення є взаємно незалежними та виконуються паралельно.
+
+\textbf{Стадія~2 --- поворотні множники.} Результати стадії~1
+множаться на матрицю поворотних множників:
+\(H_{r}(k_{1})=W_{16}^{r\cdot k_{1}}\cdot G_{r}(k_{1})\). При
+\(r=0\) або \(k_{1}=0\) маємо \(W_{16}^{0}=1\), тому 7~з 16~множень є
+тривіальними. Числові значення 9~нетривіальних множників наведено у
+табл.~2.2.
+
+Таблиця 2.2.
+
+Поворотні множники \(W_{16}^{r\cdot k_{1}}\) (округлено до 3~знаків)
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.0978}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.0399}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2159}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2384}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2384}}@{}}
+\caption[Поворотні множники \(W_{16}^{r\cdot k_{1}}\)]{Поворотні множники
+\(W_{16}^{r \cdot k_{1}}\) (округлено до 3 знаків)}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\[r \smallsetminus k_{1}\]
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+0
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+2
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+3
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\[r \smallsetminus k_{1}\]
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+0
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+2
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+3
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+0 & \(1\) & \(1\) & \(1\) & \(1\) \\
+1 & \(1\) & \(0{,}924 - 0{,}383j\) & \(0{,}707 - 0{,}707j\) &
+\(0{,}383 - 0{,}924j\) \\
+2 & \(1\) & \(0{,}707 - 0{,}707j\) & \(-j\) & \(-0{,}707 - 0{,}707j\) \\
+3 & \(1\) & \(0{,}383 - 0{,}924j\) & \(-0{,}707 - 0{,}707j\) &
+\(-0{,}924 + 0{,}383j\) \\
+\end{longtable}
+
+\textbf{Стадія~3 --- стовпцеві 4-точкові ДПФ.} Для кожного \(k_{1}\)
+обчислюється 4-точкове ДПФ стовпця матриці~\(\mathbf{H}\):
+\(X(4k_{1}+k_{2})=\sum_{r=0}^{3}H_{r}(k_{1})\,W_{4}^{rk_{2}}\).
+Чотири стовпцевих перетворення також є взаємно незалежними.
+
+Ядром обох стадій є 4-точкове ДПФ, що завдяки властивостям
+\(W_{4}\in\{1,-j,-1,j\}\) реалізується без нетривіальних множень. Для
+входів \(v_{0},v_{1},v_{2},v_{3}\in\mathbb{C}\) вводяться проміжні
+суми і різниці \(E_{0}=v_{0}+v_{2}\), \(E_{1}=v_{0}-v_{2}\),
+\(O_{0}=v_{1}+v_{3}\), \(O_{1}=v_{1}-v_{3}\), після чого вихідні
+відліки:
+
+\[\begin{aligned}
+V_{0} &= E_{0}+O_{0}, & V_{2} &= E_{0}-O_{0}, \\
+V_{1} &= E_{1}-j\cdot O_{1}, & V_{3} &= E_{1}+j\cdot O_{1}.
+\end{aligned}\]
+
+Множення на \(j\) зводиться до перестановки дійсної та уявної частин зі
+зміною знаку (\(j\cdot(a+bj)=-b+aj\)) і не потребує операції множення у
+традиційному сенсі. Таким чином, одне 4-точкове ДПФ потребує
+\textbf{8~комплексних додавань і 0 нетривіальних множень}~(Nussbaumer 1982).
+
+Загальна обчислювальна вартість алгоритму для \(N=16\): стадія~1 ---
+\(4\cdot8=32\) комплексних додавань; стадія~2 --- 9~нетривіальних
+комплексних множень (36~дійсних) і 16~комплексних додавань; стадія~3 ---
+\(4\cdot8=32\) комплексних додавань. Разом: \textbf{9~нетривіальних
+комплексних множень} і \textbf{80~комплексних додавань}, порівняно з
+\(N^{2}=256\) множень прямого ДПФ --- прискорення у \(\approx28\)~разів
+за кількістю множень~(Nussbaumer 1982; Burrus and Parks 1985).
+
+Алгоритм подається у вигляді орієнтованого ациклічного графа потоку
+даних (DFG) \(G=(V,E)\)~(Dennis 1974; Lee and Hurson 1994), де \(V\)
+--- множина вузлів чотирьох типів (\texttt{source}, \texttt{dft4},
+\texttt{twiddle}, \texttt{sink}), а \(E\subseteq V\times V\) --- множина
+спрямованих дуг, що є FIFO-чергами токенів. \textbf{Правило
+активації:} вузол~\(v\) є готовим до виконання тоді і лише тоді, коли
+на кожному з його вхідних каналів присутній щонайменше один токен; при
+активації він поглинає вхідні токени, виконує обчислення та породжує
+вихідні токени. \textbf{Часова модель:} вузол має затримку виконання
+\texttt{latency}, а дуга --- затримку доставки \texttt{delay}; токен,
+породжений у момент~\(t\), стає готовим у момент \(t+\text{delay}\);
+логічний час \(\tau\) симулятора інкрементується дискретно на кроці
+\(d\tau\), що регулюється множником швидкості.
+
+Планувальник (ядро \texttt{DataflowRuntime}) на кожному кроці симуляції
+виконує доставку токенів із FIFO-черг і запуск готових вузлів. Узагальнений
+псевдокод наведено нижче.
+
+{\def\LTcaptype{none}
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 0\tabcolsep) * \real{0.5847}}@{}}
+\toprule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\begin{minipage}[t]{\linewidth}\raggedright
+\begin{verbatim}
+procedure TICK(dt, maxFires)
+    tau <- tau + dt
+    for each edge e in E
+        while e.queue.head.t + e.delay <= tau
+            token <- e.queue.pop()
+            v <- target(e); port <- targetPort(e)
+            v.inputs[port] <- token
+    fires <- 0
+    for each node v in V  order by id
+        if v is ready and not busy and fires < maxFires
+            emit onFire(v, tau)
+            v.busy <- tau + v.latency
+            outs <- compute(v.kind, v.inputs)
+            schedule outs on outgoing edges at time v.busy
+            fires <- fires + 1
+    for each node v in V
+        if v.busy <= tau then v.busy <- 0
+\end{verbatim}
+\end{minipage} \\
+\end{longtable}
+}
+
+Псевдокод однієї ітерації ядра симуляції
+\texttt{DataflowRuntime.tick()}. Джерело: розроблено автором.
+
+Ця процедура забезпечує детермінованість (NF5): при фіксованому порядку
+обходу вузлів результат симуляції не залежить від реального часу
+виконання у браузері.
+
+\protect\phantomsection\label{_Toc228121457}{}2.3. Загальна архітектура
+системи
+
+Архітектура симулятора описується на двох рівнях моделі C4~(Brown 2018)
+--- Context і Container, --- доповнених деталізацією структури DFG.
+
+На контекстному рівні система представляється як «чорна скринька», що
+взаємодіє з одним актором --- \emph{користувачем} (студент або
+викладач), --- та двома зовнішніми сутностями: \emph{браузером}
+(runtime-середовище) і \emph{локальним сховищем браузера} (для
+збереження пресетів вхідних сигналів). Застосунок завантажується
+одноразово зі статичного веб-хостингу та надалі працює автономно.
+
+На рівні контейнерів симулятор декомпозується на чотири логічні
+підсистеми, що виконуються у межах одного процесу браузера:
+(1)~\textbf{Simulation Core} (\texttt{DataflowRuntime}, \texttt{scheduler},
+\texttt{math}) --- реалізує псевдокод підрозд.~2.2, зберігає стан графа
+та черг; (2)~\textbf{Graph Generator} --- модуль побудови DFG для
+заданого \(N\) та параметрів затримок; (3)~\textbf{State Store} ---
+централізоване сховище стану, до якого підписуються всі UI-компоненти;
+(4)~\textbf{UI Layer} --- набір React-компонентів: \texttt{GraphView}
+(полотно React~Flow), \texttt{SpectrumView} (діаграма \(|X(k)|\)),
+\texttt{Metrics} (пропускна здатність, затримка, черги),
+\texttt{Controls} (пуск/пауза/швидкість). UI Layer читає стан зі State
+Store та викликає команди; State Store делегує обробку до Simulation
+Core; Simulation Core публікує події (\texttt{onToken}, \texttt{onFire},
+\texttt{onOutput}), на які State Store оновлює відповідні поля; Graph
+Generator викликається один раз при ініціалізації та при кожній зміні
+параметрів.
+
+Детальна структура DFG для \(N=16\) складається з \textbf{56~вузлів} і
+\textbf{64~дуг}, розподілених за п'ятьма ярусами: 16~вузлів
+\texttt{source} (src\(_{0}\ldots\)src\(_{15}\)) генерують токени вхідних
+відліків \(x(n)\); 4~вузли \texttt{dft4} (row-0\ldots row-3) виконують
+рядкові ДПФ (стадія~1); 16~вузлів \texttt{twiddle} (tw-\(r\)-\(k_{1}\))
+множать на поворотні множники (стадія~2); 4~вузли \texttt{dft4}
+(col-0\ldots col-3) виконують стовпцеві ДПФ (стадія~3); 16~вузлів
+\texttt{sink} (snk\(_{0}\ldots\)snk\(_{15}\)) збирають спектральні
+відліки \(X(k)\). Характеристики вузлів і дуг зведено у
+табл.~2.3--2.4.
+
+Таблиця 2.3.
+
+Типи вузлів DFG та їхні характеристики
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1217}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0765}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1270}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1342}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1423}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.3983}}@{}}
+\caption[Типи вузлів DFG та їхні характеристики]{Типи вузлів DFG та
+їхні характеристики}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Тип вузла
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+К-сть
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Вх. портів
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Вих. портів
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Затримка
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Функція
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Тип вузла
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+К-сть
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Вх. портів
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Вих. портів
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Затримка
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Функція
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{source} & 16 & 0 & 1 & --- & Генерація \(x(n)\) \\
+\texttt{dft4} & 8 & 4 & 4 & 400 & 4-точкове ДПФ (метелик radix-4) \\
+\texttt{twiddle} & 16 & 1 & 1 & 200 & Множення на \(W_{16}^{rk_{1}}\) \\
+\texttt{sink} & 16 & 1 & 0 & --- & Збір \(X(k)\) \\
+\multicolumn{2}{@{}>{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1982} + 2\tabcolsep}}{%
+\textbf{Разом: 56 вузлів}} & & & & \\
+\end{longtable}
+
+Таблиця 2.4.
+
+Типи дуг DFG
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1424}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2109}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1435}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1427}}@{}}
+\caption[Типи дуг DFG]{Типи дуг DFG}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+З вузла
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+До вузла
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+К-сть дуг
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Затримка
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+З вузла
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+До вузла
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+К-сть дуг
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Затримка
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{source} & \texttt{dft4} (рядковий) & 16 & 600 \\
+\texttt{dft4} (ряд.) & \texttt{twiddle} & 16 & 600 \\
+\texttt{twiddle} & \texttt{dft4} (стовпц.) & 16 & 600 \\
+\texttt{dft4} (ст.) & \texttt{sink} & 16 & 600 \\
+\multicolumn{2}{@{}>{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3533} + 2\tabcolsep}}{%
+\textbf{Разом: 64 дуги}} & & \\
+\end{longtable}
+
+Критичний шлях у DFG (найдовший шлях від \texttt{source} до
+\texttt{sink} з урахуванням затримок вузлів і дуг) становить:
+
+\[T_{kr} = 400 + 600 + 200 + 600 + 400 = 2200\]
+
+умовних одиниць часу. Послідовний час виконання (при одному активному
+вузлі): \(T_{ps}=8\cdot400+16\cdot200=6400\). Коефіцієнт паралелізму:
+
+\[K_{p} = \frac{T_{ps}}{T_{kr}} = \frac{6400}{2200} \approx 2{,}9,\]
+
+тобто паралельне виконання незалежних вузлів забезпечує майже трикратне
+прискорення порівняно з послідовним обчисленням~(Veen 1986).
+
+\protect\phantomsection\label{_Toc228121462}{}2.4. Структури даних
+
+Інформаційне забезпечення симулятора визначається набором типів даних,
+що є програмними відповідниками формальних об'єктів DFG.
+
+Усі числові значення подаються структурою \texttt{Complex}
+(\(\{re: number,\;im: number\}\)), де \texttt{re} і \texttt{im} ---
+дійсна та уявна частини числа \(z=re+j\cdot im\), збережені у подвійній
+точності IEEE~754 (64~біти, \(\varepsilon_{mach}\approx2.22\cdot10^{-16}\)).
+
+Тип \texttt{Token} є програмним відповідником токена DFG, що
+переміщується по дугам графа. Поля типу наведено у табл.~2.5. Поле
+\texttt{t} визначає момент готовності токена: він стає доступним
+вузлу-приймачу в момент \(t+\text{edge.delay}\). Поле \texttt{originT}
+зберігається незмінним упродовж усього маршруту і використовується для
+вимірювання наскрізної затримки.
+
+Таблиця 2.5.
+
+Поля типу \texttt{Token}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1004}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1146}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4709}}@{}}
+\caption[Поля типу Token]{Поля типу \texttt{Token}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Поле
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Тип
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Призначення
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Поле
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Тип
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Призначення
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{id} & \texttt{string} & Унікальний ідентифікатор токена \\
+\texttt{value} & \texttt{Complex} & Комплексне значення токена \\
+\texttt{t} & \texttt{number} & Логічний час надходження на дугу \\
+\texttt{originT} & \texttt{number} & Час народження у \texttt{source} \\
+\end{longtable}
+
+Тип \texttt{Edge} описує спрямований канал між двома портами вузлів
+(табл.~2.6). Поля \texttt{label} і \texttt{labelValue} використовуються
+для дуг між стадіями~1 і~2, що несуть мітки поворотних множників
+\(W_{16}^{rk_{1}}\).
+
+Таблиця 2.6.
+
+Поля типу \texttt{Edge}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1346}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1495}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.5600}}@{}}
+\caption[Поля типу Edge]{Поля типу \texttt{Edge}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Поле
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Тип
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Призначення
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Поле
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Тип
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Призначення
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{id} & \texttt{string} & Унікальний ідентифікатор дуги \\
+\texttt{from} & \texttt{\{node, port\}} & Вузол і порт-джерело \\
+\texttt{to} & \texttt{\{node, port\}} & Вузол і порт-приймач \\
+\texttt{delay} & \texttt{number} & Затримка доставки токена (600) \\
+\texttt{label} & \texttt{string?} & Мітка на ребрі (\(W_{16}^{rk_{1}}\)) \\
+\texttt{labelValue} & \texttt{Complex?} & Числове значення поворотного
+множника \\
+\end{longtable}
+
+Тип \texttt{NodeSpec} визначає специфікацію вузла DFG, а тип
+\(\texttt{Graph}=\{\texttt{nodes: NodeSpec[]},\,\texttt{edges: Edge[]}\}\)
+--- повний граф обчислювача. Поля \texttt{NodeSpec} наведено у
+табл.~2.7. Для \(N=16\) об'єкт \texttt{Graph} містить 56~специфікацій
+вузлів і 64~дуги. Тип \texttt{NodeKind} є переліковим:
+\texttt{'source'~|~'dft4'~|~'twiddle'~|~'sink'} і використовується як
+ключ у шаблоні Strategy для вибору функції обчислення вузла.
+
+Таблиця 2.7.
+
+Поля типу \texttt{NodeSpec}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1117}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1275}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4959}}@{}}
+\caption[Поля типу NodeSpec]{Поля типу \texttt{NodeSpec}}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Поле
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Тип
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Призначення
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Поле
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Тип
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Призначення
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{id} & \texttt{string} & Ідентифікатор вузла \\
+\texttt{kind} & \texttt{NodeKind} & Тип (source, dft4, twiddle, sink) \\
+\texttt{inPorts} & \texttt{string[]} & Список вхідних портів \\
+\texttt{outPorts} & \texttt{string[]} & Список вихідних портів \\
+\texttt{latency} & \texttt{number} & Тривалість обчислення (400 або 200) \\
+\texttt{params} & \texttt{object?} & Параметри (для twiddle: \(N,k\)) \\
+\end{longtable}
+
+Алгоритм оперує чотирма матрицями даних розміром \(4\times4\):
+
+\[\begin{aligned}
+\mathbf{A}[r][s] &= x(4s+r), & &\text{вхідні дані,} \\
+\mathbf{G}[r][k_{1}] &= DFT4(\mathbf{A}[r][\cdot])[k_{1}], & &\text{після стадії 1,} \\
+\mathbf{H}[r][k_{1}] &= W_{16}^{r\cdot k_{1}}\cdot\mathbf{G}[r][k_{1}], & &\text{після стадії 2,} \\
+X(4k_{1}+k_{2}) &= DFT4(\mathbf{H}[\cdot][k_{1}])[k_{2}]. & &\text{вихідний спектр.}
+\end{aligned}\]
+
+Для контрольної верифікації використано лінійний вхідний сигнал
+\(x(n)=n\), \(n=0\ldots15\). Проміжні значення для першого рядка
+(\(r=0\)) і перших чотирьох спектральних відліків наведено у
+табл.~2.8. Точне значення \(X(0)=\sum_{n=0}^{15}n=120\) підтверджує
+коректність стадії~3; рядок \(\mathbf{H}[0][\cdot]\) збігається з
+\(\mathbf{G}[0][\cdot]\), оскільки \(W_{16}^{0\cdot k_{1}}=1\) для
+всіх~\(k_{1}\).
+
+Таблиця 2.8.
+
+Проміжні значення алгоритму для \(x(n)=n\), рядок \(r=0\)
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2233}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1370}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1733}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1733}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1733}}@{}}
+\caption[Проміжні значення алгоритму]{Проміжні значення алгоритму для
+\(x(n)=n\), рядок \(r=0\)}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Матриця
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Індекс 0
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Індекс 1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Індекс 2
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Індекс 3
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Матриця
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Індекс 0
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Індекс 1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Індекс 2
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Індекс 3
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\(\mathbf{A}[0][\cdot]\) & \(0\) & \(4\) & \(8\) & \(12\) \\
+\(\mathbf{G}[0][\cdot]\) & \(24+0j\) & \(-8+8j\) & \(-8+0j\) & \(-8-8j\) \\
+\(\mathbf{H}[0][\cdot]\) & \(24+0j\) & \(-8+8j\) & \(-8+0j\) & \(-8-8j\) \\
+\(X(k)\), \(k=0\ldots3\) & \(120+0j\) & \(\approx-8+40j\) &
+\(\approx-8+19j\) & \(\approx-8+12j\) \\
+\end{longtable}
+
+\protect\phantomsection\label{_Toc228121469}{}2.5. Механізми обміну
+даними та інтеграції
+
+Оскільки симулятор не має серверної частини, класичні механізми мережевої
+інтеграції (REST API, WebSocket, gRPC) у ньому не застосовуються.
+Координація підсистем реалізується через \emph{внутрішній подійний
+канал} і \emph{реактивне сховище стану}.
+
+Ядро \texttt{DataflowRuntime} публікує три типи подій, що утворюють
+внутрішній API симулятора (табл.~2.9). Події реалізують шаблон
+Publisher/Subscriber: видавець (ядро) не має прямих посилань на
+підписників, а лише передає об'єкт події у список зареєстрованих
+обробників. Це забезпечує ізоляцію бізнес-логіки від UI та дозволяє
+додавати нові підписники (наприклад, експорт event~log у файл) без
+модифікації ядра.
+
+Таблиця 2.9.
+
+Події шини симуляції
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1201}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3574}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.5226}}@{}}
+\caption[Події шини симуляції]{Події шини симуляції}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Подія
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Умова виникнення
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Підписники
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Подія
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Умова виникнення
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Підписники
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{onToken} & Токен надійшов на дугу \(e\in E\) & Heatmap черг,
+Metrics (queue size) \\
+\texttt{onFire} & Активовано вузол \(v\in V\) & Heatmap активності
+вузлів \\
+\texttt{onOutput} & Токен надійшов до \texttt{sink} & SpectrumView,
+Metrics (throughput, latency) \\
+\end{longtable}
+
+Стан симулятора централізований у сховищі \texttt{simStore}, що містить
+чотири групи полів: \emph{стан графа} (\texttt{graph: Graph},
+\texttt{queues: Map<EdgeId, Token[]>},
+\texttt{nodeBusy: Map<NodeId, number>}); \emph{стан виконання}
+(\texttt{status: 'IDLE'|'RUNNING'|'PAUSED'|'DONE'}, \texttt{simTime},
+\texttt{speed}); \emph{метрики} (\texttt{throughputEMA},
+\texttt{latencyEMA}, \texttt{queueSizeEMA},
+\texttt{activity: Map<NodeId, number>}); \emph{результат}
+(\texttt{spectrum: Complex[16]}, \texttt{eventLog: Event[]}). UI-компоненти
+підписуються на окремі поля сховища за допомогою селекторів і
+перемальовуються лише при зміні підписаних полів, що забезпечує стабільні
+60~fps (NF3) навіть при інтенсивному потоці подій.
+
+Для підтримки повторюваних демонстраційних сценаріїв (UC1) передбачено
+механізм пресетів. Пресет --- це JSON-об'єкт, що містить вхідний
+сигнал \(\{x_{n}\}\), значення \texttt{latency} і \texttt{delay} та
+початкову швидкість симуляції. Пресети зберігаються у Local~Storage
+браузера за ключем \texttt{simulator.presets} і завантажуються через
+компонент \texttt{PresetSelector}. Експорт пресету і журналу подій (UC9)
+реалізується стандартним Web~API \texttt{Blob+URL.createObjectURL} без
+передачі на сервер, що відповідає принципу конфіденційності
+(підрозд.~1.4).
+
+\protect\phantomsection\label{_Toc228121473}{}2.6. Інтерфейс
+користувача та взаємодія із системою
+
+Інтерфейс симулятора спроєктовано за принципом \emph{інформаційної
+ієрархії}: найбільша площа екрана відводиться під центральний об'єкт
+дослідження --- граф потоку даних, --- а допоміжні панелі (метрики,
+спектр, керування) розміщуються по периметру, не перекриваючи граф.
+Головний екран розділено на чотири функціональні зони.
+
+\textbf{Центральна зона (GraphView)} --- полотно React~Flow з вузлами та
+анімованими дугами; користувач може перетягувати вузли, змінювати масштаб
+колесом миші та клікати по вузлу для перегляду поточних значень на
+входах/виходах. \textbf{Верхня панель (Controls)} --- кнопки «Пуск»,
+«Пауза», «Крок», «Скидання», повзунок множника швидкості (\(0.1\times\)
+до \(10\times\)), селектор пресету вхідного сигналу і поле редагування
+\texttt{latency}/\texttt{delay}. \textbf{Права панель (SpectrumView +
+Metrics)} --- стовпчикова діаграма \(|X(k)|\) у лінійному або
+логарифмічному масштабі та три числових індикатори (throughput, latency,
+queue size). \textbf{Нижня панель (TerminalOutput)} --- журнал подій у
+реальному часі з фільтрацією за типом та можливістю експорту у файл.
+
+Базовий user-flow для студента (UC3) складається з трьох кроків,
+доступних у межах двох кліків від головного екрана (NF8):
+(1)~вибір пресету вхідного сигналу або введення власних відліків через
+\texttt{InputEditor};
+(2)~натискання кнопки «Пуск» --- ядро починає викликати \texttt{tick()}
+у циклі \texttt{requestAnimationFrame} з кроком \(d\tau=16.67\)~мс
+\(\cdot\)~speed;
+(3)~спостереження за рухом токенів у GraphView, зміною метрик та
+поступовим заповненням SpectrumView. У режимі паузи доступний покроковий
+режим~\emph{Step}: одне натискання ініціює один виклик \texttt{tick()},
+що дозволяє детально дослідити виконання алгоритму.
+
+Для підсилення сприйняття потокової природи алгоритму UI використовує
+три допоміжні візуальні механізми. \textbf{Анімація токенів:} кожен
+токен відображається як кружечок, що переміщується по дузі в інтервалі
+\([t,\,t+\text{delay}]\) з плавною інтерполяцією позиції; числове
+значення (дійсна та уявна частини) виводиться безпосередньо на кружечку.
+\textbf{Теплова карта активності вузлів:} заливка кожного вузла
+модулюється значенням \(a_{i}(\tau)\), що оновлюється за
+експоненціальним законом
+\(a_{i}(\tau+d\tau)=\alpha\cdot a_{i}(\tau)+\Delta a_{i}\), де
+\(\alpha=0{,}92\) і \(\Delta a_{i}=1\) при подіях \texttt{onFire}; вузли,
+що нещодавно часто активувалися, відображаються яскравішими.
+\textbf{Стан busy на вузлах:} поки вузол виконує обчислення
+(\(v.busy>\tau\)), навколо нього відображається кільцевий індикатор
+прогресу, що ілюструє затримку \texttt{latency}.
+
+Загальний вигляд інтерфейсу подано на рис.~2.1.
+
+\protect\phantomsection\label{fig:ui}{}Рис.~2.1. Макет інтерфейсу
+веб-симулятора потокового 16-точкового ШПФ: центральна зона GraphView,
+верхня панель Controls, права панель SpectrumView + Metrics, нижня панель
+TerminalOutput. Джерело: розроблено автором.
+
+\protect\phantomsection\label{_Toc228121478}{}2.7. Висновки до розділу~2
+
+У другому розділі спроєктовано програмне рішення, що відповідає вимогам,
+сформульованим у підрозд.~1.5.
+
+Обрано архітектурний підхід клієнтського SPA без серверної частини, що
+одночасно забезпечує виконання вимог NF2 (відгук \(\leq100\)~мс), NF4
+(портативність Chrome/Firefox/Edge), NF7 (робота без встановлення) і NF5
+(детермінованість). Вибір реактивного рендерингу та централізованого
+сховища стану обґрунтований як компроміс між продуктивністю та
+супроводжуваністю коду. Застосовано шаблони Observer, State, Strategy,
+Factory і Facade; зв'язок між вимогами та рішеннями показано у
+табл.~2.1.
+
+Побудовано математичну модель алгоритму ШПФ radix-4 для \(N=16\) у
+вигляді тристадійної \(4\times4\) декомпозиції, що потребує
+9~нетривіальних комплексних множень і 80~комплексних додавань проти
+256~множень прямого ДПФ. Сформульовано формальну модель потоку даних із
+правилом активації та часовою семантикою, подано псевдокод планувальника.
+
+Спроєктовано архітектуру системи на рівнях C4 Context і Container з
+декомпозицією на чотири підсистеми (Simulation Core, Graph Generator,
+State Store, UI Layer). Деталізовано граф обчислювача: 56~вузлів
+чотирьох типів і 64~дуги з затримкою 600~одиниць, критичним шляхом
+\(T_{kr}=2200\) і коефіцієнтом паралелізму \(K_{p}\approx2{,}9\).
+
+Визначено структури даних \texttt{Token}, \texttt{Edge}, \texttt{NodeSpec},
+\texttt{Graph} --- програмні відповідники формальних об'єктів DFG;
+комплексні числа подаються у форматі IEEE~754 double, що гарантує запас
+точності відносно \(\varepsilon=10^{-9}\) (NF1). Обрано механізми обміну
+даними: внутрішня шина подій (\texttt{onToken}, \texttt{onFire},
+\texttt{onOutput}) для ізоляції UI від ядра, реактивне сховище та
+пресети у Local~Storage для повторюваних сценаріїв. Спроєктовано
+інтерфейс з інформаційною ієрархією, трьома візуальними механізмами
+відображення потокової природи алгоритму та базовим user-flow у межах
+двох кліків (NF8).
+
+Описані проєктні рішення утворюють повне технічне завдання для
+реалізації, що подається у розділі~3.

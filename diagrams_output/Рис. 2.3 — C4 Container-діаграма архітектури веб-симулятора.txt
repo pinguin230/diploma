@@ -1,0 +1,26 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title Рис. 2.3 — C4 Container-діаграма архітектури веб-симулятора
+
+Person(user, "Користувач", "Студент / викладач")
+
+System_Boundary(spa, "Веб-симулятор потокового ШПФ (SPA у браузері)") {
+  Container(ui, "UI Layer", "React 18, React Flow 12", "GraphView, SpectrumView, Metrics, Controls, TerminalOutput — реактивні компоненти")
+  Container(store, "State Store", "Zustand (simStore.ts)", "Єдине джерело істини: стан графа, виконання, метрики; селектори; пресети")
+  Container(core, "Simulation Core", "TypeScript (scheduler.ts, buffers.ts)", "DataflowRuntime.tick(): доставка токенів, правило активації, FIFO-черги на дугах")
+  Container(gen, "Graph Generator", "TypeScript (generateDFT4x4.ts, layout4x4.ts)", "Побудова DFG: 56 вузлів, 64 дуги та їхні координати")
+}
+
+ContainerDb(storage, "Local Storage", "Web Storage API", "Пресети сигналів, параметри latency / delay")
+
+Rel(user, ui, "Команди Run / Pause / Step / Reset", "події UI")
+Rel(ui, store, "dispatch-дії; читання через селектори", "хук useSimStore")
+Rel(store, core, "start / tick(dt) / reset / configure")
+Rel_U(core, store, "onToken, onBeforeFire, onFire, onOutput", "шина подій")
+Rel(gen, store, "setGraph(Graph): 56 вузлів, 64 дуги")
+Rel(store, ui, "Реактивне оновлення стану", "перемалювання ~60 fps")
+Rel(store, storage, "Збереження / читання пресетів", "JSON")
+
+LAYOUT_WITH_LEGEND()
+@enduml
