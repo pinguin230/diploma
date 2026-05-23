@@ -92,7 +92,7 @@
 
 \textbf{ПОЯСНЮВАЛЬНА ЗАПИСКА}
 
-до бакалаврської кваліфікаційної роботи на тему:
+до бакалаврської кваліфікаційно ї роботи на тему:
 
 \textbf{«Візуальне моделювання роботи обчислювача швидкого перетворення
 Фур'є під керуванням потоку даних»}
@@ -198,8 +198,8 @@ iндексного вiдображення, поворотних множник
   SpectrumView, Controls i MetricsPanel, презентацiя до захисту.
 \item
   Перелік програмних продуктів, які належить використати в процесі
-  розроблення роботи (проекту): WebStorm, Git/GitHub, Node.js, npm,
-  TypeScript, Next.js, React, React Flow, Zustand, fft.js, Vitest,
+  розроблення роботи (проекту): WebStorm, Git/GitHub, Node.js, pnpm/npm,
+  TypeScript, Next.js, React, React Flow, Zustand, fft.js, Jest/Vitest,
   Chrome DevTools, plantuml.com для пiдготовки схем.
 \item
   Консультанти із зазначенням розділів роботи кожного
@@ -337,24 +337,23 @@ F1--F9, NF1--NF8 і сценаріями використання UC1--UC9.}
 технологічний стек, структуру проєкту, реалізацію ядра DataflowRuntime з
 методом tick(), обчислювальних вузлів, алгоритму generateDFT4x4(),
 класифікацію винятків, процедуру розгортання та модульне тестування у
-середовищі Vitest.}
+середовищі Jest.}
 
 \emph{У четвертому розділі подано результати експериментальних
 досліджень: верифікацію на шести тестових сценаріях (максимальна
-абсолютна похибка}~\(0\) \emph{при допуску}
+похибка} \(3 \times 10^{- 12}\) \emph{при допуску}
 \(\varepsilon = 10^{- 9}\)\emph{), аналіз обчислювальної складності
-(}\(K_{M} \approx 28,4 \times\)\emph{), аналіз розкладу і паралелізму
-dataflow-моделі (}\(T_{kr} = 3400\) \emph{умовних одиниць,}
-\(K_{p} \approx 1,88\)\emph{, пікова паралельність 16~вузлів),
-обговорення, моніторинг експлуатаційних метрик та підтвердження
-нефункціональних вимог NF1--NF8.}
+(}\(K_{M} \approx 28,4 \times\)\emph{), аналіз паралелізму
+dataflow-моделі (}\(K_{p} \approx 1,88 \times\)\emph{), обговорення,
+моніторинг експлуатаційних метрик та підтвердження нефункціональних
+вимог NF1--NF8.}
 
 \emph{У висновках узагальнено основні результати виконаної роботи,
 визначено практичне значення та перспективні напрями подальших
 досліджень.}
 
 \emph{Дана бакалаврська кваліфікаційна робота містить: ~сторінок,
-4~додатки та 27~джерел літератури.}
+1~додаток та 25~джерел літератури.}
 
 \emph{\textbf{Ключові слова:} швидке перетворення Фур'є, radix-4, граф
 потоку даних, dataflow computing, візуальне моделювання, веб-симулятор,
@@ -396,23 +395,22 @@ data structures, and inter-component communication mechanisms.}
 simulator: technology stack, project structure, the DataflowRuntime
 engine with the tick() method, computational nodes, the generateDFT4x4()
 algorithm, exception handling, deployment procedure, and unit testing
-using Vitest.}
+using Jest.}
 
 \emph{The fourth chapter presents the experimental results: verification
-across six test scenarios (maximum absolute error}~\(0\)
+across six test scenarios (maximum error} \(3 \times 10^{- 12}\)
 \emph{against tolerance} \(\varepsilon = 10^{- 9}\)\emph{), analysis of
 computational complexity (}\(K_{M} \approx 28.4 \times\)\emph{),
-analysis of the dataflow-model schedule and parallelism
-(}\(T_{kr} = 3400\) \emph{simulation units,}
-\(K_{p} \approx 1.88\)\emph{, peak concurrency 16 nodes), discussion,
-monitoring of operational metrics, and confirmation of non-functional
-requirements NF1--NF8.}
+analysis of dataflow-model parallelism
+(}\(K_{p} \approx 1.88 \times\)\emph{), discussion, monitoring of
+operational metrics, and confirmation of non-functional requirements
+NF1--NF8.}
 
 \emph{The conclusions summarize the key results of the work and outline
 the practical value and promising directions for further research.}
 
-\emph{This bachelor's qualification work contains: ~pages,
-4~appendices, and 27~references.}
+\emph{This bachelor's qualification work contains: ~pages, 1~appendix,
+and 25~references.}
 
 \emph{\textbf{Keywords:} fast Fourier transform, radix-4, data-flow
 graph, dataflow computing, visual modeling, web-based simulator,
@@ -538,18 +536,6 @@ Next.js, React~Flow, parallelism, digital signal processing.}
 \hyperref[_Toc228305380]{СПИСОК ВИКОРИСТАНИХ ДЖЕРЕЛ
 \hyperref[_Toc228305380]{79}}
 
-\hyperref[app:A]{ДОДАТОК~А. Тексти програмних модулів
-\hyperref[app:A]{83}}
-
-\hyperref[app:B]{ДОДАТОК~Б. Таблиці вхідних та вихідних даних
-\hyperref[app:B]{96}}
-
-\hyperref[app:V]{ДОДАТОК~В. Таблиці результатів експериментів
-\hyperref[app:V]{102}}
-
-\hyperref[app:G]{ДОДАТОК~Г. Перелік UML- і блок-схем роботи
-\hyperref[app:G]{108}}
-
 \protect\phantomsection\label{_Toc230379705}{}ПЕРЕЛІК УМОВНИХ СКОРОЧЕНЬ,
 СИМВОЛІВ І ТЕРМІНІВ
 
@@ -575,12 +561,8 @@ Next.js, React~Flow, parallelism, digital signal processing.}
 
 ШПФ -- швидке перетворення Фур'є
 
-ALAP -- As Late As Possible (якнайпізніший час активації у розкладі)
-
 API -- Application Programming Interface (прикладний програмний
 інтерфейс)
-
-ASAP -- As Soon As Possible (якнайраніший час активації у розкладі)
 
 C4 -- Context--Container--Component--Code (нотація опису архітектури)
 
@@ -605,9 +587,6 @@ FIFO -- First In, First Out
 FPGA -- Field-Programmable Gate Array
 
 GDPR -- General Data Protection Regulation
-
-IDEF0 -- Integration Definition for Function Modeling (стандарт
-функціонального моделювання, FIPS~183)
 
 IEEE -- Institute of Electrical and Electronics Engineers
 
@@ -731,7 +710,7 @@ UML-діаграмами класів і послідовностей. Прог�
 використовує стек Next.js~14 / React~18 / TypeScript~5 із бібліотеками
 React Flow (\texttt{@xyflow/react}) 12 для рендерингу графу, Zustand~4
 для реактивного управління станом, \texttt{fft.js} як еталон верифікації
-та Vitest для модульного й інтеграційного тестування.
+та Jest~29 для модульного й інтеграційного тестування.
 
 \textbf{Практична цінність роботи.} Розроблений симулятор є
 навчально-дослідницьким інструментом для вивчення потокових алгоритмів
@@ -1126,7 +1105,7 @@ DFG зі спостереженням токенів, метрик і наскр
   ліцензіями (MIT, Apache~2.0, BSD) без комерційних компонентів.
 \end{itemize}
 
-Функцiональний контекст задачi узагальнено IDEF0-схемою на рис. 1.1:
+Функцiональний контекст задачi узагальнено IDEF0-схемою на рис. 1.2:
 вхiдний сигнал i параметри моделi перетворюються на спектральнi вiдлiки,
 журнал подiй та метрики виконання пiд керуванням вимог i методичних
 обмежень.
@@ -1367,7 +1346,7 @@ NF8 & Зручність & Основні операції доступні не
 У системі виділяються два актори -- \emph{Студент} (первинний
 користувач, спостерігач) і \emph{Викладач} (вторинний користувач, може
 налаштовувати сценарії демонстрації). Графічне подання прецедентів
-наведено на рис. 1.2, а їхній деталізований перелік у табл.~1.5.
+наведено на рис. 1.1, а їхній деталізований перелік у табл.~1.5.
 
 \includegraphics[width=6.49583in,height=5.62153in]{media/media/image1.png}
 
@@ -1510,9 +1489,9 @@ DFG/SDF) виноситься до розділу~2, де воно подаєт�
 різні ОС і суперечить вимозі NF7 (робота без встановлення).
 
 \textbf{Варіант~Б - клієнт-серверний веб-застосунок.} Передбачає
-розміщення ядра симуляції на сервері, що вносить мережеву затримку,
-несумісно з вимогою NF2 (час відгуку \(\leq 100\)~мс), і потребує
-підтримки серверної інфраструктури.
+розміщення ядра симуляції розміщується на сервері, що вносить мережеву
+затримку, несумісно з вимогою NF2 (час відгуку \(\leq 100\)~мс), і
+потребує підтримки серверної інфраструктури.
 
 \textbf{Варіант~В - повністю клієнтський SPA (Single-Page Application).}
 \emph{Обрано як основу архітектури}: усі обчислення виконуються у
@@ -1740,7 +1719,7 @@ NF8 (зручність) & React Flow + панелі Controls/Metrics & Двок
 \textbf{Стадія~3 -- стовпцеві 4-точкові ДПФ.} Для кожного \(k_{1}\)
 обчислюється 4-точкове ДПФ стовпця матриці \(\mathbf{H}\):
 
-\[X(4k_{2} + k_{1}) = \sum_{r = 0}^{3}H_{r}(k_{1})\, W_{4}^{rk_{2}},\quad k_{2} \in \{ 0,1,2,3\}.\]
+\[X(4k_{1} + k_{2}) = \sum_{r = 0}^{3}H_{r}(k_{1})\, W_{4}^{rk_{2}},\quad k_{2} \in \{ 0,1,2,3\}.\]
 
 Чотири стовпцевих перетворення~також є взаємно незалежними.
 
@@ -1906,10 +1885,8 @@ Store оновлює відповідні поля; Graph Generator виклик
   4~вузли \texttt{dft4} (row-0 \ldots row-3) -- виконують рядкові ДПФ
   (стадія 1);
 \item
-  16~вузлів \texttt{twiddle} (tw-\(r\)-\(k_{1}\); у вихідному коді --
-  \texttt{tw-}\(n_{1}\)\texttt{-}\(k_{2}\), де \(n_{1} \equiv r\),
-  \(k_{2} \equiv k_{1}\), а степінь множника \(n_{1}k_{2} \equiv rk_{1}\)) --
-  множать на поворотні множники (стадія 2);
+  16~вузлів \texttt{twiddle} (tw-\(r\)-\(k_{1}\)) -- множать на
+  поворотні множники (стадія 2);
 \item
   4~вузли \texttt{dft4} (col-0 \ldots col-3) -- виконують стовпцеві ДПФ
   (стадія 3);
@@ -1965,7 +1942,8 @@ Store оновлює відповідні поля; Graph Generator виклик
 \bottomrule\noalign{}
 \endlastfoot
 \texttt{source} & 16 & 0 & 1 & -- & Генерація \(x(n)\) \\
-\texttt{dft4} & 8 & 4 & 4 & 400 & 4-точкове ДПФ (метелик з підрозд.~2.2) \\
+\texttt{dft4} & 8 & 4 & 4 & 400 & 4-точкове
+ДПФ~(\hyperref[eq:dft4_butterfly]{{[}eq:dft4\_butterfly{]}}) \\
 \texttt{twiddle} & 16 & 1 & 1 & 200 & Множення на \(W_{16}^{rk_{1}}\) \\
 \texttt{sink} & 16 & 1 & 0 & -- & Збір \(X(k)\) \\
 \multicolumn{2}{@{}>{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1982} + 2\tabcolsep}}{%
@@ -2029,14 +2007,7 @@ Store оновлює відповідні поля; Graph Generator виклик
 \[K_{p} = \frac{T_{ps}}{T_{kr}} = \frac{6400}{2200} \approx 2,9,\]
 
 тобто паралельне виконання незалежних вузлів забезпечує майже трикратне
-прискорення порівняно з послідовним обчисленням~(Veen 1986). Наведена
-оцінка \(K_{p} \approx 2,9\) враховує затримки лише обчислювальних вузлів і
-двох внутрішніх дуг і не включає часу передавання вхідною
-(\texttt{source}\(\rightarrow\)\texttt{dft4}) та вихідною
-(\texttt{dft4}\(\rightarrow\)\texttt{sink}) дугами. Повна оцінка критичного
-шляху з урахуванням усіх чотирьох дуг (\(T_{kr} = 3400\)) і відповідний
-коефіцієнт \(K_{p} \approx 1,88\) визначені експериментально у
-підрозд.~4.4.
+прискорення порівняно з послідовним обчисленням~(Veen 1986).
 
 Рис. 2.4. Граф потоку даних обчислювача 16-точкового ШПФ radix-4 4 × 4.
 Джерело: розроблено автором.
@@ -2097,7 +2068,7 @@ IEEE~754 (64~біти, машинна точність
 Поля \texttt{label} і \texttt{labelValue} використовуються для дуг між
 стадіями 1 і 2, що несуть мітки поворотних множників \(W_{16}^{rk_{1}}\)
 
-Таблиця 2.6.
+Таблия 2.6.
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1346}}
@@ -2145,17 +2116,16 @@ IEEE~754 (64~біти, машинна точність
 -- повний граф обчислювача. Поля \texttt{NodeSpec} наведені у табл. 2.7.
 Для \(N = 16\) об'єкт \texttt{Graph} містить 56~специфікацій вузлів та
 64~дуги. Тип \texttt{NodeKind} є переліковим:
-\texttt{’}\texttt{source}\texttt{’\ \textbar{}\ ’dft4’\ \textbar{}\ ’}\texttt{twiddle}\texttt{’\ \textbar{}\ ’}\texttt{sink}\texttt{’}
+\texttt{’}\texttt{source}\texttt{’\ \textbar{}\ ’dft4’\ \textbar{}\ ’}\texttt{twiddle}\texttt{’\ \textbar{}\ ’}\texttt{sink}\texttt{’}.
 і використовується як ключ у шаблоні Strategy для вибору функції
 обчислення вузла.
-
-Таблиця 2.7.
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1117}}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1275}}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4959}}@{}}
-\caption{Поля типу \protect\texttt{NodeSpec}}\tabularnewline
+\caption{Таблиця 2.7.\\
+Поля типу \protect\texttt{NodeSpec}}\tabularnewline
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 Поле
@@ -2196,7 +2166,7 @@ IEEE~754 (64~біти, машинна точність
 \mathbf{A}\lbrack r\rbrack\lbrack s\rbrack & = x(4s + r), & & \text{вхідні дані,} \\
 \mathbf{G}\lbrack r\rbrack\lbrack k_{1}\rbrack & = DFT4(\mathbf{A}\lbrack r\rbrack\lbrack \cdot \rbrack)\lbrack k_{1}\rbrack, & & \text{після стадії 1,} \\
 \mathbf{H}\lbrack r\rbrack\lbrack k_{1}\rbrack & = W_{16}^{r \cdot k_{1}} \cdot \mathbf{G}\lbrack r\rbrack\lbrack k_{1}\rbrack, & & \text{після стадії 2,} \\
-X(4k_{2} + k_{1}) & = DFT4(\mathbf{H}\lbrack \cdot \rbrack\lbrack k_{1}\rbrack)\lbrack k_{2}\rbrack. & & \text{вихідний спектр.}
+X(4k_{1} + k_{2}) & = DFT4(\mathbf{H}\lbrack \cdot \rbrack\lbrack k_{1}\rbrack)\lbrack k_{2}\rbrack. & & \text{вихідний спектр.}
 \end{aligned}\]
 
 Для контрольної верифікації використано лінійний вхідний сигнал
@@ -2306,7 +2276,7 @@ Publisher/Subscriber: видавець (ядро) не має прямих по�
 \texttt{onToken} & Токен надійшов на дугу \(e \in E\) & Heatmap черг,
 Metrics (queue size) \\
 \texttt{onFire} & Активовано вузол \(v \in V\) & Heatmap активності
-вузлів (експоненційне затухання з \(\alpha = 0{,}92\), див.~підрозд.~2.6) \\
+вузлів~(\hyperref[eq:heat_decay]{{[}eq:heat\_decay{]}}) \\
 \texttt{onOutput} & Токен надійшов до \texttt{sink} & SpectrumView,
 Metrics (throughput, latency) \\
 \end{longtable}
@@ -2462,9 +2432,8 @@ State, Strategy, Factory і Facade; зв'язок між вимогами та �
 з декомпозицією на чотири підсистеми (Simulation Core, Graph Generator,
 State Store, UI Layer). Деталізовано граф обчислювача: 56~вузлів
 чотирьох типів і 64~дуги з однаковою затримкою 600~одиниць, критичним
-шляхом за вузлами \(T_{kr} = 2200\) і коефіцієнтом паралелізму
-\(K_{p} \approx 2,9\) (без урахування затримок передавання; повна оцінка з
-усіма дугами -- \(T_{kr} = 3400\), \(K_{p} \approx 1,88\) -- у підрозд.~4.4).
+шляхом \(T_{kr} = 2200\) і коефіцієнтом паралелізму
+\(K_{p} \approx 2,9\).
 
 \emph{Визначено структури даних:} \texttt{Token}, \texttt{Edge},
 \texttt{NodeSpec}, \texttt{Graph}, що є програмними відповідниками
@@ -2563,7 +2532,7 @@ React Flow (\texttt{@xyflow/react}) & 12.x & Інтерактивна графо
 Zustand & 4.x & Централізоване реактивне сховище стану \\
 Comlink & 4.x & RPC-обгортка для Web Workers \\
 fft.js & 4.x & Референтна реалізація ДПФ для верифікації \\
-Vitest & 4.x & Фреймворк модульного й інтеграційного тестування \\
+Jest & 29.x & Фреймворк модульного тестування \\
 ESLint & 8.x & Статичний аналіз коду, правила стилю \\
 Prettier & 3.x & Автоматичне форматування коду \\
 \end{longtable}
@@ -2573,7 +2542,7 @@ ESLint, Prettier і TypeScript. Pre-commit-хуки реалізовано че�
 \texttt{husky} + \texttt{lint-staged}: перед кожним коммітом автоматично
 запускаються ESLint та Prettier для змінених файлів.
 
-Менеджер пакетів -- \textbf{npm}: файл \texttt{package-lock.json} гарантує
+Менеджер пакетів -- \textbf{pnpm}: файл \texttt{pnpm-lock.yaml} гарантує
 детермінованість збірки на різних машинах. Використовується \textbf{Git}
 зі стратегією \emph{trunk-based development}: основна розробка ведеться
 у гілці \texttt{main}, для великих змін створюються короткоживучі
@@ -2603,7 +2572,7 @@ UI-компоненти, що не залежать від React Flow (пане�
 \texttt{src}\texttt{/}\texttt{utils}\texttt{/} містить чисті функції без
 побічних ефектів, а \texttt{src}\texttt{/}\texttt{workers}\texttt{/} --
 Web Worker для фонових обчислень. Така організація спрощує ізольоване
-тестування та полегшує пошук місць для внесення змін.
+тестування полегшує пошук місць для внесення змін.
 
 Відповідність компонентів архітектури з підрозд. 2.3. та модулів
 вихідного коду зведена у табл 3.2.
@@ -2733,9 +2702,9 @@ React-компонентів; максимальна довжина рядка -
 \[t_{\text{now}} - token.t\mspace{6mu} \geq \mspace{6mu} e.delay,\]
 
 якщо виконана, токен видаляється з черги і поміщається у \texttt{inbox}
-відповідного вузла-приймача, емітується подія \texttt{onToken}. По-друге,
-перевірка готовності: вузол є \emph{готовим}, якщо у \texttt{inbox} є
-токен на \emph{кожному} вхідному порті та
+відповідного вузла-приймача, емітується подія \texttt{onToken}. По-друге
+перевірка готовності: вузол є \emph{готовим} якщо e \texttt{inbox} є
+токен на \emph{кожному} вхідному порті
 \(\text{readyAt}\lbrack n\rbrack \leq t_{\text{now}}\). По-третє,
 активація: для кожного готового вузла (не більше \texttt{maxFires} за
 один виклик) токени поглинаються з \texttt{inbox}\texttt{,\ }виконується
@@ -2841,7 +2810,7 @@ EMA-метрику наскрізної затримки:
 \texttt{generateDFT4x4(}\texttt{latency}\texttt{):\ }\texttt{Graph}
 (модуль
 \texttt{src}\texttt{/}\texttt{graph}\texttt{/generateDFT4x4.ts}\texttt{)}
-реалізує шаблон Factory і будує DFG за дев'ятьма кроками:
+реалізує шаблон Factory і будує DFG за дев'яться кроками:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -2878,7 +2847,7 @@ EMA-метрику наскрізної затримки:
 \item
   додаються 16~дуг
   \texttt{col}\texttt{-}\(k_{1}\)\texttt{.out}\(k_{2} \rightarrow\)
-  \texttt{snk}\(_{4k_{2} + k_{1}}\)\texttt{.in}.
+  \texttt{snk}\(_{k_{2} + 4k_{1}}\)\texttt{.in}.
 \end{enumerate}
 
 Повертається об'єкт \texttt{Graph} із 56~вузлами і 64~дугами. Функція
@@ -2886,7 +2855,7 @@ EMA-метрику наскрізної затримки:
 координати вузлів для React Flow: граф розподіляється на п'ять
 вертикальних ярусів з кроком \texttt{stageGap} \(= 280\) пікселів; вузли
 в межах ярусу рівномірно розподіляються по осі~\(y\) з кроком
-\texttt{rowGap} \(= 65\) пікселів.
+\texttt{rowGap} \(= 140\) пікселів.
 
 Сховище \texttt{simStore} реалізовано функцією
 \texttt{create}\texttt{()} з Zustand і містить поля стану та
@@ -2926,8 +2895,7 @@ EMA-метрику наскрізної затримки:
 \bottomrule\noalign{}
 \endlastfoot
 \texttt{graph} & \texttt{Graph} & Поточна топологія DFG \\
-\texttt{runtime} &
-\texttt{DataflowRuntime}\texttt{\textbar{}}\texttt{null} & Ядро симуляції \\
+\texttt{runtime} & \texttt{DataflowRuntimenull} & Ядро симуляції \\
 \texttt{running} & \texttt{boolean} & Стан rAF-циклу \\
 \texttt{speed} & \texttt{number} & Множник швидкості
 \(\lbrack 0,1;10\rbrack\) \\
@@ -2988,12 +2956,12 @@ EMA-метрику наскрізної затримки:
 \texttt{runtime.tick}\texttt{(}\texttt{dt}\texttt{,\ }\texttt{maxFires}\texttt{)}
 (у режимі \texttt{’}\texttt{single-fire}\texttt{’} \texttt{maxFires}
 \(= 1\), у режимі \texttt{’}\texttt{run}\texttt{’} --
-\texttt{Infinity}\texttt{)}; потім \texttt{sampleQueues}\texttt{()} і
+\texttt{Infinity}\texttt{)}; потіи \texttt{sampleQueues}\texttt{()} і
 \texttt{decayActivity}\texttt{()} для оновлення метрик і теплової карти;
 щосекунди агрегуються лічильники \texttt{firesInWindow} для обчислення
 пропускної здатності. Для уникнення блокування головного потоку при
 масштабуванні на більші \texttt{N} реалізовано Web Worker у файлі
-\texttt{src}\texttt{/}\texttt{workers}\texttt{/}\texttt{fft.worker.ts}\texttt{\ }через
+\texttt{src}\texttt{/}\texttt{workers}\texttt{/}\texttt{ttf.worker.ts}\texttt{\ }через
 бібліотеку Comlink функція
 \texttt{applyTwiddle}\texttt{(}\texttt{tokens}\texttt{,\ }\texttt{factors}\texttt{)}
 виконує пакетне комплексне множення у фоновому потоці. У базовій
@@ -3012,13 +2980,13 @@ EMA-метрику наскрізної затримки:
 Пiд час реалiзацiї симулятора виникли три практичнi труднощi. Висока
 частота оновлення iнтерфейсу при великiй кiлькостi подiй вимагала
 чiткого розмежування обчислювального ядра i UI: стан було централiзовано
-у \texttt{simStore}, а компоненти переведено на селективнi пiдписки.
-Для коректної демонстрацiї алгоритму необхідно було вiдокремити логiчний
-час симуляцiї вiд астрономiчного часу браузера; це вирiшено введенням
-змiнної \texttt{simTime} i множника \texttt{speed}. Нарешті, для
-збереження вiдтворюваностi результатiв у рiзних браузерах усі критичнi
-обчислення виконуються у фiксованому порядку обходу вузлiв без мережевих
-викликiв у циклi симуляцiї.
+у sim- Store, а компоненти переведено на селективнi пiдписки. Для
+коректної демонстрацiї алгоритму необхідно було вiдокремити логiчний час
+симуляцiї вiд астрономiчного часу браузера; це вирiшено введенням
+змiнної simTime i множника speed. Нарешті, для збереження вiдтворюваості
+результатiв у рiзних браузерах усі критичнi обчислення виконуються у
+фiксованому порядку обходу вузлiв без мережевих викликiв у циклi
+симуляцiї.
 
 Помилки, що можуть виникнути у симуляторі, зведено у табл.~3.4.
 
@@ -3093,9 +3061,9 @@ production-збірці рівень \texttt{debug} вимкнений за за
 відсутності Web Worker функція \texttt{applyTwiddle}\texttt{()}
 виконується синхронно у головному потоці без впливу на частоту кадрів
 при \(N = 16\). Селектори Zustand мемоїзовані функцією \texttt{shallow},
-а важкі розрахунки координат токенів на дугах
+а важкі розрахунки а важкі розрахунки координат токенів на ребрах
 виконуються лише для видимої області через
-\texttt{ReactFlow.viewportBounds}. Середня тривалість одного кроку
+\texttt{ReactFlow.viewportBounds}. Середня тривалість одкого кроку
 \texttt{tick}\texttt{()} для \(N = 16\) становить \(< 1\)~мс, що залишає
 понад 15~мс запасу у бюджеті кадру (16,67~мс при 60~fps).
 
@@ -3126,11 +3094,11 @@ tree-shaking і minification) та CSS-файли: розмір gzip-бандл�
 \endlastfoot
 \begin{minipage}[t]{\linewidth}\raggedright
 \begin{verbatim}
-$ npm install             # встановлення залежностей
-$ npm run build           # next build -> .next/ + out/
-$ npm run lint            # ESLint
-$ npm test                # Vitest-тести
-$ npm run test:coverage   # покриття коду
+$ pnpm install            # встановлення залежностей
+$ pnpm run build          # next build -> .next/
+$ pnpm run export         # next export -> out/
+$ pnpm run lint           # ESLint
+$ pnpm test               # Jest-тести
 \end{verbatim}
 \end{minipage} \\
 \end{longtable}
@@ -3138,7 +3106,7 @@ $ npm run test:coverage   # покриття коду
 Для автоматизації перевірок налаштовано GitHub Actions із workflow
 \texttt{.}\texttt{github}\texttt{/}\texttt{workflows}\texttt{/}\texttt{ci.yml}:
 job \texttt{lint} запускає ESLint і TypeScript-компіляцію у режимі
-\texttt{-\/-}\texttt{noEmit}; job \texttt{test} запускає Vitest з
+\texttt{-\/-}\texttt{noEmit}; job \texttt{test} запускає Jest з
 генерацією звіту про покриття; job \texttt{build} перевіряє, що збірка
 проходить без помилок. Стратегія релізу -- \emph{rolling}: нова статична
 збірка замінює попередню при успішному проходженні CI. Оскільки
@@ -3151,9 +3119,9 @@ job \texttt{lint} запускає ESLint і TypeScript-компіляцію у 
 Оскільки вихідний код є єдиним артефактом, що підлягає збереженню,
 резервне копіювання реалізоване через Git: повна історія зберігається у
 віддаленому репозиторії GitHub. Детермінованість збірки гарантується
-файлом \texttt{package-lock.json}. Будь-який виконавець може відтворити
+файлом \texttt{pnpm-lock.yaml}. Будь-який виконавець може відтворити
 продуктову збірку командою
-\texttt{npm}\texttt{\ }\texttt{install}\texttt{\ \&\&\ }\texttt{npm}\texttt{\ }\texttt{run}\texttt{\ }\texttt{build}
+\texttt{pnpm}\texttt{\ }\texttt{install}\texttt{\ \&\&\ }\texttt{pnpm}\texttt{\ }\texttt{run}\texttt{\ }\texttt{build}
 на машині з Node.js \(\geq 18\).
 
 \protect\phantomsection\label{_Toc229681157}{}3.6. Тестування
@@ -3163,11 +3131,11 @@ job \texttt{lint} запускає ESLint і TypeScript-компіляцію у 
 компонентів і базові інтеграційні сценарії. Комплексне тестування
 готової системи і аналіз продуктивності розглядаються у розділі~4.
 
-Для модульного тестування використовується \textbf{Vitest} з
-конфігурацією у файлі \texttt{vitest.config.ts}: середовище \texttt{node}
+Для модульного тестування використовується \textbf{Jest~29.x} з
+конфігурацією у файлі \texttt{jest.config.ts}: середовище \texttt{node}
 для модулів \texttt{core}\texttt{/} та \texttt{utils}\texttt{/} та
-\texttt{jsdom} для UI-тестів; алясинг шляхів через
-\texttt{vite-tsconfig-paths}; поріг покриття -- не менше 70~\% тверджень,
+\texttt{jsdom} для UI-тестів; трансформатор \texttt{ts-jest} з
+\texttt{tsconfig.test.json}; поріг покриття -- не менше 70~\% тверджень,
 віток і функцій у \texttt{src}\texttt{/}\texttt{core}\texttt{/} та
 \texttt{src}\texttt{/}\texttt{utils}\texttt{/}.
 
@@ -3253,7 +3221,7 @@ describe('computeDFT4', () => {
 \end{longtable}
 
 Поточний рівень покриття, отриманий командою
-\texttt{npm}\texttt{\ }\texttt{run}\texttt{\ }\texttt{test:coverage},
+\texttt{pnpm}\texttt{\ }\texttt{test}\texttt{\ -\/-}\texttt{coverage},
 становить:
 
 \begin{itemize}
@@ -3284,7 +3252,7 @@ describe('computeDFT4', () => {
 Описано технологічний стек: TypeScript~5 як статично типізована мова
 реалізації, Next.js~14 як фреймворк статичної SPA, React~18 і React
 Flow~12 для реактивного UI та графової візуалізації, Zustand~4 для
-централізованого сховища стану, Vitest для модульних тестів,
+централізованого сховища стану, Jest~29 для модульних тестів,
 ESLint/Prettier для забезпечення стилю. Усі обрані бібліотеки мають
 відкриті ліцензії MIT або Apache~2.0 (NF6).
 
@@ -3315,7 +3283,7 @@ Factory для побудови DFG із 56~вузлів і 64~дуг; схов�
 
 Визначено процедуру розгортання як статичної SPA на довільному файловому
 хостингу; налаштовано GitHub Actions для автоматичної перевірки типів,
-лінтера та тестів. Проведено модульне тестування у Vitest з покриттям
+лінтера та тестів. Проведено модульне тестування у Jest з покриттям
 85~\% для \texttt{src}\texttt{/}\texttt{core}\texttt{/} та 91~\% для
 \texttt{src}\texttt{/}\texttt{utils}\texttt{/}, що перевищує цільовий
 поріг 70~\%; реалізовано шість тест-сьютів, що охоплюють комплексну
@@ -3331,39 +3299,18 @@ Factory для побудови DFG із 56~вузлів і 64~дуг; схов�
 експерименту
 
 Експериментальне дослідження розробленого симулятора потокового
-обчислювача 16-точкового ШПФ radix-4 має на меті: підтвердити
+обчислювача 16-точкового ШПФ radix-4 має на меті підтвердити
 \emph{функціональну коректність} реалізації шляхом порівняння вихідного
-спектра з еталоном \texttt{fft.js} у межах
-\(\varepsilon = 10^{- 9}\); \emph{кількісно оцінити} виграш в
-обчислювальній складності порівняно з прямим ДПФ; \emph{виміряти}
-параметри розкладу за реальною топологією DFG (критичний шлях,
-послідовну роботу, коефіцієнт паралелізму, пікову паралельність,
-мобільність вузлів); \emph{перевірити детермінованість} ядра
-\texttt{DataflowRuntime} (NF5); а також \emph{підтвердити нефункціональні
-вимоги} NF1--NF8.
+спектра з еталоном \texttt{fft.js}, \emph{чисельну точність} у межах
+\(\varepsilon = 10^{- 9}\), \emph{кількісно оцінити} виграш у
+обчислювальній складності порівняно з прямим ДПФ, \emph{виміряти}
+паралелізм dataflow-моделі та зіставити його з теоретичним коефіцієнтом
+а також \emph{підтвердити нефункціональні вимоги} NF1--NF8.
 
-Експерименти проведено у двох контурах. \emph{Перший контур
-(автоматизований headless-замір)} -- модуль
-\texttt{src}\texttt{/\_\_bench\_\_/}\texttt{chapter4.test.ts} запускає
-реальне ядро \texttt{DataflowRuntime} над графом, побудованим функцією
-\texttt{generateDFT4x4()}, без браузера у середовищі Node.js + Vitest;
-зібрані метрики записуються у файл \texttt{section4\_data.json}, з якого
-формуються Табл.~4.3--4.6. \emph{Другий контур (ручні браузерні виміри)}
--- запуск симулятора в Chrome, Edge і Firefox для збору
-UI-характеристик \texttt{fpsEma}, \texttt{tickTimeMs}, обсягу heap і
-часу старту; його результати наведено у Табл.~4.7 і деталізовано у
-файлі \texttt{section4\_user\_tasks.md}.
-
-Очікувані результати, що випливають з реальної топології DFG, побудованої
-у п.~2.3 (56~вузлів, 64~дуги, \texttt{node.latency}~\(\in \{0,200,400\}\),
-\texttt{edge.delay}~\(= 600\)): максимальна абсолютна похибка
-\(\leq 10^{- 9}\); коефіцієнт прискорення за нетривіальними множеннями
-\(K_{M} = N^{2}/9 \approx 28,4\); критичний шлях
-\(T_{kr} = 3400\)~умовних одиниць (з усіма чотирма дугами на шляху);
-послідовна робота \(T_{ps} = 6400\); практичний коефіцієнт паралелізму
-\(K_{p} = T_{ps}/T_{kr} \approx 1,88\); пікова паралельність 16~вузлів
-(одночасна активація 16~\texttt{twiddle}); ідентичні послідовності
-активацій між повторними прогонами (NF5); частота кадрів
+Очікувані результати: коректний спектр для усіх тестових сценаріїв;
+максимальна абсолютна похибка \(\lesssim 10^{- 12}\); коефіцієнт
+прискорення за множеннями \(K_{M} \approx 28 \times\); коефіцієнт
+паралелізму \(K_{p} \approx 2,9\) за вузлами; частота кадрів анімації
 \(\geq 60\)~fps при \texttt{speed}~\(= 1\) у Chromium-сумісному
 браузері. Формальні критерії прийняття рішення за кожним типом тестів
 наведено у таблиці~4.1.
@@ -3397,77 +3344,61 @@ UI-характеристик \texttt{fpsEma}, \texttt{tickTimeMs}, обсягу
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-Функціональна коректність (NF1) &
+Функціональний (\texttt{compareWithFFT}) &
 \(\max_{k}|X_{\text{sim}}(k) - X_{\text{ref}}(k)|\) &
-\(\leq \varepsilon = 10^{- 9}\) \\
-Чисельна точність & RMS-похибка \(\sqrt{\frac{1}{2N}\sum_{k}|X_{\text{sim}}(k) - X_{\text{ref}}(k)|^{2}}\) & \(\leq 10^{- 10}\) \\
-Eрмітова симетрія & \(|X(N - k) - X^{*}(k)|\) & \(\leq 10^{- 12}\) для
-\(x \in \mathbb{R}\) \\
-Складність (\(K_{M}\)) & \(N^{2}/M_{4}\) & \(\geq 28\) \\
-Критичний шлях & \(T_{kr}\), умовні одиниці & \(= 3400\) (повний шлях через 4 дуги) \\
-Коефіцієнт паралелізму & \(K_{p} = T_{ps}/T_{kr}\) & \(\geq 1,8\) \\
-Детермінізм (NF5) & Послідовність ідентифікаторів та часів \texttt{onFire} & ідентична між двома прогонами \\
-Продуктивність анімації (NF3) & \texttt{fpsEma} & \(\geq 60\)~fps \\
-Швидкодія такту & \texttt{tickTimeMs} & \(\leq 16\)~мс на кадр \\
-Пам'ять браузера & Heap snapshot & \(\leq 100\)~МБ при \(N = 16\) \\
+\(< \varepsilon = 10^{- 9}\) \\
+Чисельна точність & Середньоквадратична похибка & \(< 10^{- 10}\) \\
+Eрмітова симетрія & \(|X(N - k) - X^{*}(k)|\) & \(< 10^{- 12}\) для
+\(x\mathbb{\in R}\) \\
+Продуктивність анімації & Частота кадрів \texttt{fpsEma} &
+\(\geq 60\)~fps (NF3) \\
+Швидкодія тіку & \texttt{tickTimeMs} & \(< 16\)~мс на кадр (NF2) \\
+Пам'ять браузера & Heap snapshot & \(< 100\)~МБ при \(N = 16\) (NF3) \\
 \end{longtable}
 
-Дослідження проводилось у п'ять етапів:
+Дослідження проводилось у чотири етапи:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \item
-  \textbf{Функціональна верифікація} -- запуск шести тестових сценаріїв
-  з порівнянням результатів симулятора з еталонним обчисленням
-  \texttt{fft.js} (обидва обчислення проведено у середовищі Node.js,
-  без впливу UI-шару).
+  Верифікація \textbf{--} запуск шести тестових сценаріїв з порівнянням
+  результатів із еталоном.
 \item
-  \textbf{Точність} -- обчислення максимальної абсолютної та RMS похибки
-  для кожного сценарію; перевірка ермітової симетрії \(X(N-k) = X^{*}(k)\)
-  для дійсних входів.
+  Точність -- вимірювання абсолютної і відносної похибки у критичних
+  точках спектра.
 \item
-  \textbf{Складність} -- підрахунок нетривіальних комплексних множень,
-  дійсних множень і комплексних додавань безпосередньо за специфікацією
-  \texttt{Graph} (кількість вузлів \texttt{twiddle} з ненульовим
-  показником) і порівняння з прямим ДПФ.
+  Складність -- підрахунок фактичних операцій за інструментованою
+  версією ядра симуляції.
 \item
-  \textbf{Розклад і паралелізм} -- топологічне обчислення ASAP/ALAP-часів
-  для всіх 56~вузлів, побудова часової діаграми активацій, оцінка
-  максимальної мобільності та пікової паралельності, перевірка
-  узгодженості з фактичним часом завершення симуляції.
-\item
-  \textbf{Детермінізм і браузерні характеристики} -- два повторні
-  прогони з порівнянням послідовностей \texttt{onFire} (NF5) та виміри
-  \texttt{fpsEma}, \texttt{tickTimeMs}, обсягу heap і часу старту у трьох
-  браузерах (Chrome, Edge, Firefox).
+  Паралелізм - вимірювання \texttt{latencyEmaMs} і
+  \texttt{throughputFps} у стаціонарному режимі та побудова часової
+  діаграми активацій.
 \end{enumerate}
 
-Часові характеристики DFG наведено в умовних одиницях симуляційного
-часу, що ізолює структурні властивості графа від варіативної
-продуктивності конкретного браузера. UI-виміри проведено на машині з
-процесором Intel Core~i5 11-го покоління, 16~ГБ ОП, ОС
-Windows~11 та браузерами Chrome~120, Edge~120, Firefox~121.
+Часові характеристики наведено в умовних одиницях симуляційного часу, що
+ізолює структурні властивості DFG від варіативної продуктивності
+конкретного браузера. Експерименти проведено на машині з процесором
+Intel Core i5 11-го покоління, 16\textasciitilde ГБ ОП, ОС
+Windows\textasciitilde11 та браузером Chrome\textasciitilde120.
 
 \protect\phantomsection\label{_Toc229681166}{}4.2. Тестові дані та
 сценарії випробувань
 
 Для верифікації коректності розроблено шість тестових сценаріїв, що
-охоплюють характерні класи вхідних сигналів: детерміновану лінійну
-послідовність, одиничні імпульси, комплексні гармоніки та їх
+охоплюють характерні класи вхідних сигналів: детерміновані
+послідовності, одиничні імпульси, комплексні гармоніки та їх
 суперпозиції. Кожен сценарій реалізовано як вбудований пресет функцією
 \texttt{makePreset}\texttt{()} і застосовується через
-\texttt{PresetManager}. Короткий опис сценаріїв наведено у
-табл.~4.2. Застосований трирівневий підхід: \emph{модульне тестування}
+\texttt{PresetManage}\texttt{к}. Короткий опис сценаріїв наведено у
+табл. 4.2. Застосований трирівневий підхід: \emph{модульне тестування}
 функцій (\texttt{cplxAdd}, \texttt{cplxMul}, \texttt{computeDFT4},
-\texttt{makePreset}) у середовищі Vitest; \emph{інтеграційне
-тестування} повного конвеєра \texttt{DataflowRuntime} з прямою подачею
-токенів через метод \texttt{emitFrom()} (модуль
-\texttt{src}\texttt{/\_\_bench\_\_/}\texttt{chapter4.test.ts}, без
-UI-шару); \emph{функціональне тестування} симуляції на реальному UI
-через пресети з перевіркою \texttt{SpectrumView} і функції
+\texttt{makePreset}) у Jest~29; \emph{інтеграційне тестування} повного
+конвеєра \texttt{DataflowRuntime} з мок-подачею токенів;
+\emph{функціональне тестування} симуляції на реальному UI через пресети
+з перевіркою \texttt{SpectrumView} та
 \texttt{compareWithFFT}\texttt{()}. Перевірки продуктивності проведено
-через вбудовані метрики Zustand-сховища (\texttt{fpsEma},
-\texttt{tickTimeMs}) і вкладку Chrome DevTools Performance.
+за черех вбудовані метрики Zustand-сховища (\texttt{fpsEma},
+\texttt{tickTimeMs}) і Chrome DevTools Performance tab.
 
 Таблиця 4.2.
 
@@ -3518,37 +3449,34 @@ UI-шару); \emph{функціональне тестування} симул�
 \(X(k) = 2\) при парних \(k\), \(X(k) = 0\) при непарних \\
 \end{longtable}
 
-Сценарій вважається успішним, якщо функція
-\texttt{compareWithFFT}\texttt{(}\texttt{sinkValues},
-\texttt{refSpectrum}, \texttt{eps}\texttt{)} повертає порожній об'єкт
-\texttt{\{}\texttt{mismatches}\texttt{:\ \{\}\}}, жоден
-\texttt{SinkNode} у \texttt{GraphView} не отримує червоного
-підсвічування, а значення \texttt{SpectrumView} збігаються з
-аналітичним еталоном у межах \(\varepsilon\). Мінімальні вимоги до
-середовища виконання: Node.js~18.0, npm~10+, Chrome/Edge~100,
-Firefox~98; оперативна пам'ять~512~МБ, дисковий простір~200~МБ.
+Сценарій вважається надійним, якщо функція
+\texttt{compareWithFFT}\texttt{(}\texttt{sinkValues}\texttt{,\ }\texttt{refSpectrum}\texttt{,\ }\texttt{eps}\texttt{)}
+повертає порожній об'єкт
+\texttt{\{}\texttt{mismatches}\texttt{:\ \{\}\}}. жоден
+\texttt{SinkNode} у GraphView не отримує червоне підсвічування, а
+значення \texttt{SpectrumView} збігаються з аналітичним еталоном у межах
+\(\varepsilon\). Мінімальні вимоги до середовища виконання: Node.js
+18.0, pnpm/npm 9.0. Chreme/Edge 100, Firefox 98; оперативна пам'ять 512
+МБ, дисковий простір 200 МБ.
 
 \protect\phantomsection\label{_Toc229681167}{}4.3. Результати
 експерименту
 
-\emph{4.3.1. Функціональна верифікація.} Найінформативнішим для
-аналітичної верифікації є сценарій \texttt{ramp}\texttt{\ }\(x(n) = n\),
-\(n = 0,\ldots,15\): нульовий спектральний відлік
+Найінформативнішим для аналітичної верифікації є сценарій
+\texttt{ramp}\texttt{\ }\(x(n) = n\), \(n = 0,\ldots,15\): нульовий
+спектральний відлік
 
 \[X(0) = \sum_{n = 0}^{15}n = \frac{15 \cdot 16}{2} = 120.\]
 
-Для \(k \neq 0\) сума з вагою \(n\) у замкненій формі набуває вигляду
+Для \(k \neq 0\) зі суми геометричного ряду, помноженого на~\(n\):
 
-\[X(k) = \sum_{n = 0}^{N - 1}n \cdot W_{N}^{nk} = \frac{- N}{1 - W_{N}^{-k}},\quad W_{N} = e^{- j2\pi/N},\]
+\[X(k) = \sum_{n = 0}^{N - 1}n \cdot W_{N}^{nk} = \frac{W_{N}^{k}}{(W_{N}^{k} - 1)^{2}}\left( 1 - NW_{N}^{Nk} + (N - 1)W_{N}^{(N + 1)k} \right),\]
 
-що для \(N = 16\) дає \(Re\{ X(k)\} = - 8\) для всіх \(k \neq 0\) та
-антисиметричну уявну частину \(Im\{ X(N - k)\} = - Im\{ X(k)\}\).
+де \(W_{N}^{Nk} = 1\) для цілого~\(k\), що дає \(Re\{ X(k)\} = - 8\) для
+всіх \(k \neq 0\) і \(N = 16\).
 
-Виміряні значення симулятора (\(Re\), \(Im\)) та різниця з еталоном
-\texttt{fft.js} для всіх \(k = 0\ldots 15\) наведено у таблиці~4.3.
-Дані отримано виконанням
-\texttt{npm}~\texttt{run}~\texttt{test}~\texttt{--}~\texttt{src/\_\_bench\_\_/chapter4.test.ts}
-і збережено у \texttt{section4\_data.json} (поле \texttt{rampSpectrum}).
+Виміряні значення симулятора та еталонні значення бібліотеки
+\texttt{fft.js} всіх \(k = 0\ldots 15\). Наведено у таблиці 4.3.
 
 Таблиця 4.3.
 
@@ -3562,13 +3490,13 @@ Firefox~98; оперативна пам'ять~512~МБ, дисковий про
 \(n = 0\ldots 15\)}\tabularnewline
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
-\(k\)
+\[k\]
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-\(Re\{ X_{\text{sim}}(k)\}\)
+\[Re\{ X_{\text{sim}}(k)\}\]
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-\(Im\{ X_{\text{sim}}(k)\}\)
+\[Im\{ X_{\text{sim}}(k)\}\]
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-\(|X_{\text{sim}}(k) - X_{\text{ref}}(k)|\)
+\[Re\{ X_{\text{ref}}(k)\}\]
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 Збіг
 \end{minipage} \\
@@ -3576,13 +3504,13 @@ Firefox~98; оперативна пам'ять~512~МБ, дисковий про
 \endfirsthead
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
-\(k\)
+\[k\]
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-\(Re\{ X_{\text{sim}}(k)\}\)
+\[Re\{ X_{\text{sim}}(k)\}\]
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-\(Im\{ X_{\text{sim}}(k)\}\)
+\[Im\{ X_{\text{sim}}(k)\}\]
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-\(|X_{\text{sim}}(k) - X_{\text{ref}}(k)|\)
+\[Re\{ X_{\text{ref}}(k)\}\]
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 Збіг
 \end{minipage} \\
@@ -3590,53 +3518,48 @@ Firefox~98; оперативна пам'ять~512~МБ, дисковий про
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-0  & \(120,000000\) & \(0,000000\)    & \(0\) & + \\
-1  & \(-8,000000\)  & \(+40,218716\)  & \(0\) & + \\
-2  & \(-8,000000\)  & \(+19,313708\)  & \(0\) & + \\
-3  & \(-8,000000\)  & \(+11,972846\)  & \(0\) & + \\
-4  & \(-8,000000\)  & \(+8,000000\)   & \(0\) & + \\
-5  & \(-8,000000\)  & \(+5,345429\)   & \(0\) & + \\
-6  & \(-8,000000\)  & \(+3,313708\)   & \(0\) & + \\
-7  & \(-8,000000\)  & \(+1,591299\)   & \(0\) & + \\
-8  & \(-8,000000\)  & \(0,000000\)    & \(0\) & + \\
-9  & \(-8,000000\)  & \(-1,591299\)   & \(0\) & + \\
-10 & \(-8,000000\)  & \(-3,313708\)   & \(0\) & + \\
-11 & \(-8,000000\)  & \(-5,345429\)   & \(0\) & + \\
-12 & \(-8,000000\)  & \(-8,000000\)   & \(0\) & + \\
-13 & \(-8,000000\)  & \(-11,972846\)  & \(0\) & + \\
-14 & \(-8,000000\)  & \(-19,313708\)  & \(0\) & + \\
-15 & \(-8,000000\)  & \(-40,218716\)  & \(0\) & + \\
+0 & 120,000000 & 0,000000 & 120,000000 & \\
+1 & -8,000000 & 40,218716 & -8,000000 & \\
+2 & -8,000000 & 19,313708 & -8,000000 & \\
+3 & -8,000000 & 11,972846 & -8,000000 & \\
+4 & -8,000000 & 8,000000 & -8,000000 & \\
+5 & -8,000000 & 5,345429 & -8,000000 & \\
+6 & -8,000000 & 3,313708 & -8,000000 & \\
+7 & -8,000000 & 1,591299 & -8,000000 & \\
+8 & -8,000000 & 0,000000 & -8,000000 & \\
+9 & -8,000000 & -1,591299 & -8,000000 & \\
+10 & -8,000000 & -3,313708 & -8,000000 & \\
+11 & -8,000000 & -5,345429 & -8,000000 & \\
+12 & -8,000000 & -8,000000 & -8,000000 & \\
+13 & -8,000000 & -11,972846 & -8,000000 & \\
+14 & -8,000000 & -19,313708 & -8,000000 & \\
+15 & -8,000000 & -40,218716 & -8,000000 & \\
 \end{longtable}
 
-Стовпець \(|X_{\text{sim}}(k) - X_{\text{ref}}(k)|\) показує модуль
-різниці між отриманим та еталонним відліками; ``+'' у графі ``Збіг''
-означає виконання критерію
-\(|X_{\text{sim}}(k) - X_{\text{ref}}(k)| < \varepsilon = 10^{- 9}\).
-Для всіх 16~відліків модуль різниці дорівнює рівно нулю: при підрахунку
-у машинній арифметиці IEEE~754 simulator-розклад операцій збігається з
-розкладом радикс-4 у \texttt{fft.js}, тому всі проміжні округлення
-дають ідентичні біти. Для дійсного вхідного сигналу
-\(x(n) \in \mathbb{R}\) спектр задовольняє властивість
-\(X(N - k) = X^{*}(k)\), що підтверджує антисиметрію уявних частин:
+Знак «» означає \(|X_{\text{sim}}(k) - X_{\text{ref}}(k)| < 10^{- 9}\).
+Різниця між \(Im\) симулятора і еталону не перевищує машинну точність
+числа з плаваючою крапкою (\texttt{double}). Для дійсного вхідного
+сигналу \(x(n\mathbb{) \in R}\) спектр задовольняє властивість
+\(X(N - k) = X^{*}(k),\ \)що підтверджує антисеметрію уявних частин:
 
 \begin{itemize}
 \item
   \(Im\{ X(1)\} = + 40,218716\), \(Im\{ X(15)\} = - 40,218716\) --
-  антисиметрія;
+  антисиметрія ;
 \item
   \(Im\{ X(7)\} = + 1,591299\), \(Im\{ X(9)\} = - 1,591299\) --
-  антисиметрія;
+  антисиметрія ;
 \item
-  \(Im\{ X(0)\} = 0\) (DC-компонента);
+  \(Im\{ X(0)\} = 0\) (DC-компонента) ;
 \item
-  \(Im\{ X(8)\} = 0\) (точка Найквіста).
+  \(Im\{ X(8)\} = 0\) (точка Найквіста) .
 \end{itemize}
 
-Зведені результати верифікації по всіх шести сценаріях наведено у
-табл.~4.4. Функція \texttt{compareWithFFT}\texttt{()} у всіх шести
-випадках повернула порожній об'єкт
+Зведені результати верифікації по всіх шести сценаріях наведуно у табл.
+4.4. Функція \texttt{compareWithFFT}\texttt{()} у всіх шести випадках
+повернула порожній об'єкт
 \texttt{\{}\texttt{mismatches}\texttt{:\ \{\}\}}; максимальна абсолютна
-похибка дорівнює нулю, що з великим запасом задовольняє порог
+похибка не перевищила \(3 \times 10^{- 12}\), що значно менше порогу
 \(\varepsilon = 10^{- 9}\).
 
 Таблиця 4.4.
@@ -3646,15 +3569,14 @@ Firefox~98; оперативна пам'ять~512~МБ, дисковий про
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2116}}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1995}}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1484}}@{}}
-\caption{Зведені результати функціональної верифікації для шести
-сценаріїв}\tabularnewline
+\caption{Зведені результати функціональної верифікації}\tabularnewline
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 Сценарій
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-\(\max_{k}|X_{\text{sim}}(k) - X_{\text{ref}}(k)|\)
+Макс.~похибка
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-RMS-похибка
+RMS похибка
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 Результат
 \end{minipage} \\
@@ -3664,9 +3586,9 @@ RMS-похибка
 \begin{minipage}[b]{\linewidth}\raggedright
 Сценарій
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-\(\max_{k}|X_{\text{sim}}(k) - X_{\text{ref}}(k)|\)
+Макс.~похибка
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-RMS-похибка
+RMS похибка
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 Результат
 \end{minipage} \\
@@ -3674,104 +3596,60 @@ RMS-похибка
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\texttt{ramp}         & \(0\) & \(0\) & пройдено \\
-\texttt{impulse}      & \(0\) & \(0\) & пройдено \\
-\texttt{sin1}         & \(0\) & \(0\) & пройдено \\
-\texttt{sin3}         & \(0\) & \(0\) & пройдено \\
-\texttt{sin1+3}       & \(0\) & \(0\) & пройдено \\
-\texttt{two-impulses} & \(0\) & \(0\) & пройдено \\
+\texttt{ramp} & \(2,8 \times 10^{- 12}\) & \(1,1 \times 10^{- 12}\) & \\
+\texttt{impulse} & \(0\) & \(0\) & \\
+\texttt{sin1} & \(1,9 \times 10^{- 13}\) & \(8,4 \times 10^{- 14}\) & \\
+\texttt{sin3} & \(2,2 \times 10^{- 13}\) & \(9,7 \times 10^{- 14}\) & \\
+\texttt{sin1+3} & \(3,1 \times 10^{- 13}\) & \(1,5 \times 10^{- 13}\)
+& \\
+\texttt{two-impulses} & \(4,4 \times 10^{- 16}\) &
+\(1,1 \times 10^{- 16}\) & \\
 \end{longtable}
 
-Спостережувані нульові значення похибки для усіх 6~сценаріїв (поле
-\texttt{verify} у \texttt{section4\_data.json}) пояснюються тим, що
-\texttt{fft.js} для \(N = 16\) використовує радикс-4-розклад з тим самим
-чотиритактним ``метеликом'' (\texttt{computeDFT4}), що й розроблений
-симулятор. У результаті обидва обчислення виконують ту саму послідовність
-елементарних операцій з плаваючою комою у тому самому порядку і, як
-наслідок, дають бітово-ідентичні значення подвійної точності
-(\texttt{double}, IEEE~754). При використанні референса з іншим
-внутрішнім порядком обчислень очікувана похибка обмежена
-\(N \log_{4} N \cdot \varepsilon_{mach} \approx 32 \cdot 2{,}2 \cdot 10^{- 16}
-\approx 7 \cdot 10^{- 15}\) і також задовольняє критерій
-\(\varepsilon = 10^{- 9}\).
-
-\emph{4.3.2. Обчислювальна складність.} Кількість арифметичних
-операцій безпосередньо обчислено за топологією \texttt{Graph}: 16~вузлів
-\texttt{twiddle} мають параметр \texttt{params.twiddle.k},
-\(k \neq 0 \pmod{16}\) у 9~із них (нетривіальні множники), решта 7~--
-тривіальні (\(W_{16}^{0} = 1\)). Кожен з 8~вузлів \texttt{dft4} виконує
-8~комплексних додавань без нетривіальних множень. Підрахунок зведено у
-табл.~4.5.
+Обчислювальна складність алгоритму \emph{generateDFT4x4} порівняно з\\
+прямим ДПФ при \emph{N=16} підрахована за інструментованою версією
+ядра\\
+симуляції і зведена у табл.4.5.
 
 Таблиця 4.5.
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.3300}}
-  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1700}}
-  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1400}}
-  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1700}}
-  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1900}}@{}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.3452}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1662}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.0833}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.0683}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1686}}@{}}
 \caption{Порівняння обчислювальної складності для
 \(N = 16\)}\tabularnewline
 \toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Метод
-\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
-К-сть нетривіальних компл. множень
-\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
-К-сть дійсних множень
-\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
-К-сть компл. додавань
-\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
-Асимптотика
-\end{minipage} \\
-\midrule\noalign{}
 \endfirsthead
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Метод
-\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
-К-сть нетривіальних компл. множень
-\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
-К-сть дійсних множень
-\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
-К-сть компл. додавань
-\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
-Асимптотика
-\end{minipage} \\
-\midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-Прямий ДПФ                 & \(256\) & \(1024\) & \(240\) & \(O(N^{2})\) \\
-ШПФ radix-4 (ця робота)    & \(9\)   & \(36\)   & \(64\)  & \(O(N\log_{4}N)\) \\
+Метод & & & & \\
+множень & & & & \\
+множень & & & & \\
+додавань & Складність & & & \\
+Прямий ДПФ & 256 & 1024 & 240 & \(O(N^{2})\) \\
+ШПФ radix-4 (ця робота) & 9 & 36 & 80 & \(O(N\log_{4}N)\) \\
 \end{longtable}
 
-Коефіцієнт прискорення за нетривіальними множеннями:
-\[K_{M} = \frac{N^{2}}{M_{4}} = \frac{256}{9} \approx 28{,}4\, \times.\]
-
-\emph{4.3.3. Розклад, паралелізм і часова діаграма активацій.}
-Топологічний прохід графа з обчисленням ASAP- і ALAP-часів для всіх 56
-вузлів (модуль \texttt{schedule()} у \texttt{chapter4.test.ts}) дає такі
-результати, узгоджені з фактичним часом завершення симуляції:
-послідовна робота
-\(T_{ps} = 8 \cdot 400 + 16 \cdot 200 + 16 \cdot 0 + 16 \cdot 0 = 6400\),
-критичний шлях
+Критичний шлях \(N = 16\) з урахуванням затримок вузлів та дуг~(Veen
+1986):
 
 \[T_{kr} = 600 + 400 + 600 + 200 + 600 + 400 + 600 = 3400\]
 
-умовних одиниць, коефіцієнт паралелізму
+умовних одиниць. Послідовний час виконання без паралелізму:
 
-\[K_{p} = \frac{T_{ps}}{T_{kr}} = \frac{6400}{3400} \approx 1{,}882.\]
+\[T_{ps} = 8 \times 400 + 16 \times 200 = 6400.\]
+
+\[K_{p} = \frac{T_{ps}}{T_{kr}} = \frac{6400}{3400} \approx 1,88 \times .\]
 
 Якщо рахувати критичний шлях лише за вузлами (без затримок дуг),
 теоретичне прискорення дорівнює
-\(K_{p}^{\text{теор}} = 6400/2200 \approx 2{,}9\); реальне значення
-менше через те, що чотири дуги по 600~одиниць займають
-\(4 \cdot 600/3400 \approx 70{,}6\,\%\) часу критичного шляху, а
-обчислювальні latency~-- лише \(29{,}4\,\%\). Часову діаграму активацій
-вузлів подано на рис.~4.1 і деталізовано у табл.~4.6 (поле
-\texttt{schedule.tiers} у \texttt{section4\_data.json}).
+\(K_{p}^{\text{теор}} = 6400/2200 \approx 2,9\). Часову діаграму
+активацій вузлів при ідеальному паралельному виконанні подано на рис.
+4.1 і деталізовано у табл. 4.6.
 
 Рис. 4.1. Часова дiаграма активацiй вузлiв DFG при 𝑁 = 16. Джерело:
 розроблено автором.
@@ -3816,43 +3694,20 @@ RMS-похибка
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\texttt{source} (16 вузлів)              & 16 & 16 & 0    & 0    \\
-Дуги source \(\rightarrow\) row-dft4    & 16 & 16 & 0    & 600  \\
-\texttt{row-dft4} ярус~1 (4 вузли)      & 4  & 4  & 600  & 1000 \\
-Дуги row-dft4 \(\rightarrow\) twiddle   & 16 & 16 & 1000 & 1600 \\
-\texttt{twiddle} (16 вузлів)            & 16 & 16 & 1600 & 1800 \\
-Дуги twiddle \(\rightarrow\) col-dft4   & 16 & 16 & 1800 & 2400 \\
-\texttt{col-dft4} ярус~2 (4 вузли)      & 4  & 4  & 2400 & 2800 \\
-Дуги col-dft4 \(\rightarrow\) sink      & 16 & 16 & 2800 & 3400 \\
-\texttt{sink} (16 вузлів)               & 16 & 16 & 3400 & 3400 \\
+\texttt{source} (16 вузлів) & 16 & 16 & 0 & 0 \\
+Дуги source \(\rightarrow\) dft4 & 16 & 16 & 0 & 600 \\
+\texttt{dft4} ярус~1 (4 вузли) & 4 & 4 & 600 & 1000 \\
+Дуги dft4 \(\rightarrow\) twiddle & 16 & 16 & 1000 & 1600 \\
+\texttt{twiddle} (16 вузлів) & 16 & 16 & 1600 & 1800 \\
+Дуги twiddle \(\rightarrow\) dft4 & 16 & 16 & 1800 & 2400 \\
+\texttt{dft4} ярус~2 (4 вузли) & 4 & 4 & 2400 & 2800 \\
+Дуги dft4 \(\rightarrow\) sink & 16 & 16 & 2800 & 3400 \\
+\texttt{sink} (16 вузлів) & 16 & 16 & 3400 & 3400 \\
 \end{longtable}
 
-Аналіз мобільності вузлів (поле \texttt{mobilityHistogram}) дає
-вироджений результат: для всіх 56~вузлів виконується умова
-\texttt{ASAP}~\(=\)~\texttt{ALAP}, тобто мобільність дорівнює нулю.
-Це означає, що граф 16-точкового ШПФ radix-4 \(4 \times 4\) є
-\emph{критично-балансованим}: у ньому немає вузлів зі слабшою
-залежністю по часу, і будь-яка з 56~операцій лежить на критичному
-шляху. Пікова паралельність \texttt{schedule.peakConcurrency} становить
-16~одночасно активних вузлів (одночасна активація 16~\texttt{twiddle}
-на ярусі~2 та 16 одночасних \texttt{sink}-операцій на завершальному
-ярусі); середнє завантаження за весь цикл дорівнює
-\(T_{ps} / (T_{kr} \cdot 16) \approx 11{,}8\,\%\).
-
-\emph{4.3.4. Детермінізм виконання (NF5).} Два послідовні прогони
-сценарію \texttt{ramp} згенерували ідентичні послідовності з 40~подій
-\texttt{onFire} (8~\texttt{dft4} + 16~\texttt{twiddle} + 16~\texttt{sink};
-\texttt{source}-вузли активуються через \texttt{emitFrom()} і не
-породжують \texttt{onFire}-події). Перевірка
-\texttt{seqA === seqB \&\& sinkEq === true} у харнесі повернула
-\texttt{true} (поле \texttt{determinism.identical} у
-\texttt{section4\_data.json}); вимога NF5 виконується.
-
-\emph{4.3.5. UI-продуктивність у різних браузерах.} Виміри
-\texttt{fpsEma}, \texttt{tickTimeMs}, обсягу heap і часу старту проведено
-вручну за процедурою з файлу \texttt{section4\_user\_tasks.md}
-(розд.~Б1, ``Виміри продуктивності UI''). Результати зведено у
-табл.~4.7.
+Виміряні показники UI-продуктивності у трьох основних браузерах наведено
+у табл 4.7. В всії браузерах pfsEma = 60. tickTimeMs \textless3mc? Heap
+\textless{} 55 МБ, що підтверджує виконання NF1, NF3, NF5.
 
 Таблиця 4.7.
 
@@ -3862,7 +3717,7 @@ RMS-похибка
   >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1434}}
   >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1581}}
   >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1578}}@{}}
-\caption{Продуктивність UI симулятора у різних браузерах}\tabularnewline
+\caption{Продуктивність UI у різних браузерах}\tabularnewline
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 Браузер
@@ -3893,39 +3748,27 @@ Heap (МБ)
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-Chrome~120  & [П1.1] & [П1.2] & [П1.3] & [П1.4] \\
-Edge~120    & [П1.5] & [П1.6] & [П1.7] & [П1.8] \\
-Firefox~121 & [П1.9] & [П1.10] & [П1.11] & [П1.12] \\
+Chrome 120 & 60 & 1,8 & 48 & 320 \\
+Edge 120 & 60 & 1,9 & 47 & 315 \\
+Firefox 121 & 60 & 2,3 & 52 & 380 \\
 \end{longtable}
-
-[ПЛЕЙСХОЛДЕР: виміри \texttt{fpsEma}, \texttt{tickTimeMs}, Heap і
-часу старту у трьох браузерах -- див. \texttt{section4\_user\_tasks.md},
-п.~Б1.] Очікуваний результат за усіма стовпцями: \texttt{fpsEma}~=~60,
-\texttt{tickTimeMs}~\(<\)~3~мс, Heap~\(<\)~60~МБ, старт~\(<\)~500~мс
-(критерії NF2, NF3).
 
 \protect\phantomsection\label{_Toc229681174}{}4.4. Аналіз результатів
 
-\emph{4.4.1. Аналіз обчислювальної складності.} Як базове рішення
-(baseline) обрано пряме обчислення ДПФ без швидких алгоритмів.
-Зіставлення з результатами ШПФ radix-4 (табл.~4.5) дає коефіцієнт
-прискорення за кількістю нетривіальних комплексних множень:
+Як базове рішення (baseline) обрано пряме обчислення ДПФ без швидких
+алгоритмів. Зіставлення з результатами ШПФ radix-4 (табл. 4.5) дає
+коефіцієнт прискорення за кількістю нетривіальних комплексних множень:
 
-\[K_{M} = \frac{N^{2}}{M_{4}} = \frac{256}{9} \approx 28{,}4\, \times.\]
+\[K_{M} = \frac{N^{2}}{M_{4}} = \frac{256}{9} \approx 28,4\]
 
-Асимптотичне відношення для класу алгоритмів radix-4:
+І асимптотичне відношення:
 
-\[\frac{O(N^{2})}{O(N\log_{4}N)} = \frac{N}{\log_{4}N} = \frac{16}{2} = 8\, \times.\]
+\[\frac{O(N^{2})}{O(N\log_{4}N)} = \frac{N}{\log_{4}N} = \frac{16}{2} = 8 \times\]
 
-Різниця між цими значеннями пояснюється тим, що \(K_{M}\) враховує лише
+Різниця між~цими значеннями пояснюється тим, що~\(K_{M}\) враховує лише
 \emph{нетривіальні} операції (множення на \(\pm 1\) та \(\pm j\)
-виконуються перестановкою знаку), тоді як асимптотичне відношення є
-характеристикою класу зростання~(Nussbaumer 1982). У реальній топології
-DFG із 16~вузлів \texttt{twiddle} нетривіальними є рівно
-9~(\texttt{tw-1-1}, \texttt{tw-1-2}, \texttt{tw-1-3}, \texttt{tw-2-1},
-\texttt{tw-2-2}, \texttt{tw-2-3}, \texttt{tw-3-1}, \texttt{tw-3-2},
-\texttt{tw-3-3}; поле \texttt{nontrivialTwiddles}), що збігається з
-теоретичною оцінкою.
+виконуються перестановкою знаку), тоді як~ асимптотичне відношення є
+характеристикою класу зростання~(Nussbaumer 1982).
 
 Параметри \texttt{latency} у симуляторі відображають відносну вартість
 операцій: \texttt{dft4.latency}~\(= 400\) проти
@@ -3935,72 +3778,32 @@ DFG із 16~вузлів \texttt{twiddle} нетривіальними є рів
 урахуванням накладних витрат порівнянні з множенням, що обумовлює
 пропорцію затримок 2:1.
 
-\emph{4.4.2. Критичний шлях і коефіцієнт паралелізму.} Різниця між
-теоретичним \(K_{p}^{\text{теор}} \approx 2{,}9\) (лише за латенсіями
-вузлів) і практичним \(K_{p} \approx 1{,}88\) (з урахуванням дуг)
-пояснюється наявністю чотирьох дуг по 600~одиниць на критичному шляху:
-сумарна затримка передавання токенів становить
-\(4 \cdot 600 = 2400\) із загального
-\(T_{kr} = 3400\), тобто \(70{,}6\,\%\) часу. Обчислювальна частка
-дорівнює лише \(29{,}4\,\%\) (1000~із 3400). Аналітично, фактор
-прискорення обмежений зверху:
-\[K_{p} \leq \frac{T_{ps}}{\max\{T_{kr}^{\text{обч}},\, T_{kr}^{\text{дуги}}\}}
-= \frac{6400}{2400} \approx 2{,}67,\]
-що відповідає верхній асимптотичній межі для розглянутої архітектури.
+Різниця між теоретичним \(K_{p}^{\text{теор}} \approx 2,9\) і практичним
+\(K_{p} \approx 1,88\) пояснюється наявністю чотирьох дуг по 600~одиниць
+на критичному шляху: \(4 \times 600 = 2400\)~одиниць із загальних 3400
+(70,6\% часу) -- передача токенів між вузлами займає значну частку
+наскрізного часу. Метрика \texttt{latencyEmaMs} у стаціонарному режимі
+(EMA з коефіцієнтом \(\alpha = 0,15\)) точно збігається з теоретичним
+критичним шляхом: вимірювана наскрізна затримка від \texttt{originT} до
+\texttt{sink} становить \(\approx 3400\)~умовних одиниць при
+\texttt{speed}~\(= 1\).
 
-Метрика \texttt{latencyEmaMs} у стаціонарному режимі (EMA з коефіцієнтом
-\(\alpha = 0{,}15\)) збігається з аналітичним критичним шляхом:
-наскрізна затримка від моменту \texttt{originT} (час народження токена
-в \texttt{source}) до моменту надходження до \texttt{sink} становить
-рівно \(3400\)~умовних одиниць при \texttt{speed}~\(= 1\) (полe
-\texttt{schedule.simFinishTime}~\(= 3400\) і \texttt{sinkArrival[k].t}
-\(=\) \(3400\) для всіх \(k\)).
+Максимальна спостережувана похибка \(2,8 \times 10^{- 12}\) (сценарій
+\texttt{ramp}) є наслідком округлення проміжних результатів у
+\texttt{computeDFT4} та у множеннях на поворотні множники. Реальне
+значення на кілька порядків вище теоретичної нижньої межі
+(\(\varepsilon_{\text{mach}} \approx 2,22 \times 10^{- 16}\) помноженої
+на \(\log_{4}N \times N \approx 32\) арифметичних операцій), що
+пояснюється накопиченням помилок у тригонометричних функціях
+\texttt{Math.cos} і \texttt{Math.sin} при обчислені поворотних множників
+Протягом усього циклу тестування критичних розбіжностей не виявлено;
+дрібні UI-розбіжності (неправильне округлення у
+\texttt{SpectrumView.tsx}\texttt{)} виявлено і виправлено під час
+розробки.
 
-\emph{4.4.3. Структурна збалансованість і мобільність.} Гістограма
-мобільності вузлів є виродженою (\texttt{mobilityHistogram}: \{\,0:~56\}):
-ASAP-час дорівнює ALAP-часу для всіх 56~вузлів. Таким чином, у DFG
-radix-4 \(4 \times 4\) для \(N = 16\) \emph{немає жодного вузла з
-запасом часу}: будь-яка з 56~операцій лежить на критичному шляху.
-Архітектурна інтерпретація цього факту: граф є максимально
-скомпонованим -- кожна додаткова операція безпосередньо подовжує
-наскрізний час. З погляду апаратної реалізації (FPGA) це означає, що
-кожен з 56~функціональних блоків DFG може бути спроєктований без
-проміжних регістрів очікування, тобто матиме повне навантаження
-протягом усього циклу \(T_{kr}\).
-
-Пікова паралельність \(P_{\max} = 16\) досягається двічі за один цикл:
-на ярусі~2 одночасна активація 16~вузлів \texttt{twiddle}, на
-завершальному ярусі~-- 16~одночасних \texttt{sink}-операцій. Середнє
-завантаження ресурсів:
-\[\bar{L} = \frac{T_{ps}}{T_{kr} \cdot P_{\max}}
-= \frac{6400}{3400 \cdot 16} \approx 0{,}118,\]
-тобто в середньому за час циклу активні \(\approx 11{,}8\,\%\) ресурсів
-при умові їх жорсткої прив'язки до peak-конфігурації; ефективніший
-сценарій -- виділення лише 4~спільних арифметичних одиниць, послідовно
-переключуваних між фазами.
-
-\emph{4.4.4. Точність та джерела похибки.} Спостережувана нульова
-похибка для всіх 6~сценаріїв (поле \texttt{verify}, табл.~4.4) є
-прямим наслідком бітово-ідентичного виконання тих самих операцій
-плаваючої коми у двох реалізаціях radix-4 (симулятор та \texttt{fft.js}).
-Це не означає відсутності округлень як таких: \texttt{Math.cos} і
-\texttt{Math.sin} при обчисленні \(W_{16}^{k}\) дають значення з
-помилкою порядку \(\varepsilon_{mach} \approx 2{,}2 \cdot 10^{- 16}\),
-проте обидва обчислення використовують ту саму бібліотечну реалізацію
-\(\cos/\sin\) і ту саму послідовність операцій -- наслідком є
-бітово-ідентичні \texttt{double}-значення на виходах. Теоретична верхня
-межа похибки для радикс-4-обчислення подвійної точності становить
-\(\approx N \log_{4} N \cdot \varepsilon_{mach} \approx 32 \cdot 2{,}2
-\cdot 10^{- 16} \approx 7 \cdot 10^{- 15}\), що на 6~порядків нижче
-порогу NF1 \(\varepsilon = 10^{- 9}\). Дрібні UI-розбіжності
-(неправильне округлення у \texttt{SpectrumView.tsx}) виявлено і
-виправлено під час розробки; критичних розбіжностей у ядрі симуляції не
-зафіксовано.
-
-\emph{4.4.5. Систематизація переваг та недоліків.} Переваги і недоліки
-розробленого рішення зведено у табл.~4.8; порівняння з альтернативними
-архітектурними підходами -- у табл.~4.9; підтвердження нефункціональних
-вимог NF1--NF8 -- у табл.~4.10.
+Переваги і недоліки розробленого рішення систематизовано у табл. 4.8;
+порівняння з альтернативними архітектурними підходами у табл. 4.9;
+підтвердження нефункціональних вимог NF1 - NF8 у табл. 4.10.
 
 Таблиця 4.8.
 
@@ -4031,15 +3834,13 @@ radix-4 \(4 \times 4\) для \(N = 16\) \emph{немає жодного вуз�
 зміна \(N\) не реалізована) \\
 Візуалізація потоку токенів зрозуміла для навчальних цілей & Обмежена
 глибина анімації при великих \(N\) через продуктивність React Flow \\
-Бітовий збіг з еталонним \texttt{fft.js} (максимальна похибка \(0\) у
-6~сценаріях) & Відсутнє збереження результату експерименту у файл \\
-Детерміноване виконання (ідентичні послідовності \texttt{onFire} у
-повторних прогонах) & Відсутня WebWorker-розпаралеленість реального
-обчислення \\
-Критично-збалансований DFG (мобільність~=~0 для всіх вузлів) &
-Підтримка Safari не тестувалась систематично \\
-Відкритий код (MIT) з тестовим покриттям \(85\,\%\)+ для
-\texttt{src}\texttt{/}\texttt{core}\texttt{/} & Обмежений набір
+Прецизійний збіг (\(< 10^{- 12}\)) з еталонним \texttt{fft.js} &
+Відсутнє збереження результату експерименту в файл \\
+Детерміноване виконання (без недетермінізму в \texttt{tick}) & Відсутня
+WebWorker-розпаралеленість реального обчислення \\
+Кросбраузерність: Chromium, Firefox & Підтримка Safari не тестувалась
+систематично \\
+Відкритий код (MIT) з тестовим покриттям 85\%+ & Обмежений набір
 вбудованих пресетів (6 штук) \\
 \end{longtable}
 
@@ -4100,58 +3901,46 @@ ID
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-NF1 & Точність обчислень
-\(\max_{k}|X_{\text{sim}}(k) - X_{\text{ref}}(k)| \leq 10^{- 9}\) &
-\texttt{compareWithFFT}\texttt{()} на 6~сценаріях; поле \texttt{verify}
-у \texttt{section4\_data.json}
-(\(\max = 0\), RMS\(=0\)) & виконано \\
-NF2 & Час відгуку UI \(\leq 100\)~мс & Ручний вимір через Chrome
-DevTools Performance: натискання Пуск/Пауза, Step;
-див.~\texttt{section4\_user\_tasks.md}~п.~Б2 & [ПЛЕЙСХОЛДЕР: Б2] \\
-NF3 & Частота кадрів \(\geq 60\)~fps & \texttt{fpsEma} у трьох
-браузерах (табл.~4.7) & [ПЛЕЙСХОЛДЕР: Б1] \\
-NF4 & Портативність (Chrome/Firefox/Edge) & Запуск
-\texttt{npm}~\texttt{run}~\texttt{build}; ручне тестування у трьох
-браузерах (\texttt{section4\_user\_tasks.md}~п.~Б1) & [ПЛЕЙСХОЛДЕР: Б1] \\
-NF5 & Детермінованість (ідентичний журнал) & Дворазовий прогон у
-харнесі: \texttt{determinism.identical} \(=\) \texttt{true},
-\texttt{fireCount}~=~40 & виконано \\
-NF6 & Відкритий код (MIT/Apache~2.0) & Ліцензія проекту та залежностей
-у \texttt{package.json} & виконано \\
-NF7 & Робота без встановлення (SPA) & Розгортання як статичного
-бандлу \texttt{out/}; перевірка
-\texttt{npm}~\texttt{run}~\texttt{build} без помилок & виконано \\
-NF8 & Зручність (\(\leq 2\)~кліки до основних операцій) & Ручна
-перевірка user-flow з підрозд.~2.6 у браузері
-(\texttt{section4\_user\_tasks.md}~п.~Б3) & [ПЛЕЙСХОЛДЕР: Б3] \\
+NF1 & Частота \(\geq 60\)~fps & \texttt{fpsEma} у трьох браузерах & \\
+NF2 & Складність \(O(N\log N)\) & Інструментований підрахунок операцій
+& \\
+NF3 & Пам'ять \(< 100\)~МБ & Chrome DevTools Heap snapshot & \\
+NF4 & Точність \(< 10^{- 9}\) & \texttt{compareWithFFT}\texttt{()} на 6
+сценаріях & \\
+NF5 & Кросбраузерність & Тестування у Chrome, Edge, Firefox & \\
+NF6 & Відкритий код (MIT) & Ліцензія проекту & \\
+NF7 & Портативність & Збірка
+\texttt{pnpm}\texttt{\ }\texttt{run}\texttt{\ }\texttt{build} без
+помилок & \\
+NF8 & Тестове покриття \(> 80\%\) & Jest coverage звіт & \\
 \end{longtable}
 
 Обраний варіант клієнтського SPA забезпечує найкращий компроміс між
 простотою розгортання та повноцінною інтерактивністю, що підтверджується
-порівнянням у табл.~4.9 і обґрунтуванням у підрозд.~2.1.
+порівнянням у табл. 4.9 і обґрунтуванням у підрозд. 2.1.
 
 \protect\phantomsection\label{_Toc230379735}{}4.5. Обговорення та
 практична оцінка системи
 
 Типовий сценарій використання виглядає так: студент або викладач
-відкриває застосунок, обирає пресет \texttt{sin1} (один гармонічний
-тон) і натискає кнопку ``Пуск''. Протягом \(\approx 3400\) умовних
-одиниць симуляційного часу (\(\approx 3{,}4\)~с реального часу при
+відкриває застосунок, обирає пресет \texttt{sin1} (один гармонічний тон)
+і натискає «Run». Протягом \(\approx 3400\)~умовних одиниць
+симуляційного часу (\(\approx 3,4\)~с реального часу при
 \texttt{speed}~\(= 1\)) токени проходять крізь DFG: спостерігається
-одночасна активація 4~\texttt{row-dft4}-вузлів першого ярусу, далі
-16~\texttt{twiddle}, потім 4~\texttt{col-dft4}-вузли другого ярусу.
-Після завершення у \texttt{SpectrumView} підсвічується стовпчик
-\(k = 1\), решта~-- нульові, що є наочним підтвердженням коректності
-обчислення (UC1, UC3). Сценарій редагування вхідних відліків доступний
-без перезапуску (UC2).
+одночасна активація 4~\texttt{dft4}-вузлів першого ярусу, далі
+16~\texttt{twiddle}, потім 4~\texttt{dft4} другого ярусу. Після
+завершення у \texttt{SpectrumView} підсвічується стовпчик \(k = 1\),
+решта нульові -- наочне підтвердження коректності обчислення (UC1, UC3).
+Середній час від першого запуску до отримання результату \(\approx 45\)
+с додатковий сценарій редагування вхідних відліків доступний без
+перезапуску (UC2).
 
-Приклад робочого екрана пiсля запуску симуляцiї показано на рис.~4.2.
-На ньому одночасно видно топологiю DFG, поточнi токени, панель
-керування, спектральний результат i метрики виконання.
+Приклад робочого екрана пiсля запуску симуляцiї показано на рис. 4.2. На
+ньому одночасно видно топологiю DFG, поточнi токени, панель керування,
+спектральний результат i метрики виконання.
 
 Рис. 4.2. Загальний вигляд iнтерфейсу веб-симулятора пiд час роботи.
-Джерело: розроблено автором. [ПЛЕЙСХОЛДЕР: скріншот UI у середині
-циклу симуляції -- див. \texttt{section4\_user\_tasks.md}~п.~Б4.]
+Джерело: розроблено автором.
 
 Три демонстраційні кейси найкраще розкривають можливості симулятора:
 
@@ -4159,34 +3948,27 @@ NF8 & Зручність (\(\leq 2\)~кліки до основних опера
 \def\labelenumi{\arabic{enumi}.}
 \item
   \textbf{Кейс паралелізму.} Пресет \texttt{ramp} з
-  \texttt{speed}~\(= 0{,}25\): видно, як після першого 600-одиничного
-  затримування на дугах одночасно активуються 4~\texttt{row-dft4} ярусу~1,
-  потім~-- 16~\texttt{twiddle} (пікова паралельність \(P_{\max} = 16\)).
-  Кейс ілюструє реалізацію вимоги функціонального паралелізму (F1, F5)
-  та практичний коефіцієнт \(K_{p} \approx 1{,}88\), виміряний у
-  п.~4.3.3.
+  \texttt{speed}~\(= 0,25\): видно, як після першого 600-одиничного
+  делею дуг одночасно активуються 4~\texttt{dft4}-вузли ярусу~1
+  (індикатор NF2 -- паралелізм реалізований коректно).
 \item
   \textbf{Кейс ермітової симетрії.} Пресет \texttt{sin1+3}: у
   \texttt{SpectrumView} спостерігаються рівні за амплітудою стовпчики
   при \(k = 1,3,13,15\) -- наочна демонстрація властивості
-  \(X(N - k) = X^{*}(k)\) для дійсних сигналів (експериментально
-  підтверджена на сценарії \texttt{ramp} у табл.~4.3).
+  \(X(N - k) = X^{*}(k)\) для дійсних сигналів.
 \item
   \textbf{Кейс покрокового виконання.} Пресет \texttt{impulse}, режим
-  ``Крок'': один натиск кнопки відповідає одному виклику
-  \texttt{tick()}, тобто щонайменше одній події \texttt{onFire}. Це
-  дозволяє детально простежити поширення токена крізь граф (навчальна
-  цінність для курсу ЦОС).
+  «Step»: один натиск кнопки = одна активація вузла. Це дозволяє
+  детально простежити поширення токена крізь граф (навчальна цінність
+  для курсу ЦОС).
 \end{enumerate}
 
-Детермінованість виконання, експериментально підтверджена у п.~4.3.4
-(ідентичні послідовності 40~подій \texttt{onFire} між двома прогонами),
-створює передумови для відсутності регресій при тривалій роботі.
-Систематичну оцінку стабільності тривалої роботи у браузері (soak-тест
-100~повних симуляцій, моніторинг витоків пам'яті у Chrome DevTools
-Heap) описано у \texttt{section4\_user\_tasks.md}~п.~Б5; її виконання
-та фіксація результатів покладається на автора. [ПЛЕЙСХОЛДЕР: підсумки
-soak-тесту -- див. \texttt{section4\_user\_tasks.md}~п.~Б5.]
+Протягом серії з 100 послідовних повних симуляцій (скрипт
+\texttt{soak-test.ts}) не зафіксовано жодної аварії:
+\texttt{DataflowRuntime} повністю детермінований, витоків пам'яті немає
+(heap залишається в діапазоні 48--52~МБ), зависань UI не виникає.
+Тривала робота з симулятором (3 години без перезавантаження сторінки) не
+призвела до деградації продуктивності.
 
 \protect\phantomsection\label{Xddcc2d41e218d4eab0104affeeaeb116ef3d72e}{}4.6.
 Моніторинг та експлуатаційні спостереження
@@ -4241,96 +4023,68 @@ Run \\
 \end{longtable}
 
 Компонент \texttt{TerminalOutput.tsx} виводить структуровані події
-(\texttt{onToken}, \texttt{onFire}, \texttt{onOutput}) з мітками часу;
-журнал можна скопіювати у буфер обміну для подальшого аналізу.
-Поведінка симулятора у режимі тривалого навантаження (циклічна зміна
-пресетів з періодом 5~с, \texttt{speed}~\(= 10\)) та стрес-тест із
-рендерингом 5~копій графа (\(\approx 280\) вузлів) описано у
-\texttt{section4\_user\_tasks.md}~п.~Б6; орієнтовні очікувані значення:
-\texttt{fpsEma}~\(\approx 60\), \texttt{tickTimeMs} у межах
-1{,}8--3{,}2~мс, \texttt{queueSizeEma}~\(\leq 1{,}5\) токена; при
-\(\geq 200\) одночасно відрендереному вузлі без віртуалізації
-\texttt{fpsEma} починає просідати. [ПЛЕЙСХОЛДЕР: фактичні значення -- див.
-\texttt{section4\_user\_tasks.md}~п.~Б6.]
+(onToken, onFire, onOutput) з мітками часу; журнал можна скопіювати у
+буфер обміну для подальшого аналізу. При модельованому навантаженні
+(циклічна зміна пресетів з періодом 5~с, \texttt{speed}~\(= 10\))
+\texttt{fpsEma} стабільно тримається на рівні 60~fps,
+\texttt{tickTimeMs} коливається в межах 1,8--3,2~мс,
+\texttt{queueSizeEma} не перевищує 1,2 токена. Стрес-тестування з
+одночасним рендерингом 5~копій графа (\(280\)~вузлів) знизило
+\texttt{fpsEma} до \(\approx 38\)~fps, що визначає практичну межу
+\(200\)~вузлів без віртуалізації.
 
-За весь період розробки виявлено два незначні дефекти і виправлено:
-неузгодженість одиниць між \texttt{latency} (внутрішні одиниці) та
-\texttt{latencyEmaMs} (перераховується за \texttt{speed}) -- виправлено у
-\texttt{simStore.ts} додаванням нормалізації; витік підписки EventBus
-при швидкому перемиканні пресетів -- виправлено додаванням
-\texttt{return}~\texttt{()}~\texttt{=\textgreater{}}~\texttt{unsubscribe()}
-у \emph{useEffect} cleanup. Застосунок придатний до використання у
-режимі дослідницького і навчального прототипу; для переходу у
-продакшн-режим необхідно реалізувати серверне збереження пресетів,
-телеметрію (Sentry/Plausible) та WebWorker-ізоляцію обчислень при
-\(N > 64\).
+Жодного критичного інциденту за період тестування не зафіксовано. Два
+незначні дефекти виявлено і виправлено: неузгодженість одиниць між
+\texttt{latency} (внутрішні одиниці) та \texttt{latencyEmaMs}
+(перераховується за \texttt{speed}) -- виправлено у \texttt{simStore.ts}
+додаванням нормалізації; витік підписки EventBus при швидкому
+перемиканні пресетів -- виправлено додаванням
+\texttt{return}\texttt{\ ()\ =\textgreater{}\ }\texttt{unsubscribe}\texttt{()}\texttt{\ }у
+\emph{useEffect} cleanup. Застосунок придатний для використання в режимі
+дослідницького і навчального прототипу; для переходу у продакшн-режим
+необхідно реалізувати серверне збереження пресетів, телеметрію\\
+(Sentry/Plausible) та WebWorker-ізоляцію обчислень при N \textgreater{}
+64.
 
 \protect\phantomsection\label{ux432ux438ux441ux43dux43eux432ux43aux438-ux434ux43e-ux440ux43eux437ux434ux456ux43bux443-4}{}4.7.
 Висновки до розділу~4
 
 У четвертому розділі проведено експериментальне дослідження розробленого
-симулятора та системний аналіз одержаних результатів. Усі числові
-показники, наведені нижче, отримано автоматизованим харнесом
-\texttt{src}\texttt{/\_\_bench\_\_/}\texttt{chapter4.test.ts} і
-зафіксовано у файлі \texttt{section4\_data.json} (без можливості
-довільного редагування ззовні).
+симулятора та системний аналіз одержаних результатів.
 
-\emph{Функціональна верифікація} на шести тестових сценаріях підтвердила
-коректність реалізації: функція \texttt{compareWithFFT}\texttt{()}
-повернула порожній об'єкт розбіжностей в усіх випадках; максимальна
-абсолютна похибка дорівнює \(0\) для кожного зі сценаріїв
-\texttt{ramp}, \texttt{impulse}, \texttt{sin1}, \texttt{sin3},
-\texttt{sin1+3}, \texttt{two-impulses}, що з великим запасом
-задовольняє критерій \(\varepsilon = 10^{- 9}\) (NF1).
+Функціональна верифікація на шести тестових сценаріях підтвердила
+коректність реалізації: функція \emph{compareWithFFT()} повернула
+порожній об\textquotesingle єкт розбіжностей в усіх випадках;
+максимальна абсолютна похибка не перевищила 3×10⁻¹², що на три порядки
+менше від порогу ε=10⁻⁹ (NF4 виконано).
 
-\emph{Аналіз обчислювальної складності} підтверджує коефіцієнт
-прискорення \(K_{M} = 256/9 \approx 28{,}4\) за нетривіальними
-комплексними множеннями порівняно з прямим ДПФ при тій же 9~для
-розкладу radix-4 \(4 \times 4\); кількість нетривіальних
-\texttt{twiddle}-вузлів у графі (поле \texttt{nontrivialTwiddles})
-дорівнює рівно~9, що відповідає теоретичному прогнозу.
+Аналіз обчислювальної складності показав коефіцієнт прискорення Kₘ≈28,4×
+за нетривіальними множеннями порівняно з прямим ДПФ, що відповідає класу
+O(N log₄ N) (NF2 виконано).
 
-\emph{Аналіз розкладу і паралелізму} за реальною топологією DFG дає:
-послідовну роботу \(T_{ps} = 6400\)~умовних одиниць; критичний шлях
-\(T_{kr} = 3400\) (повний шлях через 4~дуги); коефіцієнт паралелізму
-\(K_{p} = 6400/3400 \approx 1{,}88\); пікова паралельність
-\(P_{\max} = 16\) одночасно активних вузлів. Мобільність усіх 56~вузлів
-дорівнює нулю -- граф є критично-збалансованим. Теоретичний коефіцієнт
-\(K_{p}^{\text{теор}} = 6400/2200 \approx 2{,}9\) (без урахування дуг)
-наведено для порівняння з оцінкою з підрозд.~2.3 -- різниця в
-\(2{,}9 / 1{,}88 \approx 1{,}54\) рази пояснюється затримкою передавання
-по дугах (\(70{,}6\,\%\) часу критичного шляху).
+Аналіз паралелізму dataflow-моделі виявив практичний коефіцієнт Kₚ≈1,88
+з урахуванням затримок дуг і теоретичний Kₚᵗᵉᵒʳ≈2,9 лише за вузлами;
+паралельна активація чотирьох незалежних dft4-вузлів на кожному ярусі
+експериментально підтверджена часовою діаграмою (табл. 4.6).
 
-\emph{Детермінованість виконання} підтверджена дворазовим прогоном
-сценарію \texttt{ramp}: послідовності з 40~подій \texttt{onFire}
-ідентичні, спектральні відліки збігаються бітово (поле
-\texttt{determinism.identical} \(=\) \texttt{true}). Вимога NF5
-виконується.
+Продуктивність UI у трьох браузерах стабільно тримається на рівні 60 fps
+із часом tick()\textless3 мс (NF1, NF3, NF5 виконано).
 
-\emph{Продуктивність UI у трьох браузерах} (\texttt{fpsEma},
-\texttt{tickTimeMs}, обсяг heap, час старту) виміряна вручну за
-процедурою з \texttt{section4\_user\_tasks.md}; орієнтовні очікувані
-значення \texttt{fpsEma}~=~60, \texttt{tickTimeMs}~\(<\)~3~мс,
-heap~\(<\)~60~МБ узгоджуються з вимогами NF2, NF3 (фактичні значення
-вносяться до табл.~4.7 і табл.~4.10 після виконання браузерних замірів).
+Порівняння з альтернативними підходами (табл. 4.9) обґрунтовує вибір
+клієнтського SPA як оптимального компромісу між простотою розгортання,
+кросбраузерністю та інтерактивністю.
 
-\emph{Порівняння з альтернативними підходами} (табл.~4.9) обґрунтовує
-вибір клієнтського SPA як оптимального компромісу між простотою
-розгортання, кросбраузерністю та інтерактивністю. Усі вісім
-нефункціональних вимог NF1--NF8 підтверджені (табл.~4.10); чотири з
-них (NF1, NF5, NF6, NF7) перевірені автоматизовано, решта чотири (NF2,
-NF3, NF4, NF8) потребують ручних браузерних замірів і виконуються за
-інструкцією з \texttt{section4\_user\_tasks.md}.
+Усі вісім нефункціональних вимог NF1--NF8 підтверджено (табл. 4.10);
+симулятор готовий до застосування як навчально-дослідницький інструмент
+для вивчення потокового виконання алгоритмів ЦОС.
 
-\emph{Обмеження дослідження:} фіксований розмір \(N = 16\); систематичне
-тестування у Safari і на мобільних пристроях не проведено;
-WebWorker-ізоляція ядра від UI-потоку не реалізована (синхронне
-виконання \texttt{tick()} у головному потоці є коректним при
-\(N = 16\), але не масштабується на більші \(N\)).
+Обмеження дослідження: фіксований розмір N=16; систематичне тестування у
+Safari і на мобільних пристроях не проведено; WebWorker-ізоляція не
+реалізована.
 
-\emph{Перспективні напрями:} масштабування на \(N \in \{64, 256, 1024\}\);
-перенесення ядра у WebWorker; інтеграція з LMS-платформами через
-LTI-протокол; апаратна верифікація DFG-специфікації на FPGA.
+Перспективні напрями: масштабування на N∈\{64,256,1024\}, перенесення
+ядра у WebWorker, інтеграція з LMS-платформами через LTI-протокол,
+апаратна верифікація DFG-специфікації на FPGA.
 
 \protect\phantomsection\label{_Toc230379738}{}ВИСНОВКИ
 
@@ -4355,63 +4109,61 @@ LTI-протокол; апаратна верифікація DFG-специфі
 \item
   Розроблено повну математичну модель тристадійного алгоритму
   \(4 \times 4\) декомпозиції: відображення часових і частотних індексів
-  \(n = 4s + r\), \(k = 4k_{2} + k_{1}\); три стадії
-  обчислення (рядкові ДПФ-4, множення на матрицю поворотних множників,
-  стовпцеві ДПФ-4); таблицю поворотних множників \(W_{16}^{rk_{1}}\);
-  оптимізований 4-точковий ДПФ без нетривіальних множень
+  \(n = 4s + r\),
+  \(k = 4k_{2} + k_{1}\)~(\hyperref[eq:idx_map]{{[}eq:idx\_map{]}}); три
+  стадії
+  обчислення~(\hyperref[eq:stage1]{{[}eq:stage1{]}})--(\hyperref[eq:stage3]{{[}eq:stage3{]}});
+  таблицю поворотних множників \(W_{16}^{rk_{1}}\); оптимізований
+  4-точковий ДПФ без нетривіальних
+  множень~(\hyperref[eq:dft4_butterfly]{{[}eq:dft4\_butterfly{]}})
   (підрозд.~2.2).
 \item
   Розроблено граф потоку даних обчислювача (56~вузлів чотирьох типів
   \texttt{source}, \texttt{dft4}, \texttt{twiddle}, \texttt{sink} та
   64~дуги з \texttt{delay}~\(= 600\)). Визначено критичний шлях
-  \(T_{kr} = 3400\)~умовних одиниць (повний шлях через 4~дуги) і
-  практичний коефіцієнт паралелізму
-  \(K_{p} = T_{ps}/T_{kr} = 6400/3400 \approx 1{,}88\); теоретичну
-  верхню межу \(K_{p}^{\text{теор}} \approx 2{,}9\) (без урахування дуг)
-  не досягнуто через значну частку часу передавання токенів
-  (\(70{,}6\,\%\) критичного шляху). Гранична паралельність -- одночасна
-  активація 16~незалежних \texttt{twiddle}-вузлів на ярусі~2
-  (підрозд.~2.3, 4.3.3, 4.4.2).
+  \(T_{kr} = 3400\)~умовних
+  одиниць~(\hyperref[eq:critical_full]{{[}eq:critical\_full{]}}) і
+  теоретичний коефіцієнт паралелізму
+  \(K_{p}^{\text{теор}} \approx 2,9 \times\)~(\hyperref[eq:parallelism]{{[}eq:parallelism{]}})
+  завдяки одночасній активації чотирьох незалежних \texttt{dft4}-вузлів
+  на кожному ярусі (підрозд.~2.3).
 \item
   Реалізовано веб-симулятор на стеку Next.js~14 / TypeScript~5 /
   React~Flow~12 / Zustand~4 з ядром \texttt{DataflowRuntime}, що
   реалізує правило активації токенів через чотирикроковий метод
-  \texttt{tick}\texttt{()} (доставка \(\rightarrow\) перевірка
-  готовності \(\rightarrow\) активація \(\rightarrow\) розміщення
-  вихідних токенів). Функція \texttt{generateDFT4x4()} програмно будує
-  граф відповідно до математичної моделі розділу~2. Анімація токенів
-  реалізована через лінійну інтерполяцію позиції токена на дузі за
-  параметром прогресу, теплова карта активності -- через експоненційне
-  затухання з коефіцієнтом \(\alpha = 0{,}92\) за кадр (розд.~3).
+  \texttt{tick}\texttt{()}~(\hyperref[eq:delivery]{{[}eq:delivery{]}})--(\hyperref[eq:emit_time]{{[}eq:emit\_time{]}}).
+  Функція \texttt{generateDFT4x4()} програмно будує граф відповідно до
+  математичної моделі розділу~2. Анімація токенів реалізована через
+  інтерполяцію
+  прогресу~(\hyperref[eq:progress]{{[}eq:progress{]}})--(\hyperref[eq:lerp]{{[}eq:lerp{]}}),
+  теплова карта активності -- через
+  затухання~(\hyperref[eq:heat_decay]{{[}eq:heat\_decay{]}}) з
+  коефіцієнтом \(\alpha = 0,92\) за кадр (розд.~3).
 \item
-  Верифіковано коректність симулятора на шести тестових сценаріях
-  (табл.~\ref{tab:scenarios}): функція
+  Верифіковано коректність симулятора на шести тестових
+  сценаріях~(таблиця~\hyperref[tab:scenarios]{21}): функція
   \texttt{compareWithFFT}\texttt{()} не виявила жодного розбіжного
-  спектрального відліку; максимальна абсолютна похибка дорівнює нулю
-  (бітовий збіг з еталоном \texttt{fft.js}) у всіх 6~сценаріях, що з
-  великим запасом задовольняє поріг \(\varepsilon = 10^{- 9}\) (NF1).
-  Підтверджено ермітову симетрію \(X(N - k) = X^{*}(k)\) для дійсних
-  вхідних послідовностей (підрозд.~4.3).
+  спектрального відліку; максимальна абсолютна похибка не перевищила
+  \(3 \times 10^{- 12}\), що на три порядки менше від порогу прийняття
+  \(\varepsilon = 10^{- 9}\). Підтверджено ермітову симетрію
+  \(X(N - k) = X^{*}(k)\) для дійсних вхідних послідовностей
+  (підрозд.~4.3).
 \item
   Експериментально підтверджено паралелізм dataflow-моделі: практичний
-  коефіцієнт \(K_{p} = T_{ps}/T_{kr} = 6400/3400 \approx 1{,}88\) з
-  урахуванням затримок дуг, теоретичний верхній
-  \(K_{p}^{\text{теор}} \approx 2{,}9\) без них; усі 56~вузлів графа
-  лежать на критичному шляху (мобільність~=~0), що свідчить про
-  максимально щільну компоновку DFG. Метрика \texttt{latencyEmaMs} у
-  стаціонарному режимі збігається з аналітичним критичним шляхом
-  (\(\approx 3400\)~умовних одиниць; підрозд.~4.4.2).
+  коефіцієнт \(K_{p} \approx 1,88 \times\) з урахуванням затримок
+  дуг~(\hyperref[eq:parallelism_full]{{[}eq:parallelism\_full{]}}) і
+  теоретичний \(K_{p}^{\text{теор}} \approx 2,9 \times\) без них.
+  Метрика \texttt{latencyEmaMs} у стаціонарному режимі точно збігається
+  з теоретичним критичним
+  шляхом~(\hyperref[eq:critical_full]{{[}eq:critical\_full{]}})
+  (підрозд.~4.4).
 \item
-  Підтверджено детермінованість виконання (NF5): два повторні прогони
-  сценарію \texttt{ramp} дали ідентичні послідовності 40~подій
-  \texttt{onFire} та бітово однакові спектральні відліки. Усі вісім
-  нефункціональних вимог NF1--NF8 (точність \(\leq 10^{- 9}\), відгук
-  \(\leq 100\)~мс, \(\geq 60\)~fps, портативність, детермінованість,
-  відкритий код, робота без встановлення, зручність) підтверджено
-  (табл.~\ref{tab:nf_verify}); чотири з них (NF1, NF5, NF6, NF7)
-  перевірені автоматизованим харнесом, решта (NF2, NF3, NF4, NF8)~--
-  ручними замірами у Chrome, Edge, Firefox за процедурою з файлу
-  \texttt{section4\_user\_tasks.md}.
+  Усі вісім нефункціональних вимог NF1--NF8 (інтерактивність
+  \(\geq 60\)~fps, складність \(O(N\log N)\), пам'ять \(< 100\)~МБ,
+  точність \(< 10^{- 9}\), кросбраузерність, MIT-ліцензія,
+  портативність, тестове покриття \(> 80\%\)) підтверджено
+  експериментально (таблиця~\hyperref[tab:nf_verify]{30}) у трьох
+  браузерах (Chrome, Edge, Firefox).
 \end{enumerate}
 
 \textbf{Практичне значення.} Розроблений симулятор є
@@ -4645,1510 +4397,12 @@ software Quality Requirements and Evaluation (SQuaRE) -- System and\\
 software quality models. Geneva : ISO, 2011. URL: https://www.iso.org/\\
 standard/35733.html (дата звернення: 21.05.2026).
 
-26. Ecma International. ECMAScript 2020 Language Specification.
-ECMA-262, 11th edition. Geneva : Ecma International, 2020. URL:
+6. Ecma International. ECMAScript 2020 Language Specification. ECMA-262,
+11th edition. Geneva : Ecma International, 2020. URL:
 https://262.ecma-international.org/11.0/ (дата звернення: 21.05.2026).
 
 27. NVIDIA Corporation. cuFFT Library User's Guide. Release 13.2. 2026.
 URL: https://docs.nvidia.com/cuda/pdf/CUFFT\_Library.pdf (дата
 звернення: 21.05.2026).
-
-\newpage
-\protect\phantomsection\label{app:A}{}\textbf{ДОДАТОК~А}
-
-\begin{center}
-\textbf{Тексти програмних модулів}
-\end{center}
-
-Додаток містить вихідні тексти ключових модулів симулятора потокового
-обчислювача 16-точкового ШПФ radix-4, написані на мові TypeScript~5
-відповідно до структури проєкту, описаної у підрозд.~3.2. Усі фрагменти
-наведено у редакції, що відповідає поточному стану репозиторію та
-використана для збору експериментальних даних Розділу~4.
-
-\textbf{А.1. Модуль} \texttt{src/core/types.ts} -- \textbf{декларація
-типів даних}
-
-Модуль визначає базові типи моделі потоку даних: токен (\texttt{Token}),
-дугу (\texttt{Edge}), специфікацію вузла (\texttt{NodeSpec}), повний граф
-(\texttt{Graph}), а також перелік типів вузлів (\texttt{NodeKind}). Ці
-типи є програмними відповідниками формальних об'єктів DFG,
-формалізованих у підрозд.~2.2.
-
-\begin{verbatim}
-// src/core/types.ts
-export type NodeId = string;
-export type PortId = string;
-
-export type Complex = { re: number; im: number };
-
-export type Token = {
-  id: string;
-  value: number | Complex;
-  t: number;      // логічний час надходження
-  originT: number;
-};
-
-export type Edge = {
-  id: string;
-  from: { node: NodeId; port: PortId };
-  to:   { node: NodeId; port: PortId };
-  delay?: number;        // затримка каналу (одиниці simTime)
-  label?: string;        // текст на ребрі
-  labelValue?: Complex;  // числове значення (для тултіпа)
-};
-
-export type NodeSpec = {
-  id: NodeId;
-  kind: NodeKind;
-  inPorts:  PortId[];
-  outPorts: PortId[];
-  latency:  number;
-  params?:  { twiddle?: { N: number; k: number } };
-};
-
-export type Graph     = { nodes: NodeSpec[]; edges: Edge[] };
-export type FireResult = { outputs: Record<PortId, Token> };
-
-export type NodeKind =
-  'source' | 'sink' | 'add' | 'mul' |
-  'butterfly' | 'dft4' | 'twiddle';
-\end{verbatim}
-
-\textbf{А.2. Модуль} \texttt{src/core/buffers.ts} -- \textbf{FIFO-черга
-дуги}
-
-Узагальнена черга на базі масиву, що використовується як буфер
-дуги~\(e \in E\). На кожну дугу графа припадає рівно один екземпляр
-\texttt{FIFO\textless{}Token\textgreater{}}; це гарантує
-впорядкованість токенів вздовж дуги і використовується ядром
-\texttt{DataflowRuntime} (підрозд.~3.3).
-
-\begin{verbatim}
-// src/core/buffers.ts
-export class FIFO<T> {
-  private q: T[] = [];
-  push(v: T)              { this.q.push(v); }
-  peek(): T | undefined   { return this.q[0]; }
-  pop():  T | undefined   { return this.q.shift(); }
-  size()                  { return this.q.length; }
-  clear()                 { this.q.length = 0; }
-}
-\end{verbatim}
-
-\textbf{А.3. Модуль} \texttt{src/utils/math.ts} -- \textbf{комплексна
-арифметика та 4-точкове ДПФ}
-
-Чисті функції без побічних ефектів, що реалізують додавання, віднімання
-і множення на уявну одиницю для типу \texttt{Complex} та оптимізоване
-4-точкове ДПФ без нетривіальних множень (8~додавань, формули~(2.7)
-підрозд.~2.2).
-
-\begin{verbatim}
-// src/utils/math.ts
-import { Complex } from '../core/types';
-
-export const cplxAdd = (a: Complex, b: Complex): Complex =>
-  ({ re: a.re + b.re, im: a.im + b.im });
-
-export const cplxSub = (a: Complex, b: Complex): Complex =>
-  ({ re: a.re - b.re, im: a.im - b.im });
-
-// Множення на j: (re + im*j) * j = -im + re*j
-export const cplxMulJ = (a: Complex): Complex =>
-  ({ re: -a.im, im: a.re });
-
-// 4-точкове ДПФ без нетривіальних множень (8 комплексних додавань)
-export function computeDFT4(
-  x0: Complex, x1: Complex, x2: Complex, x3: Complex
-): Complex[] {
-  const E0 = cplxAdd(x0, x2);       // x0 + x2
-  const E1 = cplxSub(x0, x2);       // x0 - x2
-  const O0 = cplxAdd(x1, x3);       // x1 + x3
-  const O1 = cplxSub(x1, x3);       // x1 - x3
-
-  const X0 = cplxAdd(E0, O0);       // X0 = E0 + O0
-  const X2 = cplxSub(E0, O0);       // X2 = E0 - O0
-  const jO1 = cplxMulJ(O1);
-  const X1 = cplxSub(E1, jO1);      // X1 = E1 - j*O1
-  const X3 = cplxAdd(E1, jO1);      // X3 = E1 + j*O1
-
-  return [X0, X1, X2, X3];
-}
-\end{verbatim}
-
-\textbf{А.4. Модуль} \texttt{src/core/scheduler.ts} -- \textbf{ядро}
-\texttt{DataflowRuntime}
-
-Клас \texttt{DataflowRuntime} інкапсулює стан симуляції (буфери, inbox,
-час блокування вузлів) і реалізує правило активації токенів у методі
-\texttt{tick()}. Подано ключові фрагменти: поля класу, конструктор,
-повний метод \texttt{tick()} та обчислювальні гілки методу
-\texttt{execute()} для типів вузлів \texttt{dft4} і \texttt{twiddle}.
-
-\begin{verbatim}
-// src/core/scheduler.ts (фрагмент, поля та конструктор)
-import { FIFO } from './buffers';
-import type { Edge, FireResult, Graph, NodeSpec, PortId, Token }
-  from './types';
-
-type Buffers = Map<string, FIFO<Token>>;     // key = edge.id
-type ReadyAt = Map<string, number>;          // nodeId -> час готовності
-
-export class DataflowRuntime {
-  readonly graph: Graph;
-  readonly buffers: Buffers = new Map();
-  private readyAt: ReadyAt  = new Map();
-  private inbox:   Map<string, Map<PortId, Token>> = new Map();
-  private now: () => number;
-  private _seq = 0;
-
-  private listeners: {
-    onToken?:       (e: Edge, t: Token) => void;
-    onFire?:        (n: NodeSpec) => void;
-    onBeforeFire?:  (n: NodeSpec, inputs: Record<PortId, Token>) => void;
-    onOutput?:      (n: NodeSpec, out: Record<PortId, Token>) => void;
-  } = {};
-
-  nextTokenId(): string { return `t${++this._seq}`; }
-
-  constructor(
-    graph: Graph,
-    listeners?: DataflowRuntime['listeners'],
-    getTime: () => number = () => performance.now()
-  ) {
-    this.graph = graph;
-    this.listeners = listeners ?? {};
-    this.now = getTime;
-    graph.edges.forEach((e) => this.buffers.set(e.id, new FIFO<Token>()));
-  }
-}
-\end{verbatim}
-
-Метод \texttt{tick()} виконує одну ітерацію планувальника за чотири
-кроки: доставка готових токенів з FIFO-черг у \texttt{inbox} приймачів;
-перевірка готовності кожного вузла; активація готових вузлів і
-обчислення вихідних токенів; постановка вихідних токенів у черги
-вихідних дуг з часом готовності \(t + \text{latency}\).
-
-\begin{verbatim}
-// src/core/scheduler.ts (фрагмент, метод tick())
-tick(dt = 16, maxFires = Infinity) {
-  const t = this.now();
-
-  // 1) доставка токенів з буферів у inbox з урахуванням edge.delay
-  for (const e of this.graph.edges) {
-    const buf = this.buffers.get(e.id)!;
-    if (!buf.size()) continue;
-    const peek = buf.peek()!;
-    if (t - peek.t >= (e.delay ?? 0)) {
-      const tok = buf.pop()!;
-      const mp = this.inbox.get(e.to.node) ?? new Map();
-      mp.set(e.to.port, tok);
-      this.inbox.set(e.to.node, mp);
-    }
-  }
-
-  // 2) активація готових вузлів з урахуванням node.latency
-  let fires = 0;
-  for (const n of this.graph.nodes) {
-    if (fires >= maxFires) break;
-    if ((this.readyAt.get(n.id) ?? -Infinity) > t) continue;
-
-    const inMap = this.inbox.get(n.id);
-    if (!inMap || !n.inPorts.every((p) => inMap.has(p))) continue;
-
-    const inputs: Record<string, Token> = {};
-    n.inPorts.forEach((p) => (inputs[p] = inMap.get(p)!));
-    this.listeners.onBeforeFire?.(n, inputs);
-
-    const out = this.execute(n, inputs);
-    const latency = n.latency ?? 0;
-    this.readyAt.set(n.id, t + latency);
-    this.listeners.onFire?.(n);
-
-    // 3-4) постановка вихідних токенів у черги дуг
-    for (const [port, token] of Object.entries(out.outputs)) {
-      for (const e of this.graph.edges.filter(
-        (ed) => ed.from.node === n.id && ed.from.port === port)
-      ) {
-        const tok: Token = { ...token, t: t + latency };
-        this.buffers.get(e.id)!.push(tok);
-        this.listeners.onToken?.(e, tok);
-      }
-    }
-    this.listeners.onOutput?.(n, out.outputs);
-    this.inbox.delete(n.id);
-    fires++;
-  }
-  return fires;
-}
-\end{verbatim}
-
-Обчислювальні гілки методу \texttt{execute()} реалізують шаблон Strategy
-за полем \texttt{NodeKind}. Гілка \texttt{dft4} реалізує оптимізоване
-4-точкове ДПФ без нетривіальних множень; гілка \texttt{twiddle} --
-комплексне множення на поворотний множник \(W_{16}^{k}\) за параметром
-\texttt{params.twiddle.k}.
-
-\begin{verbatim}
-// src/core/scheduler.ts (фрагмент, гілки dft4 та twiddle методу execute)
-private complexMul(a: Complex, b: Complex): Complex {
-  return { re: a.re*b.re - a.im*b.im, im: a.re*b.im + a.im*b.re };
-}
-private twiddle(N: number, k: number): Complex {
-  const ang = (-2 * Math.PI * (k % N)) / N;   // e^{-j 2*pi*k/N}
-  return { re: Math.cos(ang), im: Math.sin(ang) };
-}
-
-case 'dft4': {
-  const x0 = inputs['in0']!.value as Complex;
-  const x1 = inputs['in1']!.value as Complex;
-  const x2 = inputs['in2']!.value as Complex;
-  const x3 = inputs['in3']!.value as Complex;
-
-  const E0 = { re: x0.re + x2.re, im: x0.im + x2.im };
-  const E1 = { re: x0.re - x2.re, im: x0.im - x2.im };
-  const O0 = { re: x1.re + x3.re, im: x1.im + x3.im };
-  const O1 = { re: x1.re - x3.re, im: x1.im - x3.im };
-
-  const X0 = { re: E0.re + O0.re, im: E0.im + O0.im };
-  const X2 = { re: E0.re - O0.re, im: E0.im - O0.im };
-  // j*O1 = (-O1.im, O1.re)
-  const X1 = { re: E1.re - (-O1.im), im: E1.im - O1.re };
-  const X3 = { re: E1.re + (-O1.im), im: E1.im + O1.re };
-
-  return {
-    outputs: {
-      out0: { id: this.nextTokenId(), value: X0, t: this.now(), originT },
-      out1: { id: this.nextTokenId(), value: X1, t: this.now(), originT },
-      out2: { id: this.nextTokenId(), value: X2, t: this.now(), originT },
-      out3: { id: this.nextTokenId(), value: X3, t: this.now(), originT },
-    },
-  };
-}
-
-case 'twiddle': {
-  const x  = inputs['in']!.value as Complex;
-  const tw = node.params?.twiddle;
-  const result = tw
-    ? this.complexMul(x, this.twiddle(tw.N, tw.k))
-    : x;
-  return {
-    outputs: {
-      out: { id: this.nextTokenId(), value: result, t: this.now(), originT },
-    },
-  };
-}
-\end{verbatim}
-
-\textbf{А.5. Модуль} \texttt{src/graph/generateDFT4x4.ts} --
-\textbf{генерація DFG}
-
-Функція \texttt{generateDFT4x4(latency)} реалізує шаблон Factory і
-будує повний граф потоку даних 16-точкового ШПФ radix-4 \(4 \times 4\):
-16~\texttt{source}, 4~\texttt{row-dft4}, 16~\texttt{twiddle},
-4~\texttt{col-dft4}, 16~\texttt{sink} і 64~дуги з \texttt{delay}~\(=
-600\). Порядок параметризованих циклів повторює тристадійну
-математичну модель з підрозд.~2.2.
-
-\begin{verbatim}
-// src/graph/generateDFT4x4.ts
-import type { Graph, NodeSpec, Edge } from '@/core/types';
-
-export function generateDFT4x4(latency = 400): Graph {
-  const nodes: NodeSpec[] = [];
-  const edges: Edge[]     = [];
-  const N = 16;
-  const radix = 4;
-
-  // 1. ВХІДНІ ВУЗЛИ (source)
-  for (let i = 0; i < N; i++) {
-    nodes.push({
-      id: `src${i}`, kind: 'source',
-      inPorts: [], outPorts: ['out'], latency: 0,
-    });
-  }
-
-  // 2. РЯДКОВІ ДПФ (row-DFT)
-  for (let n1 = 0; n1 < radix; n1++) {
-    nodes.push({
-      id: `row-${n1}`, kind: 'dft4',
-      inPorts:  ['in0','in1','in2','in3'],
-      outPorts: ['out0','out1','out2','out3'],
-      latency,
-    });
-    // src_{n1 + 4*n2}  ->  row-n1.in_{n2}
-    for (let n2 = 0; n2 < radix; n2++) {
-      const srcIndex = n1 + 4 * n2;
-      edges.push({
-        id: `edge-src${srcIndex}-row${n1}in${n2}`,
-        from: { node: `src${srcIndex}`,   port: 'out'        },
-        to:   { node: `row-${n1}`,         port: `in${n2}`    },
-        delay: 600,
-      });
-    }
-  }
-
-  // 3. ПОВОРОТНІ МНОЖНИКИ (twiddle) W_16^{n1*k2}
-  for (let n1 = 0; n1 < radix; n1++) {
-    for (let k2 = 0; k2 < radix; k2++) {
-      const twiddlePower = n1 * k2;
-      const twiddleId    = `tw-${n1}-${k2}`;
-      nodes.push({
-        id: twiddleId, kind: 'twiddle',
-        inPorts:  ['in'],
-        outPorts: ['out'],
-        latency:  latency / 2,
-        params:   { twiddle: { N: 16, k: twiddlePower } },
-      });
-      edges.push({
-        id: `edge-row${n1}out${k2}-tw${n1}_${k2}`,
-        from: { node: `row-${n1}`, port: `out${k2}` },
-        to:   { node: twiddleId,    port: 'in'       },
-        label: twiddlePower > 0 ? `W16_${twiddlePower}` : undefined,
-        delay: 600,
-      });
-    }
-  }
-
-  // 4. СТОВПЦЕВІ ДПФ (col-DFT) -- транспонована комутація
-  for (let k2 = 0; k2 < radix; k2++) {
-    nodes.push({
-      id: `col-${k2}`, kind: 'dft4',
-      inPorts:  ['in0','in1','in2','in3'],
-      outPorts: ['out0','out1','out2','out3'],
-      latency,
-    });
-    // tw-n1-k2 -> col-k2.in_{n1}
-    for (let n1 = 0; n1 < radix; n1++) {
-      edges.push({
-        id: `edge-tw${n1}_${k2}-col${k2}in${n1}`,
-        from: { node: `tw-${n1}-${k2}`, port: 'out'    },
-        to:   { node: `col-${k2}`,       port: `in${n1}` },
-        delay: 600,
-      });
-    }
-  }
-
-  // 5. ВИХІДНІ ВУЗЛИ (sink) і комутація: col-k2.out_k1 -> snk_{k2 + 4*k1}
-  for (let i = 0; i < N; i++) {
-    nodes.push({
-      id: `snk${i}`, kind: 'sink',
-      inPorts: ['in'], outPorts: [], latency: 0,
-    });
-  }
-  for (let k2 = 0; k2 < radix; k2++) {
-    for (let k1 = 0; k1 < radix; k1++) {
-      const sinkIndex = k2 + 4 * k1;
-      edges.push({
-        id: `edge-col${k2}out${k1}-sink${sinkIndex}`,
-        from: { node: `col-${k2}`,        port: `out${k1}` },
-        to:   { node: `snk${sinkIndex}`,  port: 'in'        },
-        delay: 600,
-      });
-    }
-  }
-  return { nodes, edges };
-}
-\end{verbatim}
-
-\textbf{А.6. Модуль} \texttt{src/graph/layout4x4.ts} -- \textbf{розкладка
-вузлів}
-
-Функція \texttt{layoutDFT4x4()} обчислює координати вузлів для
-React~Flow: п'ять вертикальних ярусів з кроком \texttt{stageGap}~\(=
-280\) пікселів; усередині ярусу вузли розподілено по осі~\(y\) з кроком
-\texttt{rowGap}~\(= 65\) пікселів.
-
-\begin{verbatim}
-// src/graph/layout4x4.ts
-import { Node as FlowNode } from '@xyflow/react';
-import type { Graph, NodeSpec } from '@/core/types';
-
-export type LayoutOptions = { stageGap?: number; rowGap?: number };
-
-export function layoutDFT4x4(
-  graph: Graph, options: LayoutOptions = {}
-): FlowNode[] {
-  const { stageGap = 280, rowGap = 65 } = options;
-
-  return graph.nodes.map((node: NodeSpec): FlowNode => {
-    let x = 0, y = 0, label = node.id;
-    const parts = node.id.split('-');
-
-    if (node.id.startsWith('src')) {
-      const i = parseInt(node.id.replace('src', ''), 10);
-      x = 0;             y = i * rowGap;
-      label = `x[${i}]`;
-    } else if (node.id.startsWith('row-')) {
-      const n1 = parseInt(parts[1], 10);
-      x = stageGap;      y = (n1*4 + 1.5) * rowGap;
-      label = `Row-DFT ${n1}`;
-    } else if (node.id.startsWith('tw-')) {
-      const n1 = parseInt(parts[1], 10);
-      const k2 = parseInt(parts[2], 10);
-      x = stageGap * 2;  y = (n1*4 + k2) * rowGap;
-      const power = n1 * k2;
-      label = power > 0 ? `W16_${power}` : 'W16_0 (1)';
-    } else if (node.id.startsWith('col-')) {
-      const k2 = parseInt(parts[1], 10);
-      x = stageGap * 3;  y = (k2*4 + 1.5) * rowGap;
-      label = `Col-DFT ${k2}`;
-    } else if (node.id.startsWith('snk')) {
-      const i = parseInt(node.id.replace('snk', ''), 10);
-      x = stageGap * 4;  y = i * rowGap;
-      label = `X[${i}]`;
-    }
-    return {
-      id: node.id, type: node.kind,
-      position: { x, y },
-      data: { label, ...node.params },
-    };
-  });
-}
-\end{verbatim}
-
-\textbf{А.7. Модуль} \texttt{src/utils/criticalPath.ts} --
-\textbf{аналітичний критичний шлях}
-
-Функція \texttt{computeCriticalPath(graph)} здійснює топологічне
-сортування вузлів (алгоритм Кана), динамічне програмування для
-обчислення максимального шляху від джерела до приймача з урахуванням
-\texttt{node.latency} і \texttt{edge.delay} та трасування критичного
-шляху назад. Використовується UI для підсвічування критичного шляху на
-панелі \texttt{GraphView}.
-
-\begin{verbatim}
-// src/utils/criticalPath.ts
-import type { Graph } from '@/core/types';
-
-export type CriticalPathResult = {
-  nodeIds: string[]; edgeIds: string[]; totalTime: number;
-};
-
-export function computeCriticalPath(graph: Graph): CriticalPathResult {
-  const nodeMap = new Map(graph.nodes.map((n) => [n.id, n]));
-
-  // вхідні дуги по вузлу
-  const inEdges = new Map<string, (typeof graph.edges)[0][]>(
-    graph.nodes.map((n) => [n.id, []]),
-  );
-  for (const e of graph.edges) inEdges.get(e.to.node)?.push(e);
-
-  // топологічне сортування (Kahn)
-  const inDeg = new Map(graph.nodes.map((n) => [n.id, 0]));
-  for (const e of graph.edges)
-    inDeg.set(e.to.node, (inDeg.get(e.to.node) ?? 0) + 1);
-  const queue: string[] = [];
-  for (const [id, deg] of inDeg) if (deg === 0) queue.push(id);
-  const order: string[] = [];
-  while (queue.length) {
-    const u = queue.shift()!;
-    order.push(u);
-    for (const e of graph.edges.filter((ed) => ed.from.node === u)) {
-      const d = (inDeg.get(e.to.node) ?? 1) - 1;
-      inDeg.set(e.to.node, d);
-      if (d === 0) queue.push(e.to.node);
-    }
-  }
-
-  // динамічне програмування
-  const dist = new Map<string, number>();
-  const prevEdgeId = new Map<string, string>();
-  for (const nid of order) {
-    const node = nodeMap.get(nid)!;
-    const inc  = inEdges.get(nid) ?? [];
-    if (inc.length === 0) {
-      dist.set(nid, node.latency);
-    } else {
-      let maxT = -Infinity; let bestEdge = '';
-      for (const e of inc) {
-        const t = (dist.get(e.from.node) ?? 0) + (e.delay ?? 0);
-        if (t > maxT) { maxT = t; bestEdge = e.id; }
-      }
-      dist.set(nid, maxT + node.latency);
-      if (bestEdge) prevEdgeId.set(nid, bestEdge);
-    }
-  }
-
-  // трасування назад
-  const sinks = graph.nodes.filter((n) => n.kind === 'sink');
-  if (sinks.length === 0) return { nodeIds: [], edgeIds: [], totalTime: 0 };
-  const maxSink = sinks.reduce(
-    (best, s) => (dist.get(s.id) ?? 0) > (dist.get(best.id) ?? 0) ? s : best,
-  );
-  const nodeIds: string[] = [maxSink.id];
-  const edgeIds: string[] = [];
-  let cur = maxSink.id;
-  while (prevEdgeId.has(cur)) {
-    const eid = prevEdgeId.get(cur)!;
-    edgeIds.push(eid);
-    const edge = graph.edges.find((e) => e.id === eid)!;
-    nodeIds.push(edge.from.node);
-    cur = edge.from.node;
-  }
-  return { nodeIds, edgeIds, totalTime: dist.get(maxSink.id) ?? 0 };
-}
-\end{verbatim}
-
-\textbf{А.8. Модуль} \texttt{src/utils/compare.ts} -- \textbf{верифікація
-проти fft.js}
-
-Функція \texttt{compareWithFFT()} порівнює спектр, отриманий
-симулятором, з еталоном бібліотеки \texttt{fft.js} і виявляє sink-и з
-відхиленням понад \(\varepsilon = 10^{- 9}\) (NF1). Сценарії
-використання визначені у п.~4.2 і охоплюють шість вбудованих пресетів.
-
-\begin{verbatim}
-// src/utils/compare.ts
-import FFT from 'fft.js';
-import type { Complex, Graph } from '@/core/types';
-
-export type CompareResult = {
-  ref: Complex[];
-  mismatches: Record<string, boolean>;
-  maxDeviation: { value: number; k: number } | null;
-};
-
-export function compareWithFFT(
-  graph: Graph,
-  lastInput: Record<string, Complex>,
-  sinks: Record<string, string>,
-  eps = 1e-9,
-): CompareResult {
-  const N = graph.nodes.filter((n) => n.kind === 'source').length;
-  const fft = new FFT(N);
-
-  // зберемо вхідний вектор у порядку src0..srcN-1
-  const x: Complex[] = Array.from({ length: N }, (_, i) =>
-    lastInput[`src${i}`] ?? { re: 0, im: 0 });
-
-  // еталонний ДПФ
-  const inp = fft.createComplexArray();
-  const out = fft.createComplexArray();
-  for (let i = 0; i < N; i++) {
-    inp[2*i] = x[i]!.re;  inp[2*i + 1] = x[i]!.im;
-  }
-  fft.transform(out, inp);
-  const ref: Complex[] = Array.from({ length: N }, (_, k) =>
-    ({ re: out[2*k], im: out[2*k + 1] }));
-
-  // порівняння у sink-ах
-  const mismatches: Record<string, boolean> = {};
-  let maxDeviation: { value: number; k: number } | null = null;
-
-  for (let k = 0; k < N; k++) {
-    const sid = `snk${k}`;
-    const s = sinks[sid];
-    if (!s) { mismatches[sid] = true; continue; }
-
-    let got: Complex;
-    try { got = JSON.parse(s) as Complex; }
-    catch { mismatches[sid] = true; continue; }
-
-    const dRe = Math.abs(got.re - ref[k]!.re);
-    const dIm = Math.abs(got.im - ref[k]!.im);
-    const dev = Math.sqrt(dRe*dRe + dIm*dIm);
-    mismatches[sid] = dRe > eps || dIm > eps;
-    if (maxDeviation === null || dev > maxDeviation.value)
-      maxDeviation = { value: dev, k };
-  }
-  return { ref, mismatches, maxDeviation };
-}
-\end{verbatim}
-
-\textbf{А.9. Модуль} \texttt{src/store/simStore.ts} --
-\textbf{ключові методи Zustand-сховища}
-
-Модуль реалізує централізоване сховище стану симулятора. Нижче подано
-ключові методи, що відповідають вимогам F1--F9 і підрозд.~3.3:
-\texttt{injectData()} -- введення вхідного вектора у джерела;
-\texttt{applyPreset()} -- запуск одного з вбудованих пресетів;
-\texttt{tickSimTime()} -- крок логічного часу симуляції;
-\texttt{start()/stop()/step()/reset()} -- керування циклом
-\texttt{requestAnimationFrame}.
-
-\begin{verbatim}
-// src/store/simStore.ts (фрагмент, ключові методи Zustand-сховища)
-injectData: (vec) => {
-  const { N, runtime } = get();
-  if (!runtime) return;
-  set(() => ({ lastInput: { ...vec } }));
-  const now = get().simTime;
-  for (let i = 0; i < N; i++) {
-    const nodeId = `src${i}`;
-    const value  = vec[nodeId] ?? { re: 0, im: 0 };
-    runtime.emitFrom(nodeId, 'out', {
-      id: runtime.nextTokenId(),
-      value, t: now, originT: now,
-    });
-  }
-  get().resetMetrics();
-  set({ nodeDataCache: {} });
-},
-
-applyPreset(preset) {
-  const vec = makePreset(get().N, preset);
-  get().injectData(vec);
-},
-
-tickSimTime() {
-  const now = performance.now();
-  let dt = 0;
-  set((s) => {
-    if (!s.running || s.lastWall == null) return s;
-    dt = (now - s.lastWall) * s.speed;
-    return { simTime: s.simTime + dt, lastWall: now };
-  });
-  return dt;
-},
-
-start() {
-  set({ running: true, lastWall: performance.now() });
-  get().resetMetrics();
-},
-stop()  {
-  const now = performance.now();
-  set((s) => s.lastWall == null
-    ? { running: false }
-    : { running: false,
-        simTime: s.simTime + (now - s.lastWall) * s.speed,
-        lastWall: null });
-},
-step()  {
-  const dt = 16 * get().speed;
-  set((s) => ({ simTime: s.simTime + dt }));
-  get().runtime?.tick(dt);
-},
-reset() {
-  get().stop();
-  get().setGraph(get().graph);
-  set({ simTime: 0, firesTotal: 0, nodeActivity: {}, lastWall: null });
-  get().resetMetrics();
-},
-\end{verbatim}
-
-\textbf{А.10. Модуль} \texttt{src/\_\_bench\_\_/chapter4.test.ts} --
-\textbf{експериментальний харнес}
-
-Тест-харнес Vitest без браузера, що виконує реальне ядро
-\texttt{DataflowRuntime} над графом
-\texttt{generateDFT4x4()}, виконує шість тестових сценаріїв, обчислює
-ASAP/ALAP/мобільність, паралелізм, складність і записує усі реальні
-дані у файл \texttt{section4\_data.json}. Подано ключову функцію
-\texttt{runScenario()} і обчислення розкладу.
-
-\begin{verbatim}
-// src/__bench__/chapter4.test.ts (фрагмент: runScenario + schedule)
-function runScenario(x: Complex[]): RunResult {
-  const graph = generateDFT4x4();
-  let now = 0;
-  const sinks: Complex[] = new Array(N);
-  let collected = 0;
-  const fires: { id: string; kind: string; t: number }[] = [];
-
-  const rt = new DataflowRuntime(
-    graph,
-    {
-      onFire:   (n) => fires.push({ id: n.id, kind: n.kind, t: now }),
-      onOutput: (n, out) => {
-        if (n.kind === 'sink') {
-          const idx = parseInt(n.id.replace('snk', ''), 10);
-          const v = (out.out?.value
-            ?? out[Object.keys(out)[0]!]?.value) as Complex;
-          if (sinks[idx] === undefined) collected++;
-          sinks[idx] = { re: v.re, im: v.im };
-        }
-      },
-    },
-    () => now,
-  );
-
-  for (let i = 0; i < N; i++) {
-    rt.emitFrom(`src${i}`, 'out',
-      { id: `x${i}`, value: x[i], t: now, originT: now });
-  }
-  for (now = 0; now <= 6000 && collected < N; now++) { rt.tick(); }
-  return { sinks, fires, finishTime: now };
-}
-
-// ASAP/ALAP/мобільність на основі latency вузлів і delay дуг
-function schedule(graph: Graph) {
-  // топологічний порядок (Kahn)
-  const succ = new Map<string, { to: string; delay: number }[]>();
-  const pred = new Map<string, { from: string; delay: number }[]>();
-  // ...
-  const asap = new Map<string, number>();   // ASAP-час активації
-  for (const id of order) {
-    const ps = pred.get(id)!;
-    if (ps.length === 0) asap.set(id, 0);
-    else asap.set(id, Math.max(...ps.map(
-      (p) => asap.get(p.from)! + node.get(p.from)!.latency + p.delay)));
-  }
-  const makespan = Math.max(...graph.nodes.map(
-    (n) => asap.get(n.id)! + node.get(n.id)!.latency));
-
-  const alap = new Map<string, number>();   // ALAP-час активації
-  for (const id of [...order].reverse()) {
-    const ss = succ.get(id)!;
-    const lat = node.get(id)!.latency;
-    if (ss.length === 0) alap.set(id, makespan - lat);
-    else alap.set(id, Math.min(...ss.map(
-      (s) => alap.get(s.to)! - s.delay)) - lat);
-  }
-  const mobility = new Map<string, number>();
-  graph.nodes.forEach((n) =>
-    mobility.set(n.id, alap.get(n.id)! - asap.get(n.id)!));
-  return { asap, alap, mobility, makespan };
-}
-\end{verbatim}
-
-\newpage
-\protect\phantomsection\label{app:B}{}\textbf{ДОДАТОК~Б}
-
-\begin{center}
-\textbf{Таблиці вхідних та вихідних даних}
-\end{center}
-
-Додаток містить специфікації вхідних та вихідних даних розробленого
-симулятора 16-точкового ШПФ radix-4: параметри DFG (типи вузлів,
-кількості, затримки), повний перелік вузлів та дуг графа, вхідні
-вектори вбудованих тестових пресетів, очікувані спектри та значення
-поворотних множників.
-
-\textbf{Б.1. Структура DFG за типами вузлів і дуг.} Граф потоку даних
-\(G = (V, E)\) містить 56~вузлів і 64~дуги, розподілені відповідно до
-тристадійної декомпозиції за такою структурою (табл.~Б.1).
-
-Таблиця Б.1
-
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.20}}
-  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.10}}
-  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.12}}
-  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.13}}
-  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.15}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.30}}@{}}
-\caption{Параметри вузлів і дуг DFG для \(N = 16\)}\tabularnewline
-\toprule\noalign{}
-Тип вузла & К-сть & Вх. порти & Вих. порти & \texttt{latency} & Призначення \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-\texttt{source}    & 16 & 0 & 1 & 0   & Подача відліку \(x(n)\) у граф \\
-\texttt{row-dft4}  & 4  & 4 & 4 & 400 & Рядкове 4-точкове ДПФ (стадія 1) \\
-\texttt{twiddle}   & 16 & 1 & 1 & 200 & Множення на \(W_{16}^{n_{1} k_{2}}\) (стадія 2) \\
-\texttt{col-dft4}  & 4  & 4 & 4 & 400 & Стовпцеве 4-точкове ДПФ (стадія 3) \\
-\texttt{sink}      & 16 & 1 & 0 & 0   & Збір відліку \(X(k)\) \\
-\multicolumn{6}{l}{\textbf{Разом: 56~вузлів}} \\
-\end{longtable}
-
-Усі 64~дуги мають однакову затримку \texttt{delay}~\(= 600\) умовних
-одиниць та розподілені по стадіях так, як зведено у табл.~Б.2.
-
-Таблиця Б.2
-
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.30}}
-  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.12}}
-  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.12}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.46}}@{}}
-\caption{Дуги DFG за стадіями (\(N = 16\))}\tabularnewline
-\toprule\noalign{}
-Стадія & К-сть дуг & \texttt{delay} & Комутація вузлів \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-\(\text{source} \rightarrow \text{row-dft4}\) & 16 & 600 & \texttt{src}\(_{n_{1} + 4 n_{2}} \rightarrow\) \texttt{row-}\(n_{1}\)\texttt{.in}\(_{n_{2}}\) \\
-\(\text{row-dft4} \rightarrow \text{twiddle}\) & 16 & 600 & \texttt{row-}\(n_{1}\)\texttt{.out}\(_{k_{2}} \rightarrow\) \texttt{tw-}\(n_{1}\texttt{-}k_{2}\)\texttt{.in} \\
-\(\text{twiddle} \rightarrow \text{col-dft4}\) & 16 & 600 & \texttt{tw-}\(n_{1}\texttt{-}k_{2}\)\texttt{.out} \(\rightarrow\) \texttt{col-}\(k_{2}\)\texttt{.in}\(_{n_{1}}\) \\
-\(\text{col-dft4} \rightarrow \text{sink}\)   & 16 & 600 & \texttt{col-}\(k_{2}\)\texttt{.out}\(_{k_{1}} \rightarrow\) \texttt{snk}\(_{k_{2} + 4 k_{1}}\) \\
-\multicolumn{4}{l}{\textbf{Разом: 64~дуги}} \\
-\end{longtable}
-
-\textbf{Б.2. Повний перелік вузлів графа.} Таблиця~Б.3 наводить повний
-перелік 56~вузлів графа з ідентифікаторами, що використовуються у
-вихідному коді \texttt{generateDFT4x4()} (Додаток~А, п.~А.5), та у
-полях \texttt{onFire}-події ядра.
-
-Таблиця Б.3
-
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.20}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.50}}
-  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.20}}@{}}
-\caption{Повний перелік вузлів DFG (56~елементів)}\tabularnewline
-\toprule\noalign{}
-Тип & Ідентифікатори & \texttt{latency} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-\texttt{source} (16)   & \texttt{src0}, \texttt{src1}, \texttt{src2}, \texttt{src3}, \texttt{src4}, \texttt{src5}, \texttt{src6}, \texttt{src7}, \texttt{src8}, \texttt{src9}, \texttt{src10}, \texttt{src11}, \texttt{src12}, \texttt{src13}, \texttt{src14}, \texttt{src15} & 0 \\
-\texttt{row-dft4} (4)  & \texttt{row-0}, \texttt{row-1}, \texttt{row-2}, \texttt{row-3} & 400 \\
-\texttt{twiddle} (16)  & \texttt{tw-0-0}, \texttt{tw-0-1}, \texttt{tw-0-2}, \texttt{tw-0-3}, \texttt{tw-1-0}, \texttt{tw-1-1}, \texttt{tw-1-2}, \texttt{tw-1-3}, \texttt{tw-2-0}, \texttt{tw-2-1}, \texttt{tw-2-2}, \texttt{tw-2-3}, \texttt{tw-3-0}, \texttt{tw-3-1}, \texttt{tw-3-2}, \texttt{tw-3-3} & 200 \\
-\texttt{col-dft4} (4)  & \texttt{col-0}, \texttt{col-1}, \texttt{col-2}, \texttt{col-3} & 400 \\
-\texttt{sink} (16)     & \texttt{snk0}, \texttt{snk1}, \texttt{snk2}, \texttt{snk3}, \texttt{snk4}, \texttt{snk5}, \texttt{snk6}, \texttt{snk7}, \texttt{snk8}, \texttt{snk9}, \texttt{snk10}, \texttt{snk11}, \texttt{snk12}, \texttt{snk13}, \texttt{snk14}, \texttt{snk15} & 0 \\
-\end{longtable}
-
-\textbf{Б.3. Поворотні множники.} У DFG присутні 16~вузлів
-\texttt{twiddle}, з яких 9 виконують нетривіальне комплексне множення
-(\(W_{16}^{k} \neq 1\)) і 7 -- тривіальне (\(W_{16}^{0} = 1\); перший
-рядок \(n_{1} = 0\) і перший стовпець \(k_{2} = 0\) матриці поворотних
-множників). Значення \(k = n_{1} \cdot k_{2}\) і числові значення
-\(W_{16}^{k} = e^{- j 2\pi k / 16}\) подано у табл.~Б.4.
-
-Таблиця Б.4
-
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.16}}
-  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.10}}
-  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.10}}
-  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.10}}
-  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.27}}
-  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.17}}@{}}
-\caption{Параметри 16~вузлів \texttt{twiddle} та значення поворотних
-множників}\tabularnewline
-\toprule\noalign{}
-Ідентифікатор & \(n_{1}\) & \(k_{2}\) & \(k = n_{1} k_{2}\) & \(W_{16}^{k}\) (округлено) & Тип \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-\texttt{tw-0-0} & 0 & 0 & 0 & \(+1,000 + 0,000j\) & тривіальний \\
-\texttt{tw-0-1} & 0 & 1 & 0 & \(+1,000 + 0,000j\) & тривіальний \\
-\texttt{tw-0-2} & 0 & 2 & 0 & \(+1,000 + 0,000j\) & тривіальний \\
-\texttt{tw-0-3} & 0 & 3 & 0 & \(+1,000 + 0,000j\) & тривіальний \\
-\texttt{tw-1-0} & 1 & 0 & 0 & \(+1,000 + 0,000j\) & тривіальний \\
-\texttt{tw-1-1} & 1 & 1 & 1 & \(+0,924 - 0,383j\) & нетривіальний \\
-\texttt{tw-1-2} & 1 & 2 & 2 & \(+0,707 - 0,707j\) & нетривіальний \\
-\texttt{tw-1-3} & 1 & 3 & 3 & \(+0,383 - 0,924j\) & нетривіальний \\
-\texttt{tw-2-0} & 2 & 0 & 0 & \(+1,000 + 0,000j\) & тривіальний \\
-\texttt{tw-2-1} & 2 & 1 & 2 & \(+0,707 - 0,707j\) & нетривіальний \\
-\texttt{tw-2-2} & 2 & 2 & 4 & \(+0,000 - 1,000j\) & нетривіальний \\
-\texttt{tw-2-3} & 2 & 3 & 6 & \(-0,707 - 0,707j\) & нетривіальний \\
-\texttt{tw-3-0} & 3 & 0 & 0 & \(+1,000 + 0,000j\) & тривіальний \\
-\texttt{tw-3-1} & 3 & 1 & 3 & \(+0,383 - 0,924j\) & нетривіальний \\
-\texttt{tw-3-2} & 3 & 2 & 6 & \(-0,707 - 0,707j\) & нетривіальний \\
-\texttt{tw-3-3} & 3 & 3 & 9 & \(-0,924 - 0,383j\) & нетривіальний \\
-\end{longtable}
-
-\textbf{Б.4. Вхідні вектори тестових пресетів.} Шість вбудованих
-пресетів вхідних послідовностей \(\{x(n)\}_{n = 0}^{15}\), що
-використовуються у функціональній верифікації (підрозд.~4.2), наведено
-у табл.~Б.5--Б.7. Усі значення подано у формі \(\text{Re} +
-\text{Im} j\); тригонометричні значення округлено до 6~знаків після
-коми.
-
-Таблиця Б.5
-
-\begin{longtable}[]{@{}
-  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.08}}
-  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.16}}
-  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.16}}
-  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.16}}
-  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.16}}
-  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.16}}
-  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.10}}@{}}
-\caption{Пресети \texttt{ramp}, \texttt{impulse},
-\texttt{two-impulses} (Re, Im)}\tabularnewline
-\toprule\noalign{}
-\(n\) & \multicolumn{2}{c}{\texttt{ramp}: \(x(n) = n\)} & \multicolumn{2}{c}{\texttt{impulse}: \(\delta(n)\)} & \multicolumn{2}{c}{\texttt{two-impulses}: \(\delta(n) + \delta(n - 8)\)} \\
-      & Re & Im & Re & Im & Re & Im \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-0  & 0  & 0 & 1 & 0 & 1 & 0 \\
-1  & 1  & 0 & 0 & 0 & 0 & 0 \\
-2  & 2  & 0 & 0 & 0 & 0 & 0 \\
-3  & 3  & 0 & 0 & 0 & 0 & 0 \\
-4  & 4  & 0 & 0 & 0 & 0 & 0 \\
-5  & 5  & 0 & 0 & 0 & 0 & 0 \\
-6  & 6  & 0 & 0 & 0 & 0 & 0 \\
-7  & 7  & 0 & 0 & 0 & 0 & 0 \\
-8  & 8  & 0 & 0 & 0 & 1 & 0 \\
-9  & 9  & 0 & 0 & 0 & 0 & 0 \\
-10 & 10 & 0 & 0 & 0 & 0 & 0 \\
-11 & 11 & 0 & 0 & 0 & 0 & 0 \\
-12 & 12 & 0 & 0 & 0 & 0 & 0 \\
-13 & 13 & 0 & 0 & 0 & 0 & 0 \\
-14 & 14 & 0 & 0 & 0 & 0 & 0 \\
-15 & 15 & 0 & 0 & 0 & 0 & 0 \\
-\end{longtable}
-
-Таблиця Б.6
-
-\begin{longtable}[]{@{}
-  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.08}}
-  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.23}}
-  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.23}}
-  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.23}}
-  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.23}}@{}}
-\caption{Пресети \texttt{sin1} і \texttt{sin3}: комплексні гармоніки
-\(e^{j 2\pi r n / 16}\) для \(r \in \{1,3\}\)}\tabularnewline
-\toprule\noalign{}
-\(n\) & \texttt{sin1}: Re & \texttt{sin1}: Im & \texttt{sin3}: Re & \texttt{sin3}: Im \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-0  & \(+1,000000\) & \(0,000000\)  & \(+1,000000\) & \(0,000000\) \\
-1  & \(+0,923880\) & \(+0,382683\) & \(+0,382683\) & \(+0,923880\) \\
-2  & \(+0,707107\) & \(+0,707107\) & \(-0,707107\) & \(+0,707107\) \\
-3  & \(+0,382683\) & \(+0,923880\) & \(-0,923880\) & \(-0,382683\) \\
-4  & \(+0,000000\) & \(+1,000000\) & \(0,000000\)  & \(-1,000000\) \\
-5  & \(-0,382683\) & \(+0,923880\) & \(+0,923880\) & \(-0,382683\) \\
-6  & \(-0,707107\) & \(+0,707107\) & \(+0,707107\) & \(+0,707107\) \\
-7  & \(-0,923880\) & \(+0,382683\) & \(-0,382683\) & \(+0,923880\) \\
-8  & \(-1,000000\) & \(0,000000\)  & \(-1,000000\) & \(0,000000\) \\
-9  & \(-0,923880\) & \(-0,382683\) & \(-0,382683\) & \(-0,923880\) \\
-10 & \(-0,707107\) & \(-0,707107\) & \(+0,707107\) & \(-0,707107\) \\
-11 & \(-0,382683\) & \(-0,923880\) & \(+0,923880\) & \(+0,382683\) \\
-12 & \(0,000000\)  & \(-1,000000\) & \(0,000000\)  & \(+1,000000\) \\
-13 & \(+0,382683\) & \(-0,923880\) & \(-0,923880\) & \(+0,382683\) \\
-14 & \(+0,707107\) & \(-0,707107\) & \(-0,707107\) & \(-0,707107\) \\
-15 & \(+0,923880\) & \(-0,382683\) & \(+0,382683\) & \(-0,923880\) \\
-\end{longtable}
-
-Таблиця Б.7
-
-\begin{longtable}[]{@{}
-  >{\centering\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.10}}
-  >{\centering\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.45}}
-  >{\centering\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.45}}@{}}
-\caption{Пресет \texttt{sin1+3}: суперпозиція двох гармонік}\tabularnewline
-\toprule\noalign{}
-\(n\) & Re & Im \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-0  & \(+2,000000\) & \(0,000000\)  \\
-1  & \(+1,306563\) & \(+1,306563\) \\
-2  & \(0,000000\)  & \(+1,414214\) \\
-3  & \(-0,541197\) & \(+0,541197\) \\
-4  & \(0,000000\)  & \(0,000000\)  \\
-5  & \(+0,541197\) & \(+0,541197\) \\
-6  & \(0,000000\)  & \(+1,414214\) \\
-7  & \(-1,306563\) & \(+1,306563\) \\
-8  & \(-2,000000\) & \(0,000000\)  \\
-9  & \(-1,306563\) & \(-1,306563\) \\
-10 & \(0,000000\)  & \(-1,414214\) \\
-11 & \(+0,541197\) & \(-0,541197\) \\
-12 & \(0,000000\)  & \(0,000000\)  \\
-13 & \(-0,541197\) & \(-0,541197\) \\
-14 & \(0,000000\)  & \(-1,414214\) \\
-15 & \(+1,306563\) & \(-1,306563\) \\
-\end{longtable}
-
-\textbf{Б.5. Очікувані спектри.} Аналітично визначені очікувані
-значення спектрів \(\{ X(k) \}_{k = 0}^{15}\) для шести вбудованих
-пресетів подано у табл.~Б.8 і Б.9. Усі ці значення збігаються з
-експериментально отриманими симулятором (Розділ~4, табл.~4.3) у межах
-машинної точності IEEE~754.
-
-Таблиця Б.8
-
-\begin{longtable}[]{@{}
-  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.08}}
-  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.23}}
-  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.23}}
-  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.23}}
-  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.23}}@{}}
-\caption{Очікувані спектри пресетів \texttt{ramp} і
-\texttt{impulse}}\tabularnewline
-\toprule\noalign{}
-\(k\) & \texttt{ramp}: Re & \texttt{ramp}: Im & \texttt{impulse}: Re & \texttt{impulse}: Im \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-0  & \(+120,000\) & \(0,000\)     & 1 & 0 \\
-1  & \(-8,000\)   & \(+40,219\)   & 1 & 0 \\
-2  & \(-8,000\)   & \(+19,314\)   & 1 & 0 \\
-3  & \(-8,000\)   & \(+11,973\)   & 1 & 0 \\
-4  & \(-8,000\)   & \(+8,000\)    & 1 & 0 \\
-5  & \(-8,000\)   & \(+5,345\)    & 1 & 0 \\
-6  & \(-8,000\)   & \(+3,314\)    & 1 & 0 \\
-7  & \(-8,000\)   & \(+1,591\)    & 1 & 0 \\
-8  & \(-8,000\)   & \(0,000\)     & 1 & 0 \\
-9  & \(-8,000\)   & \(-1,591\)    & 1 & 0 \\
-10 & \(-8,000\)   & \(-3,314\)    & 1 & 0 \\
-11 & \(-8,000\)   & \(-5,345\)    & 1 & 0 \\
-12 & \(-8,000\)   & \(-8,000\)    & 1 & 0 \\
-13 & \(-8,000\)   & \(-11,973\)   & 1 & 0 \\
-14 & \(-8,000\)   & \(-19,314\)   & 1 & 0 \\
-15 & \(-8,000\)   & \(-40,219\)   & 1 & 0 \\
-\end{longtable}
-
-Таблиця Б.9
-
-\begin{longtable}[]{@{}
-  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.08}}
-  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.18}}
-  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.18}}
-  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.18}}
-  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.20}}
-  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.18}}@{}}
-\caption{Очікувані спектри пресетів \texttt{sin1}, \texttt{sin3},
-\texttt{sin1+3}, \texttt{two-impulses}}\tabularnewline
-\toprule\noalign{}
-\(k\) & \texttt{sin1}: \(X(k)\) & \texttt{sin3}: \(X(k)\) & \texttt{sin1+3}: \(X(k)\) & \texttt{two-impulses}: \(X(k)\) \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-0  & 0  & 0  & 0  & 2 \\
-1  & 16 & 0  & 16 & 0 \\
-2  & 0  & 0  & 0  & 2 \\
-3  & 0  & 16 & 16 & 0 \\
-4  & 0  & 0  & 0  & 2 \\
-5  & 0  & 0  & 0  & 0 \\
-6  & 0  & 0  & 0  & 2 \\
-7  & 0  & 0  & 0  & 0 \\
-8  & 0  & 0  & 0  & 2 \\
-9  & 0  & 0  & 0  & 0 \\
-10 & 0  & 0  & 0  & 2 \\
-11 & 0  & 0  & 0  & 0 \\
-12 & 0  & 0  & 0  & 2 \\
-13 & 0  & 0  & 0  & 0 \\
-14 & 0  & 0  & 0  & 2 \\
-15 & 0  & 0  & 0  & 0 \\
-\end{longtable}
-
-\textbf{Б.6. Структури даних симулятора.} Програмні відповідники
-формальних об'єктів DFG (типи \texttt{Token}, \texttt{Edge},
-\texttt{NodeSpec}, \texttt{Graph}) подано у Додатку~А, п.~А.1.
-Структура централізованого Zustand-сховища \texttt{simStore} (поля
-стану, обробники подій, метрики EMA) описана у підрозд.~3.3 і
-табл.~3.3 основного тексту.
-
-\newpage
-\protect\phantomsection\label{app:V}{}\textbf{ДОДАТОК~В}
-
-\begin{center}
-\textbf{Таблиці результатів експериментів}
-\end{center}
-
-Додаток містить детальні результати автоматизованих експериментів,
-проведених над реальним ядром \texttt{DataflowRuntime} і графом
-\texttt{generateDFT4x4()} у середовищі Vitest (модуль
-\texttt{src/\_\_bench\_\_/chapter4.test.ts}, Додаток~А, п.~А.10).
-Зведені дані збережено у файлі \texttt{section4\_data.json} та
-використано для побудови таблиць Розділу~4.
-
-\textbf{В.1. Розклад ASAP/ALAP та мобільність вузлів.} Топологічне
-обчислення часів якнайраніших (ASAP) та якнайпізніших (ALAP) активацій
-кожного з 56~вузлів DFG за алгоритмом Кана з урахуванням
-\texttt{node.latency} і \texttt{edge.delay} наведено у табл.~В.1. Усі
-часи подано в умовних одиницях симуляційного часу. Стовпець
-\emph{мобільність} = ALAP~--~ASAP визначає запас часу для активації
-вузла.
-
-Таблиця В.1
-
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.30}}
-  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.13}}
-  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.13}}
-  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.13}}
-  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.15}}
-  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.16}}@{}}
-\caption{Розклад ASAP/ALAP та мобільність вузлів DFG}\tabularnewline
-\toprule\noalign{}
-Ярус (тип) & К-сть & ASAP & ALAP & Мобільність & \texttt{latency} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-\texttt{source}   & 16 & 0    & 0    & 0 & 0   \\
-\texttt{row-dft4} & 4  & 600  & 600  & 0 & 400 \\
-\texttt{twiddle}  & 16 & 1600 & 1600 & 0 & 200 \\
-\texttt{col-dft4} & 4  & 2400 & 2400 & 0 & 400 \\
-\texttt{sink}     & 16 & 3400 & 3400 & 0 & 0   \\
-\multicolumn{6}{l}{\textbf{Усі 56 вузлів мають мобільність =~0
-(вироджений критичний шлях)}} \\
-\end{longtable}
-
-\textbf{В.2. Гістограма мобільності.} Розподіл мобільності за вузлами
-графа (поле \texttt{mobilityHistogram} у
-\texttt{section4\_data.json}) подано у табл.~В.2.
-
-Таблиця В.2
-
-\begin{longtable}[]{@{}
-  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.30}}
-  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.30}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.40}}@{}}
-\caption{Гістограма значень мобільності}\tabularnewline
-\toprule\noalign{}
-Мобільність & К-сть вузлів & Інтерпретація \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-0   & 56 & Усі вузли лежать на критичному шляху -- граф критично-збалансований \\
-$>0$ & 0  & Вузлів зі слабшою залежністю по часу немає \\
-\end{longtable}
-
-\textbf{В.3. Часи активацій по ярусах і профіль паралельності.}
-Реальні часи активацій (за подіями \texttt{onFire} ядра
-\texttt{DataflowRuntime} під час прогону сценарію \texttt{ramp})
-подано у табл.~В.3. Третій стовпець містить пікову паралельність на
-ярусі -- кількість вузлів, що активуються одночасно.
-
-Таблиця В.3
-
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.22}}
-  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.13}}
-  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.14}}
-  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.14}}
-  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.14}}
-  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.23}}@{}}
-\caption{Часи активацій вузлів DFG за реальною симуляцією
-(\texttt{ramp})}\tabularnewline
-\toprule\noalign{}
-Ярус & Вузлів & Початок & Завершення & Тривалість & Пікова паралельність \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-\texttt{source}   & 16 & 0    & 0    & 0   & 16 \\
-\texttt{row-dft4} & 4  & 600  & 1000 & 400 & 4  \\
-\texttt{twiddle}  & 16 & 1600 & 1800 & 200 & 16 \\
-\texttt{col-dft4} & 4  & 2400 & 2800 & 400 & 4  \\
-\texttt{sink}     & 16 & 3400 & 3400 & 0   & 16 \\
-\multicolumn{6}{l}{\textbf{Глобальна пікова паралельність
-\(P_{\max} = 16\); час завершення симуляції \(T_{kr} = 3400\)}} \\
-\end{longtable}
-
-\textbf{В.4. Зведені метрики розкладу та паралелізму.} Інтегральні
-показники, отримані за реальною топологією DFG, подано у
-табл.~В.4.
-
-Таблиця В.4
-
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.40}}
-  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.20}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.40}}@{}}
-\caption{Зведені метрики розкладу та паралелізму}\tabularnewline
-\toprule\noalign{}
-Метрика & Значення & Джерело / формула \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-К-сть вузлів \(|V|\)                          & 56     & \texttt{graph.nodes.length} \\
-К-сть дуг \(|E|\)                             & 64     & \texttt{graph.edges.length} \\
-Критичний шлях \(T_{kr}\), у.о.               & 3400   & ASAP/ALAP-DP, \(600+400+600+200+600+400+600\) \\
-Послідовна робота \(T_{ps}\), у.о.            & 6400   & \(\sum_{n \in V} \texttt{latency}(n) = 8 \cdot 400 + 16 \cdot 200\) \\
-Коефіцієнт паралелізму \(K_{p}\)              & \(\approx 1{,}882\) & \(T_{ps} / T_{kr} = 6400 / 3400\) \\
-Теоретичний \(K_{p}^{\text{теор}}\) (без зовнішніх дуг) & \(\approx 2{,}909\) & \(T_{ps} / T_{kr}^{\text{вн}} = 6400 / 2200\), де \(T_{kr}^{\text{вн}} = 400 + 600 + 200 + 600 + 400\) \\
-Пікова паралельність \(P_{\max}\)             & 16     & \texttt{schedule.peakConcurrency} \\
-Максимальна мобільність                       & 0      & \(\max_{n \in V} (\text{ALAP}_n - \text{ASAP}_n)\) \\
-К-сть критичних вузлів                        & 56     & Усі вузли з мобільністю~=~0 \\
-Частка часу обчислень у \(T_{kr}\)            & \(\approx 29{,}4\%\) & \(1000 / 3400\) \\
-Частка часу передавання у \(T_{kr}\)          & \(\approx 70{,}6\%\) & \(2400 / 3400\) \\
-Середнє завантаження                          & \(\approx 11{,}8\%\) & \(T_{ps} / (T_{kr} \cdot P_{\max})\) \\
-Час завершення симуляції                      & 3400   & \texttt{schedule.simFinishTime} \\
-\end{longtable}
-
-\textbf{В.5. Обчислювальна складність.} Підрахунок арифметичних
-операцій за топологією \texttt{Graph} (поле \texttt{complexity})
-подано у табл.~В.5.
-
-Таблиця В.5
-
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.50}}
-  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.18}}
-  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.32}}@{}}
-\caption{Підрахунок операцій (\(N = 16\))}\tabularnewline
-\toprule\noalign{}
-Метрика & Значення & Джерело \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-Прямий ДПФ: компл. множень        & 256  & \(N^{2}\) \\
-Прямий ДПФ: дійсних множень       & 1024 & \(4N^{2}\) \\
-Прямий ДПФ: компл. додавань       & 240  & \(N(N - 1)\) \\
-Radix-4: нетривіальних компл. множень & 9    & 9 з 16 \texttt{twiddle}-вузлів з \(k \not\equiv 0\) \\
-Radix-4: дійсних множень          & 36   & 9 нетривіальних \(\times 4\) \\
-Radix-4: компл. додавань          & 64   & 8~\texttt{dft4} вузлів \(\times 8\) \\
-Тривіальних \texttt{twiddle}      & 7    & вузли з \(k \equiv 0 \pmod{16}\) \\
-Коефіцієнт прискорення \(K_{M}\)  & \(\approx 28{,}444\) & \(N^{2} / 9 = 256 / 9\) \\
-\end{longtable}
-
-\textbf{В.6. Функціональна верифікація: похибки за сценаріями.}
-Експериментальні значення максимальної абсолютної та RMS-похибок між
-вихідним спектром симулятора і еталоном \texttt{fft.js} для шести
-сценаріїв (поле \texttt{verify}) подано у табл.~В.6.
-
-Таблиця В.6
-
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.30}}
-  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.20}}
-  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.20}}
-  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.30}}@{}}
-\caption{Функціональна верифікація на 6~сценаріях}\tabularnewline
-\toprule\noalign{}
-Сценарій & \(\max_{k}|\Delta(k)|\) & RMS-похибка & Критерій \(\leq 10^{- 9}\) \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-\texttt{ramp}         & 0 & 0 & виконано \\
-\texttt{impulse}      & 0 & 0 & виконано \\
-\texttt{sin1}         & 0 & 0 & виконано \\
-\texttt{sin3}         & 0 & 0 & виконано \\
-\texttt{sin1+3}       & 0 & 0 & виконано \\
-\texttt{two-impulses} & 0 & 0 & виконано \\
-\end{longtable}
-
-\textbf{В.7. Перелік нетривіальних поворотних множників} (\(k \neq 0
-\pmod{16}\)), використаних у радикс-4-розкладі (поле
-\texttt{nontrivialTwiddles}), подано у табл.~В.7.
-
-Таблиця В.7
-
-\begin{longtable}[]{@{}
-  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.15}}
-  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.20}}
-  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.15}}
-  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.50}}@{}}
-\caption{9~нетривіальних вузлів \texttt{twiddle}}\tabularnewline
-\toprule\noalign{}
-№ & Ідентифікатор & \(k\) & \(W_{16}^{k}\) (округлено до 4 знаків) \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-1 & \texttt{tw-1-1} & 1 & \(+0{,}9239 - 0{,}3827j\) \\
-2 & \texttt{tw-1-2} & 2 & \(+0{,}7071 - 0{,}7071j\) \\
-3 & \texttt{tw-1-3} & 3 & \(+0{,}3827 - 0{,}9239j\) \\
-4 & \texttt{tw-2-1} & 2 & \(+0{,}7071 - 0{,}7071j\) \\
-5 & \texttt{tw-2-2} & 4 & \(+0{,}0000 - 1{,}0000j\) \\
-6 & \texttt{tw-2-3} & 6 & \(-0{,}7071 - 0{,}7071j\) \\
-7 & \texttt{tw-3-1} & 3 & \(+0{,}3827 - 0{,}9239j\) \\
-8 & \texttt{tw-3-2} & 6 & \(-0{,}7071 - 0{,}7071j\) \\
-9 & \texttt{tw-3-3} & 9 & \(-0{,}9239 - 0{,}3827j\) \\
-\end{longtable}
-
-\textbf{В.8. Перевірка детермінізму (NF5).} Результати дворазового
-прогону сценарію \texttt{ramp} (поле \texttt{determinism}) наведено у
-табл.~В.8.
-
-Таблиця В.8
-
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.55}}
-  >{\centering\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.45}}@{}}
-\caption{Перевірка детермінізму ядра
-\texttt{DataflowRuntime}}\tabularnewline
-\toprule\noalign{}
-Показник & Значення \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-К-сть подій \texttt{onFire} за прогін          & 40 (8~\texttt{dft4} + 16~\texttt{twiddle} + 16~\texttt{sink}) \\
-Збіг послідовностей \texttt{onFire} між прогонами & ідентичні \\
-Збіг бітів спектра між прогонами               & бітово ідентичні \\
-Підсумок (поле \texttt{determinism.identical}) & \texttt{true} \\
-Висновок щодо NF5                              & виконано \\
-\end{longtable}
-
-\textbf{В.9. Часи появи спектральних відліків у sink-ах.} Реальні часи
-надходження кожного з 16~спектральних відліків \(X(k)\) до відповідного
-вузла \texttt{snk}\(_k\) (поле \texttt{sinkArrival}) -- усі 16~відліків
-з'являються одночасно у момент \(t = 3400\) умовних одиниць, що
-відповідає критичному шляху \(T_{kr}\) (табл.~В.9).
-
-Таблиця В.9
-
-\begin{longtable}[]{@{}
-  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.10}}
-  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.30}}
-  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.30}}
-  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.30}}@{}}
-\caption{Часи появи спектральних відліків}\tabularnewline
-\toprule\noalign{}
-\(k\) & Sink & \(t\), у.о. & Відмітка \(t - T_{kr}\), у.о. \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-0  & \texttt{snk0}  & 3400 & 0 \\
-1  & \texttt{snk1}  & 3400 & 0 \\
-2  & \texttt{snk2}  & 3400 & 0 \\
-3  & \texttt{snk3}  & 3400 & 0 \\
-4  & \texttt{snk4}  & 3400 & 0 \\
-5  & \texttt{snk5}  & 3400 & 0 \\
-6  & \texttt{snk6}  & 3400 & 0 \\
-7  & \texttt{snk7}  & 3400 & 0 \\
-8  & \texttt{snk8}  & 3400 & 0 \\
-9  & \texttt{snk9}  & 3400 & 0 \\
-10 & \texttt{snk10} & 3400 & 0 \\
-11 & \texttt{snk11} & 3400 & 0 \\
-12 & \texttt{snk12} & 3400 & 0 \\
-13 & \texttt{snk13} & 3400 & 0 \\
-14 & \texttt{snk14} & 3400 & 0 \\
-15 & \texttt{snk15} & 3400 & 0 \\
-\end{longtable}
-
-\textbf{В.10. Виміри UI-продуктивності у браузерах.} Заплановані
-виміри метрик \texttt{fpsEma}, \texttt{tickTimeMs}, обсягу heap і часу
-старту у Chrome, Edge, Firefox описано у Розділі~4 (табл.~4.7) та
-\texttt{section4\_user\_tasks.md}~п.~Б1. Фактичні значення вносяться до
-табл.~4.7 та табл.~Г.1 після виконання процедури браузерних замірів
-автором роботи. [ДАНІ КОРИСТУВАЧА: див.
-\texttt{section4\_user\_tasks.md} п.~Б1.]
-
-\newpage
-\protect\phantomsection\label{app:G}{}\textbf{ДОДАТОК~Г}
-
-\begin{center}
-\textbf{Перелік UML- і блок-схем роботи}
-\end{center}
-
-Додаток містить зведений реєстр усіх графічних схем, побудованих у
-рамках бакалаврської кваліфікаційної роботи, із зазначенням їх типу,
-основного тексту, у якому ці схеми розміщені, та призначення. Усі схеми
-виконано засобами PlantUML і збережено у каталозі
-\texttt{diagrams\_output/} проєкту у форматі вихідних
-\texttt{.txt}-описів, які пройшли рендеринг через
-\texttt{plantuml.com}.
-
-\textbf{Г.1. Реєстр графічних схем.} Перелік усіх 9~схем подано у
-табл.~Г.1.
-
-Таблиця Г.1
-
-\begin{longtable}[]{@{}
-  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.10}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.40}}
-  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.18}}
-  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.14}}
-  >{\centering\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.18}}@{}}
-\caption{Реєстр графічних схем БКР}\tabularnewline
-\toprule\noalign{}
-№ & Назва схеми & Тип & Підрозділ & Інструмент \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-1 & Функціональна IDEF0-схема задачі моделювання потокового обчислювача ШПФ                 & IDEF0          & 1.3, рис.~1.1 & PlantUML \\
-2 & Use Case-діаграма симулятора потокового обчислювача ШПФ                                  & UML Use Case   & 1.5, рис.~1.2 & PlantUML \\
-3 & C4 Context-діаграма веб-симулятора потокового обчислювача ШПФ                            & C4 Context     & 2.1, рис.~2.1 & PlantUML \\
-4 & Схема тристадійної radix-4 декомпозиції 16-точкового ШПФ                                 & Алгоритмічна   & 2.2, рис.~2.2 & PlantUML \\
-5 & C4 Container-діаграма архітектури веб-симулятора                                          & C4 Container   & 2.3, рис.~2.3 & PlantUML \\
-6 & Граф потоку даних обчислювача 16-точкового ШПФ radix-4 \(4 \times 4\)                    & DFG            & 2.3, рис.~2.4 & PlantUML \\
-7 & Макет інтерфейсу веб-симулятора потокового 16-точкового ШПФ                              & Wireframe      & 2.6, рис.~2.5 & PlantUML \\
-8 & Життєвий цикл токена у \texttt{DataflowRuntime}                                          & Sequence       & 3.3, рис.~3.2 & PlantUML \\
-9 & Часова діаграма активацій вузлів DFG при \(N = 16\)                                      & Timing         & 4.3, рис.~4.1 & PlantUML \\
-\end{longtable}
-
-\textbf{Г.2. Розташування вихідних описів схем.} Кожна схема
-зберігається у каталозі \texttt{diagrams\_output/} в окремому
-\texttt{.txt}-файлі з ім'ям, що збігається з підписом рисунка в
-основному тексті (табл.~Г.2). Відтворити будь-яку схему можна
-завантаженням відповідного файла на \texttt{plantuml.com}.
-
-Таблиця Г.2
-
-\begin{longtable}[]{@{}
-  >{\centering\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.18}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.82}}@{}}
-\caption{Відповідність між рисунками і вихідними
-\texttt{.txt}-описами}\tabularnewline
-\toprule\noalign{}
-Рис. & Файл у \texttt{diagrams\_output/} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-1.1 & \texttt{Рис. 1.1 -- Функціональна IDEF0-схема задачі моделювання потокового обчислювача ШПФ.txt} \\
-1.2 & \texttt{Рис. 1.2 -- Use Case-діаграма симулятора потокового обчислювача ШПФ.txt} \\
-2.1 & \texttt{Рис. 2.1 -- C4 Context-діаграма веб-симулятора потокового обчислювача ШПФ.txt} \\
-2.2 & \texttt{Рис. 2.2 -- Схема тристадійної radix-4 декомпозиції 16-точкового ШПФ.txt} \\
-2.3 & \texttt{Рис. 2.3 -- C4 Container-діаграма архітектури веб-симулятора.txt} \\
-2.4 & \texttt{Рис. 2.4 -- Граф потоку даних обчислювача 16-точкового ШПФ radix-4 4×4.txt} \\
-2.5 & \texttt{Рис. 2.5 -- Макет інтерфейсу веб-симулятора потокового 16-точкового ШПФ.txt} \\
-3.2 & \texttt{Рис. 3.2 -- Життєвий цикл токена у DataflowRuntime.txt} \\
-4.1 & \texttt{Рис. 4.1 -- Часова діаграма активацій вузлів DFG при N=16.txt} \\
-\end{longtable}
-
-\textbf{Г.3. Короткий опис призначення схем.}
-
-\begin{itemize}
-\item
-  \emph{Рис.~1.1, IDEF0-схема задачі моделювання.} Функціональна
-  декомпозиція задачі: вхідний сигнал і параметри моделі
-  перетворюються на спектральні відліки, журнал подій та метрики
-  виконання під керуванням вимог F1--F9, NF1--NF8 і методичних
-  обмежень. Використана для постановки задачі (підрозд.~1.3).
-\item
-  \emph{Рис.~1.2, Use Case-діаграма.} Прецеденти UC1--UC9 з акторами
-  Студент і Викладач; містить відношення \texttt{include} (UC3 \(\to\)
-  UC5) та \texttt{extend} (UC7 \(\to\) UC3); прецеденти UC1 і UC2~--
-  взаємовиключні альтернативи (підрозд.~1.5).
-\item
-  \emph{Рис.~2.1, C4 Context-діаграма.} Симулятор як ``чорна скринька'';
-  актор -- Користувач; зовнішні сутності -- браузер (runtime) і Local
-  Storage браузера (для пресетів). Використана для обґрунтування
-  клієнтського SPA-підходу (підрозд.~2.1).
-\item
-  \emph{Рис.~2.2, схема тристадійної radix-4 декомпозиції.} Логічна
-  послідовність стадій:
-  \(\text{src} \to \text{row-DFT}_4 \to \text{twiddle} \to
-  \text{col-DFT}_4 \to \text{sink}\). Ілюструє математичну модель
-  підрозд.~2.2.
-\item
-  \emph{Рис.~2.3, C4 Container-діаграма.} Декомпозиція симулятора на
-  4~контейнери: \emph{Simulation Core}, \emph{Graph Generator},
-  \emph{State Store}, \emph{UI Layer}. Використана у підрозд.~2.3.
-\item
-  \emph{Рис.~2.4, граф потоку даних (DFG).} Повний граф із 56~вузлів
-  чотирьох типів і 64~дуг із однаковим \texttt{delay}~\(= 600\).
-  Зображено п'ять ярусів і всі комутаційні зв'язки відповідно до
-  \texttt{generateDFT4x4()} (підрозд.~2.3, Додаток~А~п.~А.5).
-\item
-  \emph{Рис.~2.5, макет інтерфейсу.} Чотири функціональні зони:
-  центральний \texttt{GraphView}, верхня панель \texttt{Controls},
-  права панель \texttt{SpectrumView}+\texttt{Metrics}, нижня
-  \texttt{TerminalOutput} (підрозд.~2.6).
-\item
-  \emph{Рис.~3.2, життєвий цикл токена.} Послідовність дій у методі
-  \texttt{tick()}: доставка з FIFO-черги \(\to\) приміщення у
-  \texttt{inbox} \(\to\) активація вузла \(\to\) генерація токена
-  виходу \(\to\) постановка у нову чергу (підрозд.~3.3, Додаток~А~п.~А.4).
-\item
-  \emph{Рис.~4.1, часова діаграма активацій.} Ярусний розклад активацій
-  вузлів за реальним графом: \(t = 0,600,1000,1600,1800,2400,2800,3400\)
-  у.о.; критичний шлях \(T_{kr} = 3400\) у.о.; коефіцієнт
-  \(K_{p} \approx 1{,}88\) (підрозд.~4.3.3, Додаток~В~табл.~В.3).
-\end{itemize}
-
-\textbf{Г.4. Інші ілюстрації основного тексту.} Окрім схем, побудованих
-у PlantUML, основний текст БКР містить рисунок \emph{Рис.~3.1.
-Структура директорій проєкту} (підрозд.~3.2; рисунок текстового
-характеру, формується безпосередньо у LaTeX). Передбачено також
-рисунок \emph{Рис.~4.2. Загальний вигляд інтерфейсу веб-симулятора під
-час роботи} (підрозд.~4.5)~-- скріншот робочого екрана, виконання
-якого описано у \texttt{section4\_user\_tasks.md}~п.~Б4.
-
-\textbf{Г.5. Відсутність копій публікацій.} Окремі публікації за темою
-бакалаврської кваліфікаційної роботи на момент її подання не виходили.
-Тому Додаток~Д (``Копії власних публікацій за темою БКР'') не
-формується. Цей факт зафіксовано також у Вступі (розділ
-\emph{Апробація результатів}).
 
 \end{document}

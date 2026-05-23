@@ -1,0 +1,346 @@
+{
+  "verify": {
+    "ramp": {
+      "maxAbs": 0,
+      "rms": 0
+    },
+    "impulse": {
+      "maxAbs": 0,
+      "rms": 0
+    },
+    "sin1": {
+      "maxAbs": 0,
+      "rms": 0
+    },
+    "sin3": {
+      "maxAbs": 0,
+      "rms": 0
+    },
+    "sin1+3": {
+      "maxAbs": 0,
+      "rms": 0
+    },
+    "two-impulses": {
+      "maxAbs": 0,
+      "rms": 0
+    }
+  },
+  "rampSpectrum": [
+    {
+      "k": 0,
+      "simRe": 120,
+      "simIm": 0,
+      "refRe": 120,
+      "refIm": 0
+    },
+    {
+      "k": 1,
+      "simRe": -8,
+      "simIm": 40.218715937006785,
+      "refRe": -8,
+      "refIm": 40.218715937006785
+    },
+    {
+      "k": 2,
+      "simRe": -8,
+      "simIm": 19.31370849898476,
+      "refRe": -8,
+      "refIm": 19.31370849898476
+    },
+    {
+      "k": 3,
+      "simRe": -8,
+      "simIm": 11.972846101323912,
+      "refRe": -8,
+      "refIm": 11.972846101323912
+    },
+    {
+      "k": 4,
+      "simRe": -8,
+      "simIm": 8,
+      "refRe": -8,
+      "refIm": 8
+    },
+    {
+      "k": 5,
+      "simRe": -7.999999999999999,
+      "simIm": 5.345429103354391,
+      "refRe": -7.999999999999999,
+      "refIm": 5.345429103354391
+    },
+    {
+      "k": 6,
+      "simRe": -8,
+      "simIm": 3.3137084989847594,
+      "refRe": -8,
+      "refIm": 3.3137084989847594
+    },
+    {
+      "k": 7,
+      "simRe": -8,
+      "simIm": 1.5912989390372658,
+      "refRe": -8,
+      "refIm": 1.5912989390372658
+    },
+    {
+      "k": 8,
+      "simRe": -8,
+      "simIm": 0,
+      "refRe": -8,
+      "refIm": 0
+    },
+    {
+      "k": 9,
+      "simRe": -8,
+      "simIm": -1.5912989390372658,
+      "refRe": -8,
+      "refIm": -1.5912989390372658
+    },
+    {
+      "k": 10,
+      "simRe": -7.999999999999999,
+      "simIm": -3.3137084989847594,
+      "refRe": -7.999999999999999,
+      "refIm": -3.3137084989847594
+    },
+    {
+      "k": 11,
+      "simRe": -8,
+      "simIm": -5.345429103354393,
+      "refRe": -8,
+      "refIm": -5.345429103354393
+    },
+    {
+      "k": 12,
+      "simRe": -8,
+      "simIm": -8,
+      "refRe": -8,
+      "refIm": -8
+    },
+    {
+      "k": 13,
+      "simRe": -7.999999999999999,
+      "simIm": -11.97284610132391,
+      "refRe": -7.999999999999999,
+      "refIm": -11.97284610132391
+    },
+    {
+      "k": 14,
+      "simRe": -7.999999999999998,
+      "simIm": -19.31370849898476,
+      "refRe": -7.999999999999998,
+      "refIm": -19.31370849898476
+    },
+    {
+      "k": 15,
+      "simRe": -7.999999999999997,
+      "simIm": -40.218715937006785,
+      "refRe": -7.999999999999997,
+      "refIm": -40.218715937006785
+    }
+  ],
+  "dfg": {
+    "nodes": 56,
+    "edges": 64,
+    "bySource": 16,
+    "byDft4": 8,
+    "byTwiddle": 16,
+    "bySink": 16
+  },
+  "schedule": {
+    "criticalPath": 3400,
+    "sequentialWork": 6400,
+    "parallelism": 1.8823529411764706,
+    "peakConcurrency": 16,
+    "maxMobility": 0,
+    "criticalNodeCount": 56,
+    "simFinishTime": 3400,
+    "tiers": {
+      "row-dft4": {
+        "start": 600,
+        "end": 1000,
+        "count": 4
+      },
+      "twiddle": {
+        "start": 1600,
+        "end": 1800,
+        "count": 16
+      },
+      "col-dft4": {
+        "start": 2400,
+        "end": 2800,
+        "count": 4
+      },
+      "sink": {
+        "start": 3400,
+        "end": 3400,
+        "count": 16
+      },
+      "source": {
+        "start": 0,
+        "end": 0,
+        "count": 16
+      }
+    }
+  },
+  "complexity": {
+    "directDFT_complexMul": 256,
+    "directDFT_realMul": 1024,
+    "directDFT_complexAdd": 240,
+    "radix4_nontrivialComplexMul": 9,
+    "radix4_realMul": 36,
+    "radix4_complexAdd": 64,
+    "trivialTwiddles": 7,
+    "speedupKM": 28.444444444444443
+  },
+  "utilization": {
+    "arcDelayOnCriticalPath": 2400,
+    "computeOnCriticalPath": 1000,
+    "arcShare": 0.7058823529411765,
+    "computeShare": 0.29411764705882354,
+    "meanLoad": 0.11764705882352941
+  },
+  "tierStats": {
+    "source": {
+      "asapStart": 0,
+      "alapStart": 0,
+      "mobility": 0,
+      "count": 16
+    },
+    "row-dft4": {
+      "asapStart": 600,
+      "alapStart": 600,
+      "mobility": 0,
+      "count": 4
+    },
+    "twiddle": {
+      "asapStart": 1600,
+      "alapStart": 1600,
+      "mobility": 0,
+      "count": 16
+    },
+    "col-dft4": {
+      "asapStart": 2400,
+      "alapStart": 2400,
+      "mobility": 0,
+      "count": 4
+    },
+    "sink": {
+      "asapStart": 3400,
+      "alapStart": 3400,
+      "mobility": 0,
+      "count": 16
+    }
+  },
+  "mobilityHistogram": {
+    "0": 56
+  },
+  "sinkArrival": [
+    {
+      "k": 0,
+      "t": 3400
+    },
+    {
+      "k": 1,
+      "t": 3400
+    },
+    {
+      "k": 2,
+      "t": 3400
+    },
+    {
+      "k": 3,
+      "t": 3400
+    },
+    {
+      "k": 4,
+      "t": 3400
+    },
+    {
+      "k": 5,
+      "t": 3400
+    },
+    {
+      "k": 6,
+      "t": 3400
+    },
+    {
+      "k": 7,
+      "t": 3400
+    },
+    {
+      "k": 8,
+      "t": 3400
+    },
+    {
+      "k": 9,
+      "t": 3400
+    },
+    {
+      "k": 10,
+      "t": 3400
+    },
+    {
+      "k": 11,
+      "t": 3400
+    },
+    {
+      "k": 12,
+      "t": 3400
+    },
+    {
+      "k": 13,
+      "t": 3400
+    },
+    {
+      "k": 14,
+      "t": 3400
+    },
+    {
+      "k": 15,
+      "t": 3400
+    }
+  ],
+  "nontrivialTwiddles": [
+    {
+      "id": "tw-1-1",
+      "k": 1
+    },
+    {
+      "id": "tw-1-2",
+      "k": 2
+    },
+    {
+      "id": "tw-1-3",
+      "k": 3
+    },
+    {
+      "id": "tw-2-1",
+      "k": 2
+    },
+    {
+      "id": "tw-2-2",
+      "k": 4
+    },
+    {
+      "id": "tw-2-3",
+      "k": 6
+    },
+    {
+      "id": "tw-3-1",
+      "k": 3
+    },
+    {
+      "id": "tw-3-2",
+      "k": 6
+    },
+    {
+      "id": "tw-3-3",
+      "k": 9
+    }
+  ],
+  "determinism": {
+    "identical": true,
+    "fireCount": 40
+  }
+}

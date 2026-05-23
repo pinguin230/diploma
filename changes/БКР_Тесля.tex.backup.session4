@@ -575,12 +575,8 @@ Next.js, React~Flow, parallelism, digital signal processing.}
 
 ШПФ -- швидке перетворення Фур'є
 
-ALAP -- As Late As Possible (якнайпізніший час активації у розкладі)
-
 API -- Application Programming Interface (прикладний програмний
 інтерфейс)
-
-ASAP -- As Soon As Possible (якнайраніший час активації у розкладі)
 
 C4 -- Context--Container--Component--Code (нотація опису архітектури)
 
@@ -605,9 +601,6 @@ FIFO -- First In, First Out
 FPGA -- Field-Programmable Gate Array
 
 GDPR -- General Data Protection Regulation
-
-IDEF0 -- Integration Definition for Function Modeling (стандарт
-функціонального моделювання, FIPS~183)
 
 IEEE -- Institute of Electrical and Electronics Engineers
 
@@ -2145,17 +2138,16 @@ IEEE~754 (64~біти, машинна точність
 -- повний граф обчислювача. Поля \texttt{NodeSpec} наведені у табл. 2.7.
 Для \(N = 16\) об'єкт \texttt{Graph} містить 56~специфікацій вузлів та
 64~дуги. Тип \texttt{NodeKind} є переліковим:
-\texttt{’}\texttt{source}\texttt{’\ \textbar{}\ ’dft4’\ \textbar{}\ ’}\texttt{twiddle}\texttt{’\ \textbar{}\ ’}\texttt{sink}\texttt{’}
+\texttt{’}\texttt{source}\texttt{’\ \textbar{}\ ’dft4’\ \textbar{}\ ’}\texttt{twiddle}\texttt{’\ \textbar{}\ ’}\texttt{sink}\texttt{’}.
 і використовується як ключ у шаблоні Strategy для вибору функції
 обчислення вузла.
-
-Таблиця 2.7.
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1117}}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1275}}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4959}}@{}}
-\caption{Поля типу \protect\texttt{NodeSpec}}\tabularnewline
+\caption{Таблиця 2.7.\\
+Поля типу \protect\texttt{NodeSpec}}\tabularnewline
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 Поле
@@ -3093,7 +3085,7 @@ production-збірці рівень \texttt{debug} вимкнений за за
 відсутності Web Worker функція \texttt{applyTwiddle}\texttt{()}
 виконується синхронно у головному потоці без впливу на частоту кадрів
 при \(N = 16\). Селектори Zustand мемоїзовані функцією \texttt{shallow},
-а важкі розрахунки координат токенів на дугах
+а важкі розрахунки координат токенів на ребрах
 виконуються лише для видимої області через
 \texttt{ReactFlow.viewportBounds}. Середня тривалість одного кроку
 \texttt{tick}\texttt{()} для \(N = 16\) становить \(< 1\)~мс, що залишає
@@ -5849,7 +5841,7 @@ $>0$ & 0  & Вузлів зі слабшою залежністю по часу 
 Критичний шлях \(T_{kr}\), у.о.               & 3400   & ASAP/ALAP-DP, \(600+400+600+200+600+400+600\) \\
 Послідовна робота \(T_{ps}\), у.о.            & 6400   & \(\sum_{n \in V} \texttt{latency}(n) = 8 \cdot 400 + 16 \cdot 200\) \\
 Коефіцієнт паралелізму \(K_{p}\)              & \(\approx 1{,}882\) & \(T_{ps} / T_{kr} = 6400 / 3400\) \\
-Теоретичний \(K_{p}^{\text{теор}}\) (без зовнішніх дуг) & \(\approx 2{,}909\) & \(T_{ps} / T_{kr}^{\text{вн}} = 6400 / 2200\), де \(T_{kr}^{\text{вн}} = 400 + 600 + 200 + 600 + 400\) \\
+Теоретичний \(K_{p}^{\text{теор}}\) (без дуг) & \(\approx 2{,}909\) & \(6400 / (8 \cdot 400 + 16 \cdot 200 - 4 \cdot 600 \cdot 0)\) тобто \(6400/2200\) \\
 Пікова паралельність \(P_{\max}\)             & 16     & \texttt{schedule.peakConcurrency} \\
 Максимальна мобільність                       & 0      & \(\max_{n \in V} (\text{ALAP}_n - \text{ASAP}_n)\) \\
 К-сть критичних вузлів                        & 56     & Усі вузли з мобільністю~=~0 \\
