@@ -12,6 +12,8 @@ export default function Metrics() {
   const throughputFps = useSimStore((s) => s.metrics.throughputFps);
   const latencyEmaMs = useSimStore((s) => s.metrics.latencyEmaMs);
   const queueEma = useSimStore((s) => s.metrics.queueEma);
+  const fpsEma = useSimStore((s) => s.metrics.fpsEma);
+  const tickTimeMs = useSimStore((s) => s.metrics.tickTimeMs);
 
   return (
     <section className={p.panel}>
@@ -35,6 +37,14 @@ export default function Metrics() {
           <div className={p.metric}>
             <span className={p.metricLabel}>Avg queue</span>
             <span className={p.metricValue}>{fmt(queueEma, 2)}</span>
+          </div>
+          <div className={p.metric}>
+            <span className={p.metricLabel}>FPS (EMA)</span>
+            <span className={p.metricValue}>{fmt(fpsEma, 1)}</span>
+          </div>
+          <div className={p.metric}>
+            <span className={p.metricLabel}>Tick (ms)</span>
+            <span className={p.metricValue}>{fmt(tickTimeMs, 1)}</span>
           </div>
         </div>
 

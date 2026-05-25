@@ -50,6 +50,9 @@ export default function GraphView() {
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const frame = useRef<number | null>(null);
   const lastAggRef = useRef({ t: performance.now(), fires: 0 });
+  const frameNowRef = useRef(performance.now());
+  const frameCountRef = useRef(0);
+  const accumDeltaRef = useRef(0);
 
   useEffect(() => {
     if (!graph) return;
@@ -139,6 +142,33 @@ export default function GraphView() {
       }
 
       const now = performance.now();
+
+      const deltaFrame = now - frameNowRef.current;
+      frameNowRef.current = now;
+      if (deltaFrame > 0 && deltaFrame < 2000) {
+        frameCountRef.current += 1;
+        accumDeltaRef.current += deltaFrame;
+      }
+
+      // Smooth FPS / tick every few frames
+      const UPDATE_EVERY = 5;
+      if (frameCountRef.current >= UPDATE_EVERY && frameCountRef.current > 0) {
+        const avgDelta = accumDeltaRef.current / frameCountRef.current;
+        const instantFps = 1000 / avgDelta;
+        const currentMetrics = useSimStore.getState().metrics;
+        const prevFps = currentMetrics.fpsEma || 0;
+        const newFps = prevFps * 0.95 + instantFps * 0.05;
+        const prevTick = currentMetrics.tickTimeMs || 0;
+        const newTick = prevTick * 0.95 + avgDelta * 0.05;
+
+        useSimStore.setState((s) => ({
+          metrics: { ...s.metrics, fpsEma: newFps, tickTimeMs: newTick },
+        }));
+
+        frameCountRef.current = 0;
+        accumDeltaRef.current = 0;
+      }
+
       if (now - lastAggRef.current.t >= 1000) {
         useSimStore.setState((s) => ({
           metrics: { ...s.metrics, windowStartSimT: s.simTime, firesInWindow: 0 },

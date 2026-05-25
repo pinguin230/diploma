@@ -7,6 +7,13 @@ import type { Complex, Graph, Token } from '@/core/types';
 import { DataflowRuntime } from '@/core/scheduler';
 import { computeCriticalPath } from '@/utils/criticalPath';
 
+let startClickTime: number | null = null;
+let startMeasurementDone = false;
+// Окремий прапорець для виміру часу відгуку UI (NF2):
+// перший тік анімаційного циклу після натискання «Пуск» — не залежить від
+// затримок у графі, відображає лише затримку браузерного event-loop/rAF.
+let startUiResponseDone = false;
+
 export type TokenVis = { id: string; t0: number; delay: number; value?: { re: number; im: number } };
 export type CustomPreset = {
   id: string;
@@ -143,6 +150,10 @@ type SimState = {
 
     // події Sink за останню секунду (таймстампи у simTime)
     sinkHits: number[];
+
+    // продуктивність візуалізації
+    fpsEma: number;
+    tickTimeMs: number;
   };
   resetMetrics: () => void;
   onNodeFireForMetrics: () => void;
@@ -215,7 +226,14 @@ export const useSimStore = create<SimState>()(
       runtime: null,
       running: false,
       speed: 1,
-      setSpeed: (v) => set({ speed: v }),
+      setSpeed: (v) => {
+        const t0 = performance.now();
+        set({ speed: v });
+        // Повзунок може стріляти часто — логуємо кожен раз; для Б2 беремо макс.
+        requestAnimationFrame(() =>
+          console.log(`[NF2] Швидкість → ${v}× (rAF): ${(performance.now() - t0).toFixed(2)} мс`),
+        );
+      },
       tokensByEdge: {},
 
       simTime: 0,
@@ -266,6 +284,8 @@ export const useSimStore = create<SimState>()(
         queueEma: 0,
         queueAlpha: 0.1,
         sinkHits: [],
+        fpsEma: 0,
+        tickTimeMs: 0,
       },
 
       resetMetrics: () =>
@@ -278,6 +298,8 @@ export const useSimStore = create<SimState>()(
             latencyEmaMs: 0,
             queueEma: 0,
             sinkHits: [],
+            fpsEma: 0,
+            tickTimeMs: 0,
           },
         })),
 
@@ -487,6 +509,15 @@ export const useSimStore = create<SimState>()(
 
                 if (node.kind !== 'sink') return;
 
+                if (startClickTime !== null && !startMeasurementDone) {
+                  const delta = performance.now() - startClickTime;
+                  // Це час критичного шляху графа (simTime ≈ real-time при speed=1).
+                  // Для DFT4x4: edge 600×4 + DFT4 400×2 + twiddle 200 = ~3400 мс.
+                  // Не є показником UI-відгуку — для NF2 дивіться лог [NF2] вище.
+                  console.log(`[КРИТИЧНИЙ ШЛЯХ] Час до першого результату (persh onOutput): ${delta.toFixed(2)} мс`);
+                  startMeasurementDone = true;
+                }
+
                 const first = Object.values(outputs)[0] as Token | undefined;
                 if (!first) return;
 
@@ -545,10 +576,24 @@ export const useSimStore = create<SimState>()(
           dt = (now - s.lastWall) * s.speed;
           return { simTime: s.simTime + dt, lastWall: now };
         });
+
+        // ─── NF2: час відгуку UI ──────────────────────────────────────────────
+        // Логується один раз на першому кадрі анімаційного циклу після кліку
+        // «Пуск». Вимірює затримку браузерного event-loop + requestAnimationFrame
+        // (не залежить від затримок у графі). Очікуване значення: 10–50 мс.
+        if (startClickTime !== null && !startUiResponseDone) {
+          const uiDelta = now - startClickTime;
+          console.log(`[NF2] Час відгуку UI (перший тік rAF): ${uiDelta.toFixed(2)} мс`);
+          startUiResponseDone = true;
+        }
+
         return dt; // щоб GraphView знав, наскільки крокнути runtime
       },
 
       start() {
+        startClickTime = performance.now();
+        startMeasurementDone = false;
+        startUiResponseDone = false; // скидаємо перед кожним запуском
         set({
           running: true,
           lastWall: performance.now(),
@@ -557,25 +602,39 @@ export const useSimStore = create<SimState>()(
       },
 
       stop() {
-        const now = performance.now();
+        const t0 = performance.now();
         set((s) =>
           s.lastWall == null
             ? { running: false }
-            : { running: false, simTime: s.simTime + (now - s.lastWall) * s.speed, lastWall: null },
+            : { running: false, simTime: s.simTime + (t0 - s.lastWall) * s.speed, lastWall: null },
+        );
+        requestAnimationFrame(() =>
+          console.log(`[NF2] Пауза (rAF): ${(performance.now() - t0).toFixed(2)} мс`),
         );
         // get().resetMetrics();
       },
       step() {
+        const t0 = performance.now();
         const dt = 16 * get().speed;
         set((s) => ({ simTime: s.simTime + dt })); // ← посунути логічний час
         get().runtime?.tick(dt);
+        requestAnimationFrame(() =>
+          console.log(`[NF2] Крок (rAF): ${(performance.now() - t0).toFixed(2)} мс`),
+        );
       },
 
       reset() {
+        const t0 = performance.now();
+        startClickTime = null;
+        startMeasurementDone = false;
+        startUiResponseDone = false;
         get().stop();
         get().setGraph(get().graph);
         set({ simTime: 0, firesTotal: 0, nodeActivity: {}, lastWall: null });
         get().resetMetrics();
+        requestAnimationFrame(() =>
+          console.log(`[NF2] Скидання (rAF): ${(performance.now() - t0).toFixed(2)} мс`),
+        );
       },
 
       updateNodeLatency(nodeId, latency) {
