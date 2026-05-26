@@ -289,10 +289,18 @@ iндексного вiдображення, поворотних множник
 \bottomrule\noalign{}
 \endlastfoot
 1 & Аналіз завдання & 15.02.26 -- 19.02.26 & \\
-2 & !!! ЗАПОВНИТИ (від 15.02/20.04 до 25.05) & 15.02.26 -- 29.03.26 & \\
-3 & & 04.04.26 -- 26.04.26 & \\
-4 & & 12.04.26 -- 17.05.26 & \\
-5 & & 17.05.26- 25.05.26 & \\
+2 & РОЗДІЛ 1. Аналіз предметної області обчислення швидкого
+перетворення Фур'є під керуванням потоку даних, огляд існуючих рішень,
+системний аналіз задачі та постановка задачі & 15.02.26 -- 29.03.26 & \\
+3 & РОЗДІЛ 2. Проєктування програмного рішення: математична модель
+16-точкового ШПФ radix-4, граф потоку даних, архітектура системи,
+структури даних та інтерфейс користувача & 04.04.26 -- 26.04.26 & \\
+4 & РОЗДІЛ 3. Реалізація програмного рішення: ядро
+\passthrough{\lstinline!DataflowRuntime!}, обчислювальні вузли, побудова
+DFG 16-точкового ШПФ, тестування та розгортання & 12.04.26 -- 17.05.26 & \\
+5 & РОЗДІЛ 4. Експериментальні дослідження та аналіз результатів:
+функціональна верифікація, аналіз складності, розкладу і паралелізму,
+підтвердження вимог & 17.05.26 -- 25.05.26 & \\
 6 & & & \\
 7 & & & \\
 \end{longtable}
@@ -656,7 +664,7 @@ XSS -- Cross-Site Scripting
 (ЦОС) і щоденно виконується мільярди разів у мобільному зв'язку 4G/5G
 (OFDM-модуляція), системах активного шумозаглушення, медичній
 діагностиці (МРТ, ЕЕГ-спектрометрія) та обробленні аудіо- і
-відеопотоків. За оцінками IEEE Signal Processing Society (2024), ШПФ
+відеопотоків. За оцінками IEEE Signal Processing Society, ШПФ
 лишається найчастіше застосовуваним числовим алгоритмом у вбудованих
 системах реального часу. Алгоритм radix-4 для \(N = 16\) через
 тристадійну \(4 \times 4\) декомпозицію потребує лише 9 нетривіальних
@@ -766,7 +774,7 @@ FFT) є одним із найбільш вживаних обчислюваль
 сучасних алгоритмів машинного навчання з перетворенням вхідних даних у
 частотний простір. За оцінками IEEE Signal Processing Society, ШПФ
 залишається найчастіше застосовуваним числовим алгоритмом у вбудованих
-системах реального часу. {[}1{]}{[}2{]}{[}21{]}.
+системах реального часу. {[}5{]}{[}27{]}{[}20{]}.
 
 Пряме обчислення дискретного перетворення Фур'є (ДПФ) має квадратичну
 складність \(O(N^{2})\). Навіть для скромного розміру \(N = 1024\) це
@@ -779,16 +787,16 @@ FFT) є одним із найбільш вживаних обчислюваль
 двовимірної декомпозиції зводить одновимірне ДПФ довжиною \(N = 16\) до
 тристадійної схеми \(4 \times 4\): чотири паралельних ДПФ-4, множення на
 матрицю поворотних множників \(W_{16}^{rk}\) та знову чотири паралельних
-ДПФ-4 {[}1{]}{[}3{]}{[}4{]}{[}21{]}.
+ДПФ-4 {[}5{]}{[}9{]}{[}26{]}{[}20{]}.
 
 Паралельна природа алгоритму природно вкладається у парадигму обчислень
 під керуванням потоку даних (англ. \emph{dataflow computing}),
 теоретичні засади якої були закладені Дж. Деннісом (Jack B. Dennis) у
-MIT на початку 1970-х рр. {[}5{]}{[}6{]}. У dataflow-моделі відсутній
+MIT на початку 1970-х рр. {[}6{]}{[}7{]}. У dataflow-моделі відсутній
 лічильник команд фон-нейманівської архітектури: вузол графа активується
 тоді і лише тоді, коли на всіх його вхідних каналах є токени, після чого
 самопланування системи (англ. \emph{self-scheduling}) забезпечує
-максимальний паралелізм без явних механізмів синхронізації {[}7{]}. Граф
+максимальний паралелізм без явних механізмів синхронізації {[}19{]}. Граф
 алгоритму ШПФ, що формально є орієнтованим ациклічним графом залежностей
 за даними, відображається на граф потоку даних (англ. \emph{Data Flow
 Graph} -- DFG) без перетворення моделі.
@@ -798,13 +806,13 @@ Graph} -- DFG) без перетворення моделі.
 прогалина між трьома рівнями опису алгоритму. Перший рівень -
 \emph{математична модель} - охоплює матричні факторизації, формули
 метеликів і поворотних множників, що подаються у класичних підручниках
-із ЦОС {[}1{]}{[}4{]}. Другий рівень - \emph{формальна потокова модель}
+із ЦОС {[}5{]}{[}26{]}. Другий рівень - \emph{формальна потокова модель}
 - DFG і Synchronous Dataflow (SDF) Лі та Месершмітта, що описують вузли,
-дуги, токени та правило активації {[}1{]}{[}4{]}. Третій рівень -
+дуги, токени та правило активації {[}5{]}{[}26{]}. Третій рівень -
 \emph{виробнича реалізація} - бібліотеки FFTW, ARM CMSIS-DSP, NVIDIA
 CuFFT, SPIRAL, Intel IPP, оптимізовані виключно під максимальну
 продуктивність на конкретних платформах
-{[}8{]}{[}9{]}{[}10{]}{[}11{]}{[}12{]}.
+{[}12{]}{[}1{]}{[}24{]}{[}28{]}{[}15{]}.
 
 Ці рівні існують відокремлено один від одного. Математичні формули не
 мають виконуваного аналога з можливістю поточного спостереження;
@@ -852,7 +860,7 @@ CuFFT, SPIRAL, Intel IPP, оптимізовані виключно під ма�
 
 \textbf{Бібліотека FFTW (Fastest Fourier Transform in the West)}
 розроблена М. Фріго і С. Джонсоном у MIT у 1997 р. і у 1999 р.
-відзначена премією Вілкінсона {[}13{]}. Архітектура FFTW ґрунтується на
+відзначена премією Вілкінсона {[}11{]}. Архітектура FFTW ґрунтується на
 трьох компонентах \emph{коделети} -- компактні блоки прямолінійного
 C-коду для ДПФ невеликих розмірів, автоматично згенеровані компілятором
 \passthrough{\lstinline!genfft!}; \emph{планувальник} --
@@ -862,10 +870,10 @@ runtime-компонент, що методом динамічного прог�
 і володарюй». Рекурсивна декомпозиція є кеш-незалежною
 (cache-oblivious): щойно підзадача поміщається у L1/L2-кеш, вона
 виконується без промахів кешу, що і забезпечує вищу продуктивність проти
-ітеративних реалізацій {[}8{]}.
+ітеративних реалізацій {[}12{]}.
 
 \textbf{ARM CMSIS-DSP} -- стандартизований пакет ЦОС для
-мікроконтролерів ARM Cortex-M {[}9{]}. Надає жорстко оптимізовані
+мікроконтролерів ARM Cortex-M {[}1{]}. Надає жорстко оптимізовані
 реалізації radix-4 для розмірів \(N = 16,64,256,1024,4096\) із ручною
 адаптацією під SIMD-інструкції NEON і DSP-розширення Cortex-M4/M7.
 Бібліотека не переноситься на інші архітектури, не підтримує адаптивного
@@ -880,7 +888,7 @@ Radeon через відмінності в ієрархії пам'яті та 
 автотюнінг: А. Нукада та С. Мацуока показали, що адаптивний вибір
 відступів у спільній пам'яті та кількості активних блоків потоків у
 відповідних конфігураціях може перевищувати продуктивність вендорної
-бібліотеки NVIDIA CuFFT {[}10{]}{[}14{]}{[}20{]}{[}27{]}.
+бібліотеки NVIDIA CuFFT {[}2{]}{[}22{]}{[}24{]}.
 
 \textbf{SPIRAL} (Carnegie Mellon University) -- принципово інший підхід:
 замість вибору між готовими ядрами, SPIRAL генерує платформо-залежний
@@ -888,37 +896,37 @@ Radeon через відмінності в ієрархії пам'яті та 
 (Signal Processing Language). Пошук оптимального графа зводиться до
 задачі пошуку у просторі еквівалентних матричних розкладів, що може
 вирішуватися евристично або методами машинного навчання. SPIRAL генерує
-код як для CPU (SIMD, AVX), так і для FPGA {[}11{]}{[}23{]}.
+код як для CPU (SIMD, AVX), так і для FPGA {[}8{]}{[}28{]}.
 
 \textbf{Intel IPP (Integrated Performance Primitives)} займає проміжне
 місце: жорстко оптимізовані примітиви ШПФ під векторні інструкції
 SSE/AVX/AVX-512 процесорів Intel без автоматичного пошуку факторизації
-під час виконання {[}12{]}.
+під час виконання {[}15{]}.
 
 Окрему групу джерел утворюють методи візуального моделювання, які
 теоретично описують структуру обчислювачів, але не реалізуються як
 виконувані симулятори з числовою верифікацією. Загальні нотації UML
 Activity, IDEF0/IDEF3, DFD Йордана/ДеМарко -- орієнтовані на
-control-flow парадигму {[}15{]}{[}16{]} і не мають формальної семантики
+control-flow парадигму {[}25{]}{[}21{]} і не мають формальної семантики
 токенів, тому для потокового обчислювача ШПФ породжують надлишкові
 конструкції
 \passthrough{\lstinline!fork!}/\passthrough{\lstinline!join!}. DFG/SDF
 (Data Flow Graph і Synchronous Dataflow) -- спеціалізовані моделі для
 задач ЦОС, де кількість токенів, що споживаються та виробляються кожним
 вузлом за одну активацію, є фіксованою і відомою на етапі статичного
-аналізу {[}7{]}{[}17{]}{[}18{]}. Це дозволяє виконувати статичне
+аналізу {[}19{]}{[}18{]}{[}17{]}. Це дозволяє виконувати статичне
 планування без ризику взаємних блокувань та перевіряти консистентність
-графа алгебраїчно через топологічну матрицю {[}19{]}. Алгоритм ШПФ із
+графа алгебраїчно через топологічну матрицю {[}3{]}. Алгоритм ШПФ із
 фіксованою довжиною N=16 є природним прикладом SDF-графа. С. С. Буррус
 формалізує зв'язок між матричною факторизацією та графом алгоритму через
 рівняння \textbf{X\textquotesingle{} = C ⋅ D ⋅ A ⋅ X}, де кожна матриця
-відповідає окремому ярусу графа (Burrus and Parks 1985). Ці діаграми є
+відповідає окремому ярусу графа {[}26{]}. Ці діаграми є
 статичними і не моделюють динаміку виконання. У вітчизняній науковій
 традиції аналогічний підхід застосовувався у роботах ОКБ ЕІВТ (М.
 Розенблат, 1970-ті рр.) та у монографії М. М. Яцимірського (1997 р.);
 зокрема, у Фізико-механічному інституті ім. Г. В. Карпенка НАН України в
 1980-х роках було розроблено векторний спецпроцесор ШПФ на основі
-dataflow-парадигми {[}2{]}.
+dataflow-парадигми {[}27{]}.
 
 Узагальнення розглянутих джерел дозволяє зафіксувати три ключові
 прогалини. По-перше, виробничі бібліотеки (FFTW, CMSIS-DSP, CuFFT,
@@ -985,20 +993,20 @@ Simulink) або не відтворюють динаміки, або потре
 \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} &
 \textbf{6} \\
 FFTW 3.x & SW бібліотека & CPU (x86, ARM) & Немає & Так & Адаптивний
-planner, cache-oblivious рекурсія (Frigo and Johnson 2005) \\
+planner, cache-oblivious рекурсія {[}12{]} \\
 & & & & & \\
 \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} &
 \textbf{6} \\
 ARM CMSIS-DSP & SW бібліотека & ARM Cortex-M & Немає & Так & Фіксований
-radix-4, SIMD-оптимізація (ARM Limited 2023) \\
+radix-4, SIMD-оптимізація {[}1{]} \\
 NVIDIA CuFFT & SW бібліотека & GPU (NVIDIA) & Немає & Ні & Масовий
-паралелізм, вендор-лок (Du et al. 2012) \\
+паралелізм, вендор-лок {[}13{]} \\
 Nukada autotuner & SW + автотюнінг & GPU (CUDA) & Немає & Част. &
-Runtime-компіляція (Nukada and Matsuoka 2009) \\
+Runtime-компіляція {[}22{]} \\
 SPIRAL & Генератор коду & CPU / FPGA & Немає & Так & Пошук у просторі
-факторизацій SPL (Püschel et al. 2004) \\
+факторизацій SPL {[}28{]} \\
 Intel IPP & SW бібліотека & Intel x86 & Немає & Ні & Примітиви AVX/SIMD
-(Intel Corporation 2021) \\
+{[}15{]} \\
 MATLAB Simulink (SDF) & Середовище моделювання & Desktop & Часткова & Ні
 & SDF-модель, комерційна ліцензія \\
 draw.io / Visio & Діаграмний редактор & Desktop / Web & Ні (статика) &
@@ -1176,14 +1184,14 @@ IEEE\textasciitilde754 щодо подання чисел з плаваючою 
 оформлення пояснювальної записки та списку використаних джерел. Окремо
 дотримується принцип академічної доброчесності: усі зовнішні джерела та
 референтні реалізації належно процитовані, а отримані результати є
-відтворюваними {[}24{]}{[}25{]}.
+відтворюваними {[}14{]}{[}16{]}.
 
 \protect\phantomsection\label{X124bb00a71ff7da6d40a6aa8e0ae644d11036d1}{}1.5.
 Постановка задачі та формулювання вимог
 
 Нехай задано комплекснозначну вхідну послідовність
 \(\{ x_{n}\}_{n = 0}^{N - 1}\) довжиною \(N = 16\), подану у подвійній
-точності формату IEEE 754 {[}24{]}. Потрібно розробити програмний
+точності формату IEEE 754 {[}14{]}. Потрібно розробити програмний
 симулятор, який:
 
 \begin{enumerate}
@@ -1310,7 +1318,7 @@ F9 & Налаштування параметрів & Редагування ча
 \end{longtable}
 
 Нефункціональні вимоги регламентують якісні характеристики системи у
-відповідності до ISO/IEC 25010 (табл. 1.4) {[}25{]}.
+відповідності до ISO/IEC 25010 (табл. 1.4) {[}16{]}.
 
 Таблиця 1.4
 
@@ -1371,11 +1379,8 @@ NF8 & Зручність & Основні операції доступні не
 
 На дiаграмi показано, що UC3 мiстить (include) UC5, а UC7 розширює
 (extend) UC3. Прецеденти UC1 i UC2 є взаємовиключними альтернативами
-пiдготовки вхiдних даних. Посилання на табл
-
-Таблиця 1.5
-
-Перелік прецедентів (Use Cases) симулятора
+пiдготовки вхiдних даних. Деталізований опис прецедентів наведено у
+табл.~\ref{tab:usecases}.
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.0717}}
@@ -1383,7 +1388,7 @@ NF8 & Зручність & Основні операції доступні не
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1748}}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.4913}}@{}}
 \caption[Перелік прецедентів (Use Cases) симулятора]{Перелік прецедентів
-(Use Cases) симулятора}\tabularnewline
+(Use Cases) симулятора}\label{tab:usecases}\tabularnewline
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 \textbf{ID}
@@ -1514,11 +1519,14 @@ DFG/SDF) виноситься до розділу 2, де воно подаєт�
 Цей варіант одночасно задовольняє вимоги NF2, NF4 (портативність), NF5
 (детермінованість) і NF7.
 
-Посилання на
+Загальна контекстна діаграма системи наведена на рис.~\ref{fig:c4-context}.
 
+\begin{figure}[H]
+\centering
 \includegraphics[width=4.952in,height=4.79265in]{media/media/image3.png}
-
-Рис. 2.1. C4 Context-дiаграма веб-симулятора потокового обчислювача ШПФ.
+\caption{C4 Context-діаграма веб-симулятора потокового обчислювача ШПФ.}
+\label{fig:c4-context}
+\end{figure}
 
 Симулятор поєднує три принципово різні підсистеми: анімована графова
 візуалізація DFG, числове ядро симуляції та панель керування і метрик.
@@ -1586,7 +1594,7 @@ React\textasciitilde Flow: бібліотека надає готові меха
 коду, що унеможливлює помилки передачі аргументів неправильного типу на
 етапі компіляції. Комплексні числа подаються структурою\{ re, im \} у
 подвійній точності IEEE 754, що забезпечує необхідний запас точності
-{[}24{]}.
+{[}14{]}.
 
 Підсумкова таблиця зв'язків між вимогами підрозд. 1.5 та обраними
 архітектурними рішеннями наведена у табл. 2.1.
@@ -1650,7 +1658,7 @@ NF8 (зручність) & React Flow + панелі Controls/Metrics & Двок
 
 Дискретне перетворення Фур'є (ДПФ) скінченної комплекснозначної
 послідовності \(\{ x_{n}\}_{n = 0}^{N - 1}\) визначається за формулою
-(2.1) (Nussbaumer 1982; Процько et al. 2025):
+(2.1) {[}23{]}{[}27{]}:
 
 \[\begin{array}{r}
 X_{k} = \sum_{n = 0}^{N - 1}x_{n}\, e^{- \frac{j2\pi nk}{N}} = \sum_{n = 0}^{N - 1}x_{n}\, W_{N}^{nk},\quad k = 0,1,\ldots,N - 1,\ \#(2.1)
@@ -1667,11 +1675,10 @@ X_{k} = \sum_{n = 0}^{N - 1}x_{n}\, e^{- \frac{j2\pi nk}{N}} = \sum_{n = 0}^{N -
 \(O(N^{2})\), що недостатньо для задач реального часу. Клас швидких
 алгоритмів (ШПФ) знижує складність до \(O(N\log_{2}N)\) за рахунок
 факторизації \(N = N_{1} \cdot N_{2}\). Для \(N = 16\) природним вибором
-є алгоритм з основою~4 (radix-4), де \(N_{1} = N_{2} = 4\) (Cooley and
-Tukey 1965).
+є алгоритм з основою~4 (radix-4), де \(N_{1} = N_{2} = 4\) {[}5{]}.
 
 Для двовимірної \(4 \times 4\) декомпозиції часовий і частотний індекси
-подаються згідно з (2.2){[}22{]}:
+подаються згідно з (2.2){[}26{]}:
 
 \[\begin{array}{r}
 n = 4s + r,\quad k = 4k_{2} + k_{1},\quad r,s,k_{1},k_{2} \in \left\{ 0,1,2,3 \right\},\ \#(2.2)
@@ -1701,7 +1708,7 @@ A\lbrack r\rbrack\lbrack s\rbrack = x(4s + r),\quad r,s \in \left\{ 0,1,2,3 \rig
 Підстановка у формулу ДПФ із використанням тотожності
 \(W_{16}^{4 \cdot ( \cdot )} = W_{4}^{( \cdot )}\) дає тристадійну
 схему, описану виразом (2.4) та показану на рисунку (\textbf{рис. Г.1}.)
-(Burrus and Parks 1985; Nussbaumer 1982):
+{[}23{]}{[}26{]}:
 
 \[\begin{array}{r}
 X(4k_{2} + k_{1}) = \sum_{r = 0}^{3}W_{16}^{rk_{1}}\underset{G_{r}(k_{1})}{\underbrace{\left( \sum_{s = 0}^{3}A\lbrack r\rbrack\lbrack s\rbrack\, W_{4}^{sk_{1}} \right)}}W_{4}^{rk_{2}},\#(2.4)
@@ -1798,11 +1805,11 @@ k\_\{1\}\} (округлено до 3 знаків)]{Поворотні множ
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-& \(1\) & \(1\) & \(1\) & \(1\) \\
-& \(1\) & \(0,924 - 0,383j\) & \(0,707 - 0,707j\) &
+0 & \(1\) & \(1\) & \(1\) & \(1\) \\
+1 & \(1\) & \(0,924 - 0,383j\) & \(0,707 - 0,707j\) &
 \(0,383 - 0,924j\) \\
-& \(1\) & \(0,707 - 0,707j\) & \(- j\) & \(- 0,707 - 0,707j\) \\
-& \(1\) & \(0,383 - 0,924j\) & \(- 0,707 - 0,707j\) &
+2 & \(1\) & \(0,707 - 0,707j\) & \(- j\) & \(- 0,707 - 0,707j\) \\
+3 & \(1\) & \(0,383 - 0,924j\) & \(- 0,707 - 0,707j\) &
 \(- 0,924 + 0,383j\) \\
 \end{longtable}
 
@@ -1859,8 +1866,7 @@ V_{1} & = E_{1} - j \cdot O_{1}, & V_{3} & = E_{1} + j \cdot O_{1}.
 Множення на \(j\) зводиться до перестановки дійсної та уявної частин зі
 зміною знаку (\(j \cdot (a + bj) = - b + aj\)) і не потребує операції
 множення у традиційному сенсі. Таким чином, одне 4-точкове ДПФ потребує
-\textbf{8 комплексних додавань і 0 нетривіальних множень} (Nussbaumer
-1982).
+\textbf{8 комплексних додавань і 0 нетривіальних множень} {[}23{]}.
 
 Загальна обчислювальна вартість алгоритму для \(N = 16\):
 
@@ -1876,11 +1882,10 @@ V_{1} & = E_{1} - j \cdot O_{1}, & V_{3} & = E_{1} + j \cdot O_{1}.
 
 Разом: \textbf{9 нетривіальних комплексних множень} і \textbf{80
 комплексних додавань}, порівняно з \(N^{2} = 256\) множень прямого ДПФ -
-прискорення у \(\approx 28\) разів за кількістю множень (Nussbaumer
-1982; Burrus and Parks 1985).
+прискорення у \(\approx 28\) разів за кількістю множень {[}23{]}{[}26{]}.
 
 Алгоритм подається у вигляді орієнтованого ациклічного графа потоку
-даних (DFG) \(G = (V,E)\) (Dennis 1974; Lee and Hurson 1994), де:
+даних (DFG) \(G = (V,E)\) {[}6{]}{[}17{]}, де:
 
 \begin{itemize}
 \item
@@ -1949,7 +1954,7 @@ V_{1} & = E_{1} - j \cdot O_{1}, & V_{3} & = E_{1} + j \cdot O_{1}.
 \protect\phantomsection\label{X8971522f2fc6036ff7f6d6d494a0986f56fee46}{}2.3.
 Загальна архітектура системи
 
-Архітектура симулятора описується на двох рівнях моделі C4 (Brown 2018)
+Архітектура симулятора описується на двох рівнях моделі C4 {[}4{]}
 -- Context і Container, -- доповнених діаграмою потоків даних.
 
 На контекстному рівні система представляється як «чорна скринька», що
@@ -2073,13 +2078,13 @@ UI Layer читає стан зі State Store та викликає команд
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\passthrough{\lstinline!source!} & & & & -- & Генерація \(x(n)\) \\
-\passthrough{\lstinline!dft4!} & & & & & -точкове ДПФ (метелик з
+\passthrough{\lstinline!source!} & 16 & 0 & 1 & -- & Генерація \(x(n)\) \\
+\passthrough{\lstinline!dft4!} & 8 & 4 & 4 & 400 & 4-точкове ДПФ (метелик з
 підрозд. 2.2) \\
-\passthrough{\lstinline!twiddle!} & & & & & Множення на
+\passthrough{\lstinline!twiddle!} & 16 & 1 & 1 & 200 & Множення на
 \(W_{16}^{rk_{1}}\) \\
-\passthrough{\lstinline!sink!} & & & & -- & Збір \(X(k)\) \\
-& & & & & \\
+\passthrough{\lstinline!sink!} & 16 & 1 & 0 & -- & Збір \(X(k)\) \\
+Всього & 56 & --- & --- & --- & --- \\
 \end{longtable}
 
 Таблиця 2.4
@@ -2119,14 +2124,14 @@ UI Layer читає стан зі State Store та викликає команд
 \bottomrule\noalign{}
 \endlastfoot
 \passthrough{\lstinline!source!} & \passthrough{\lstinline!dft4!}
-(рядковий) & & \\
+(рядковий) & 16 & 600 \\
 \passthrough{\lstinline!dft4!} (ряд.) &
-\passthrough{\lstinline!twiddle!} & & \\
+\passthrough{\lstinline!twiddle!} & 16 & 600 \\
 \passthrough{\lstinline!twiddle!} & \passthrough{\lstinline!dft4!}
-(стовпц.) & & \\
+(стовпц.) & 16 & 600 \\
 \passthrough{\lstinline!dft4!} (ст.) & \passthrough{\lstinline!sink!} &
-& \\
-& & & \\
+16 & 600 \\
+Всього & --- & 64 & --- \\
 \end{longtable}
 
 Критичний шлях у DFG (найдовший шлях від
@@ -2176,7 +2181,7 @@ K_{p} = \frac{T_{ps}}{T_{kr}} = \frac{6400}{2200} \approx 2,9,\ \#(2.12)
 \(T_{kr}\) -- довжина критичного шляху згідно з~(2.10),
 
 тобто паралельне виконання незалежних вузлів забезпечує майже трикратне
-прискорення порівняно з послідовним обчисленням (Veen 1986). Наведена
+прискорення порівняно з послідовним обчисленням {[}29{]}. Наведена
 оцінка \(K_{p} \approx 2,9\) враховує затримки лише обчислювальних
 вузлів і двох внутрішніх дуг і не включає часу передавання вхідною
 (\passthrough{\lstinline!source!}\(\rightarrow\)\passthrough{\lstinline!dft4!})
@@ -2251,18 +2256,14 @@ DFG, що переміщується по дугам графа. Поля тип
 Тип \passthrough{\lstinline!Edge!} описує спрямований канал між двома
 портами вузлів. Поля \passthrough{\lstinline!label!} і
 \passthrough{\lstinline!labelValue!} використовуються для дуг між
-стадіями 1 і 2, що несуть мітки поворотних множників \(W_{16}^{rk_{1}}\)
-Посилання на
-
-Таблиця 2.6
-
-Поля типу \passthrough{\lstinline!Edge!}
+стадіями 1 і 2, що несуть мітки поворотних множників \(W_{16}^{rk_{1}}\).
+Поля типу \passthrough{\lstinline!Edge!} наведено у табл.~\ref{tab:edge-fields}.
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1253}}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1390}}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4833}}@{}}
-\caption[Поля типу Edge]{Поля типу Edge}\tabularnewline
+\caption[Поля типу Edge]{Поля типу \passthrough{\lstinline!Edge!}}\label{tab:edge-fields}\tabularnewline
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 Поле
@@ -2680,7 +2681,7 @@ double, що гарантує запас точності відносно \(\va
 (NF1). Обрано механізми обміну даними: внутрішня шина подій
 (\passthrough{\lstinline!onToken!}, \passthrough{\lstinline!onFire!},
 \passthrough{\lstinline!onOutput!}) для ізоляції UI від ядра, реактивне
-сховище та пресети у Local Storage для повторюваних сценаріїв {[}24{]}.
+сховище та пресети у Local Storage для повторюваних сценаріїв {[}10{]}.
 
 \emph{Спроєктовано інтерфейс} з інформаційною ієрархією, трьома
 візуальними механізмами відображення потокової природи алгоритму та
@@ -2711,7 +2712,7 @@ double, що гарантує запас точності відносно \(\va
 \(\varepsilon \leq 10^{- 9}\)). Цільовим середовищем виконання є
 браузерний рушій JavaScript (V8 у Chrome/Edge, SpiderMonkey у Firefox) з
 підтримкою \passthrough{\lstinline!requestAnimationFrame!}, Web Workers,
-Canvas API та Local Storage {[}26{]}.
+Canvas API та Local Storage {[}10{]}.
 
 Повний перелік використаних бібліотек із версіями та призначенням
 наведено у табл. 3.1. Next.js забезпечує маршрутизацію, оптимізоване
@@ -2927,7 +2928,7 @@ Math \& verify &
 Клас \passthrough{\lstinline!DataflowRuntime!} (модуль
 \passthrough{\lstinline!src!}\passthrough{\lstinline!/!}\passthrough{\lstinline!core!}\passthrough{\lstinline!/!}\passthrough{\lstinline!scheduler!}\passthrough{\lstinline!.!}\passthrough{\lstinline!ts!})
 є програмною реалізацією абстрактної машини потоку даних із підрозд. 2.2
-(Veen 1986; Dennis and Misunas 1975). Він відповідає за виконання
+{[}7{]}{[}29{]}. Він відповідає за виконання
 правила активації вузлів та управління FIFO-чергами на дугах графа і
 зберігає такі внутрішні структури:
 
@@ -2962,7 +2963,7 @@ Math \& verify &
 Метод
 \passthrough{\lstinline!tick!}\passthrough{\lstinline!(!}\passthrough{\lstinline!dt!}\passthrough{\lstinline!,!}\passthrough{\lstinline! !}\passthrough{\lstinline!maxFires!}\passthrough{\lstinline!)!}
 виконує єдиний крок потокового обчислення і реалізує правило активації
-(Veen 1986; Dennis and Misunas 1975). Алгоритм складається з чотирьох
+{[}7{]}{[}29{]}. Алгоритм складається з чотирьох
 послідовних кроків. По-перше, доставка токенів: для кожної дуги \(e\)
 перевіряється умова (3.2):
 
@@ -4032,22 +4033,22 @@ n, n = 0\textbackslash ldots 15}\tabularnewline
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-& \(120,000000\) & \(0,000000\) & \(0\) & + \\
-& \(- 8,000000\) & \(+ 40,218716\) & \(0\) & + \\
-& \(- 8,000000\) & \(+ 19,313708\) & \(0\) & + \\
-& \(- 8,000000\) & \(+ 11,972846\) & \(0\) & + \\
-& \(- 8,000000\) & \(+ 8,000000\) & \(0\) & + \\
-& \(- 8,000000\) & \(+ 5,345429\) & \(0\) & + \\
-& \(- 8,000000\) & \(+ 3,313708\) & \(0\) & + \\
-& \(- 8,000000\) & \(+ 1,591299\) & \(0\) & + \\
-& \(- 8,000000\) & \(0,000000\) & \(0\) & + \\
-& \(- 8,000000\) & \(- 1,591299\) & \(0\) & + \\
-& \(- 8,000000\) & \(- 3,313708\) & \(0\) & + \\
-& \(- 8,000000\) & \(- 5,345429\) & \(0\) & + \\
-& \(- 8,000000\) & \(- 8,000000\) & \(0\) & + \\
-& \(- 8,000000\) & \(- 11,972846\) & \(0\) & + \\
-& \(- 8,000000\) & \(- 19,313708\) & \(0\) & + \\
-& \(- 8,000000\) & \(- 40,218716\) & \(0\) & + \\
+0 & \(120,000000\) & \(0,000000\) & \(0\) & + \\
+1 & \(- 8,000000\) & \(+ 40,218716\) & \(0\) & + \\
+2 & \(- 8,000000\) & \(+ 19,313708\) & \(0\) & + \\
+3 & \(- 8,000000\) & \(+ 11,972846\) & \(0\) & + \\
+4 & \(- 8,000000\) & \(+ 8,000000\) & \(0\) & + \\
+5 & \(- 8,000000\) & \(+ 5,345429\) & \(0\) & + \\
+6 & \(- 8,000000\) & \(+ 3,313708\) & \(0\) & + \\
+7 & \(- 8,000000\) & \(+ 1,591299\) & \(0\) & + \\
+8 & \(- 8,000000\) & \(0,000000\) & \(0\) & + \\
+9 & \(- 8,000000\) & \(- 1,591299\) & \(0\) & + \\
+10 & \(- 8,000000\) & \(- 3,313708\) & \(0\) & + \\
+11 & \(- 8,000000\) & \(- 5,345429\) & \(0\) & + \\
+12 & \(- 8,000000\) & \(- 8,000000\) & \(0\) & + \\
+13 & \(- 8,000000\) & \(- 11,972846\) & \(0\) & + \\
+14 & \(- 8,000000\) & \(- 19,313708\) & \(0\) & + \\
+15 & \(- 8,000000\) & \(- 40,218716\) & \(0\) & + \\
 \end{longtable}
 
 Стовпець \(|X_{\text{sim}}(k) - X_{\text{ref}}(k)|\) показує модуль
@@ -4430,7 +4431,7 @@ K_{M} = \frac{N^{2}}{M_{4}} = \frac{256}{9} \approx 28,4,\ \#(4.6)
 Різниця між цими значеннями пояснюється тим, що \(K_{M}\) враховує лише
 \emph{нетривіальні} операції (множення на \(\pm 1\) та \(\pm j\)
 виконуються перестановкою знаку), тоді як асимптотичне відношення є
-характеристикою класу зростання (Nussbaumer 1982). У реальній топології
+характеристикою класу зростання {[}23{]}. У реальній топології
 DFG із 16 вузлів \passthrough{\lstinline!twiddle!} нетривіальними є
 рівно 9 (\passthrough{\lstinline!tw!}\passthrough{\lstinline!-1-1!},
 \passthrough{\lstinline!tw!}\passthrough{\lstinline!-1-2!},
@@ -5072,61 +5073,43 @@ WebWorker-ізоляція обчислювального ядра від UI-п�
   як джерела генерації RTL-опису.
 \end{enumerate}
 
-12. Intel Corporation. Intel Integrated Performance Primitives. Fast
-Fourier\\
-Transform Functions. Intel IPP Developer Guide and Reference. 2024.\\
-URL: https://www.intel.com/content/www/us/en/docs/ipp/developer-\\
-guide-reference/2021-12/fast-fourier-transform-functions.html (дата\\
-звернення: 21.05.2026).
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\setcounter{enumi}{8}
-\item
-  Arm Ltd. CMSIS-DSP: Complex FFT Functions. Version 1.16.2. URL:\\
-  https://arm-software.github.io/CMSIS-DSP/v1.16.2/group\_\_Complex\\
-  FFT.html (дата звернення: 21.05.2026).
-\end{enumerate}
-
-13. FFTW. FFTW Home Page. Awards. URL: https://www.fftw.org/ (дата\\
-звернення: 21.05.2026).
-
-15. Object Management Group. Unified Modeling Language Specification.\\
-Version 2.5.1. 2017. URL: https://www.omg.org/spec/UML/2.5.1/ (дата\\
-звернення: 21.05.2026).
-
-19. Bhattacharyya S. S., Murthy P. K., Lee E. A. Software Synthesis
-from\\
-Dataflow Graphs. The Springer International Series in Engineering and
-Computer Science. Vol. 360. Norwell: Kluwer Academic Publishers, 1996.
-189 p. URL:\\
-https://ptolemy.berkeley.edu/publications/papers/96/softSynthBook/\\
-(дата звернення: 21.05.2026).
-
-25. ISO/IEC 25010:2011. Systems and software engineering -- Systems
-and\\
-software Quality Requirements and Evaluation (SQuaRE) -- System and\\
-software quality models. Geneva : ISO, 2011. URL: https://www.iso.org/\\
-standard/35733.html (дата звернення: 21.05.2026).
-
-27. NVIDIA Corporation. cuFFT Library User's Guide. Release 13.2. 2026.
-URL: https://docs.nvidia.com/cuda/pdf/CUFFT\_Library.pdf (дата
-звернення: 21.05.2026).
-
 \protect\phantomsection\label{_Toc230636436}{}СПИСОК ВИКОРИСТАНИХ ДЖЕРЕЛ
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi})}
+\item
+  Arm~Ltd. CMSIS-DSP: Complex FFT Functions. Version 1.16.2. URL:~\url{https://arm-software.github.io/CMSIS-DSP/v1.16.2/group__ComplexFFT.html}
+  (дата звернення: 21.05.2026).
 \item
   Auto-tuning of fast fourier transform on graphics processors~/
   Y.~Dotsenko et al.~\emph{The 16th ACM symposium}, San Antonio, TX,
   USA, 12--16 February 2011. New York, New York, USA, 2011.
   URL:~\url{https://doi.org/10.1145/1941553.1941589}.
 \item
+  Bhattacharyya~S.~S., Murthy~P.~K., Lee~E.~A. Software Synthesis from
+  Dataflow Graphs. The Springer International Series in Engineering and
+  Computer Science. Vol.~360. Norwell~: Kluwer Academic Publishers,
+  1996. 189~p. URL:~\url{https://ptolemy.berkeley.edu/publications/papers/96/softSynthBook/}.
+\item
+  Brown~S. The C4 model for visualising software architecture. 2018.
+  URL:~\url{https://c4model.com/} (дата звернення: 21.05.2026).
+\item
   Cooley~J.~W., Tukey~J.~W. An algorithm for the machine calculation of
   complex Fourier series.~\emph{Mathematics of computation}. 1965.
   Vol.~19, no.~90. P.~297.
   URL:~\url{https://doi.org/10.1090/s0025-5718-1965-0178586-1}.
+\item
+  Dennis~J.~B. First version of a data flow procedure
+  language.~\emph{Programming Symposium}: Proc. Colloque sur la
+  Programmation, Paris, 9--11 April 1974. Lecture Notes in Computer
+  Science. Vol.~19. Berlin, Heidelberg~: Springer, 1974. P.~362--376.
+  URL:~\url{https://doi.org/10.1007/3-540-06859-7_145}.
+\item
+  Dennis~J.~B., Misunas~D.~P. A preliminary architecture for a basic
+  data-flow processor.~\emph{Proceedings of the 2nd Annual Symposium on
+  Computer Architecture}, Houston, TX, USA, 19--21 January 1975. New
+  York~: ACM, 1975. P.~126--132.
+  URL:~\url{https://doi.org/10.1145/642089.642111}.
 \item
   Discrete fourier transform on multicore~/ F.~Franchetti et
   al.~\emph{IEEE signal processing magazine}. 2009. Vol.~26, no.~6.
@@ -5139,6 +5122,9 @@ URL: https://docs.nvidia.com/cuda/pdf/CUFFT\_Library.pdf (дата
   Ecma. Ecmascript language specification (open documents standards
   library). Iuniverse Inc, 2000. 196~p.
 \item
+  FFTW. FFTW Home Page. Awards. URL:~\url{https://www.fftw.org/} (дата
+  звернення: 21.05.2026).
+\item
   Frigo~M., Johnson~S.~G. The design and implementation of
   FFTW3.~\emph{Proceedings of the IEEE}. 2005. Vol.~93, no.~2.
   P.~216--231. URL:~\url{https://doi.org/10.1109/jproc.2004.840301}.
@@ -5148,12 +5134,24 @@ URL: https://docs.nvidia.com/cuda/pdf/CUFFT\_Library.pdf (дата
   computing}. 2012. Vol.~38, no.~8. P.~391--407.
   URL:~\url{https://doi.org/10.1016/j.parco.2011.10.002}.
 \item
-  Houston)~S.~o. C. A. (. 1. U. o. Conference proceedings: the 2nd
-  annual symposium on computer architecture. New York~: Institute of
-  Electrical and Electronics Engineers, 1975. 231~p.
-\item
   Institute Of Electrical and Electronics Engineers. IEEE 754-2008: IEEE
   standard for floating-point arithmetic. IEEE, 2008.
+  URL:~\url{https://doi.org/10.1109/ieeestd.2008.4610935}.
+\item
+  Intel Corporation. Intel Integrated Performance Primitives. Fast
+  Fourier Transform Functions. Intel IPP Developer Guide and Reference.
+  2024. URL:~\url{https://www.intel.com/content/www/us/en/docs/ipp/developer-guide-reference/2021-12/fast-fourier-transform-functions.html}
+  (дата звернення: 21.05.2026).
+\item
+  ISO/IEC 25010:2011. Systems and software engineering -- Systems and
+  software Quality Requirements and Evaluation (SQuaRE) -- System and
+  software quality models. Geneva~: ISO, 2011.
+  URL:~\url{https://www.iso.org/standard/35733.html} (дата звернення:
+  21.05.2026).
+\item
+  Lee~B., Hurson~A.~R. Dataflow architectures and
+  multithreading.~\emph{Computer}. 1994. Vol.~27, no.~8. P.~27--39.
+  URL:~\url{https://doi.org/10.1109/2.303622}.
 \item
   Lee~E.~A., Messerschmitt~D.~G. Static scheduling of synchronous data
   flow programs for digital signal processing.~\emph{IEEE transactions
@@ -5168,7 +5166,7 @@ URL: https://docs.nvidia.com/cuda/pdf/CUFFT\_Library.pdf (дата
   Philadelphia~: SIAM, 1992. 273~p.
 \item
   National Institute of Standards and Technology (U.S.). Integration
-  definition for function modeling (IDEFO). Gaithersburg, MD~: Computer
+  definition for function modeling (IDEF0). Gaithersburg, MD~: Computer
   Systems Laboratory, National Institute of Standards and Technology,
   1993. 80~p.
 \item
@@ -5181,6 +5179,14 @@ URL: https://docs.nvidia.com/cuda/pdf/CUFFT\_Library.pdf (дата
   Berlin, Heidelberg~: Springer Berlin Heidelberg, 1981.
   URL:~\url{https://doi.org/10.1007/978-3-662-00551-4}.
 \item
+  NVIDIA Corporation. cuFFT Library User's Guide. Release 13.2. 2026.
+  URL:~\url{https://docs.nvidia.com/cuda/pdf/CUFFT_Library.pdf} (дата
+  звернення: 21.05.2026).
+\item
+  Object Management Group. Unified Modeling Language Specification.
+  Version 2.5.1. 2017. URL:~\url{https://www.omg.org/spec/UML/2.5.1/}
+  (дата звернення: 21.05.2026).
+\item
   Parks~T.~W., Potts~J.~F., Burrus~C.~S. DFT/FFT and convolution
   algorithms and implementation. John Wiley \& Sons, 1985. 256~p.
 \item
@@ -5190,7 +5196,7 @@ URL: https://docs.nvidia.com/cuda/pdf/CUFFT\_Library.pdf (дата
   URL:~\url{https://doi.org/10.23939/ujit2025.01.001}.
 \item
   Spiral: a generator for platform-adapted libraries of signal
-  processing alogorithms~/ M.~Püschel et al.~\emph{The international
+  processing algorithms~/ M.~Püschel et al.~\emph{The international
   journal of high performance computing applications}. 2004. Vol.~18,
   no.~1. P.~21--45. URL:~\url{https://doi.org/10.1177/1094342004041291}.
 \item
@@ -6017,16 +6023,16 @@ DFG для N = 16}\tabularnewline
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\passthrough{\lstinline!source!} & & & & & Подача відліку \(x(n)\) у
+\passthrough{\lstinline!source!} & 16 & 0 & 1 & 0 & Подача відліку \(x(n)\) у
 граф \\
-\passthrough{\lstinline!row-dft4!} & & & & & Рядкове 4-точкове ДПФ
+\passthrough{\lstinline!row-dft4!} & 4 & 4 & 4 & 400 & Рядкове 4-точкове ДПФ
 (стадія 1) \\
-\passthrough{\lstinline!twiddle!} & & & & & Множення на
+\passthrough{\lstinline!twiddle!} & 16 & 1 & 1 & 200 & Множення на
 \(W_{16}^{n_{1}k_{2}}\) (стадія 2) \\
-\passthrough{\lstinline!col-dft4!} & & & & & Стовпцеве 4-точкове ДПФ
+\passthrough{\lstinline!col-dft4!} & 4 & 4 & 4 & 400 & Стовпцеве 4-точкове ДПФ
 (стадія 3) \\
-\passthrough{\lstinline!sink!} & & & & & Збір відліку \(X(k)\) \\
-& & & & & \\
+\passthrough{\lstinline!sink!} & 16 & 1 & 0 & 0 & Збір відліку \(X(k)\) \\
+Всього & 56 & --- & --- & --- & --- \\
 \end{longtable}
 
 Усі 64 дуги мають однакову затримку \passthrough{\lstinline!delay!}
@@ -6070,20 +6076,20 @@ DFG для N = 16}\tabularnewline
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\(\text{source} \rightarrow \text{row-dft4}\) & & &
+\(\text{source} \rightarrow \text{row-dft4}\) & 16 & 600 &
 \passthrough{\lstinline!src!}\(_{n_{1} + 4n_{2}} \rightarrow\)
 \passthrough{\lstinline!row-!}\(n_{1}\)\passthrough{\lstinline!.in!}\(_{n_{2}}\) \\
-\(\text{row-dft4} \rightarrow \text{twiddle}\) & & &
+\(\text{row-dft4} \rightarrow \text{twiddle}\) & 16 & 600 &
 \passthrough{\lstinline!row-!}\(n_{1}\)\passthrough{\lstinline!.out!}\(_{k_{2}} \rightarrow\)
 \passthrough{\lstinline!tw!}\passthrough{\lstinline!-!}\(n_{1}\text{-}k_{2}\)\passthrough{\lstinline!.in!} \\
-\(\text{twiddle} \rightarrow \text{col-dft4}\) & & &
+\(\text{twiddle} \rightarrow \text{col-dft4}\) & 16 & 600 &
 \passthrough{\lstinline!tw!}\passthrough{\lstinline!-!}\(n_{1}\text{-}k_{2}\)\passthrough{\lstinline!.out!}
 \(\rightarrow\)
 \passthrough{\lstinline!col-!}\(k_{2}\)\passthrough{\lstinline!.in!}\(_{n_{1}}\) \\
-\(\text{col-dft4} \rightarrow \text{sink}\) & & &
+\(\text{col-dft4} \rightarrow \text{sink}\) & 16 & 600 &
 \passthrough{\lstinline!col-!}\(k_{2}\)\passthrough{\lstinline!.out!}\(_{k_{1}} \rightarrow\)
 \passthrough{\lstinline!snk!}\(_{k_{2} + 4k_{1}}\) \\
-& & & \\
+Всього & 64 & --- & --- \\
 \end{longtable}
 
 \textbf{Б.2. Повний перелік вузлів графа.}
@@ -6134,10 +6140,10 @@ DFG (56~елементів)}\tabularnewline
 \passthrough{\lstinline!src9!}, \passthrough{\lstinline!src10!},
 \passthrough{\lstinline!src11!}, \passthrough{\lstinline!src12!},
 \passthrough{\lstinline!src13!}, \passthrough{\lstinline!src14!},
-\passthrough{\lstinline!src15!} & \\
+\passthrough{\lstinline!src15!} & 0 \\
 \passthrough{\lstinline!row-dft4!} (4) &
 \passthrough{\lstinline!row-0!}, \passthrough{\lstinline!row-1!},
-\passthrough{\lstinline!row-2!}, \passthrough{\lstinline!row-3!} & \\
+\passthrough{\lstinline!row-2!}, \passthrough{\lstinline!row-3!} & 400 \\
 \passthrough{\lstinline!twiddle!} (16) &
 \passthrough{\lstinline!tw-0-0!}, \passthrough{\lstinline!tw-0-1!},
 \passthrough{\lstinline!tw-0-2!}, \passthrough{\lstinline!tw-0-3!},
@@ -6146,10 +6152,10 @@ DFG (56~елементів)}\tabularnewline
 \passthrough{\lstinline!tw-2-0!}, \passthrough{\lstinline!tw-2-1!},
 \passthrough{\lstinline!tw-2-2!}, \passthrough{\lstinline!tw-2-3!},
 \passthrough{\lstinline!tw-3-0!}, \passthrough{\lstinline!tw-3-1!},
-\passthrough{\lstinline!tw-3-2!}, \passthrough{\lstinline!tw-3-3!} & \\
+\passthrough{\lstinline!tw-3-2!}, \passthrough{\lstinline!tw-3-3!} & 200 \\
 \passthrough{\lstinline!col-dft4!} (4) &
 \passthrough{\lstinline!col-0!}, \passthrough{\lstinline!col-1!},
-\passthrough{\lstinline!col-2!}, \passthrough{\lstinline!col-3!} & \\
+\passthrough{\lstinline!col-2!}, \passthrough{\lstinline!col-3!} & 400 \\
 \passthrough{\lstinline!sink!} (16) & \passthrough{\lstinline!snk0!},
 \passthrough{\lstinline!snk1!}, \passthrough{\lstinline!snk2!},
 \passthrough{\lstinline!snk3!}, \passthrough{\lstinline!snk4!},
@@ -6158,7 +6164,7 @@ DFG (56~елементів)}\tabularnewline
 \passthrough{\lstinline!snk9!}, \passthrough{\lstinline!snk10!},
 \passthrough{\lstinline!snk11!}, \passthrough{\lstinline!snk12!},
 \passthrough{\lstinline!snk13!}, \passthrough{\lstinline!snk14!},
-\passthrough{\lstinline!snk15!} & \\
+\passthrough{\lstinline!snk15!} & 0 \\
 \end{longtable}
 
 \textbf{Б.3. Поворотні множники.}
@@ -6219,37 +6225,37 @@ DFG (56~елементів)}\tabularnewline
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\passthrough{\lstinline!tw-0-0!} & & & & \(+ 1,000 + 0,000j\) &
+\passthrough{\lstinline!tw-0-0!} & 0 & 0 & 0 & \(+ 1,000 + 0,000j\) &
 тривіальний \\
-\passthrough{\lstinline!tw-0-1!} & & & & \(+ 1,000 + 0,000j\) &
+\passthrough{\lstinline!tw-0-1!} & 0 & 1 & 0 & \(+ 1,000 + 0,000j\) &
 тривіальний \\
-\passthrough{\lstinline!tw-0-2!} & & & & \(+ 1,000 + 0,000j\) &
+\passthrough{\lstinline!tw-0-2!} & 0 & 2 & 0 & \(+ 1,000 + 0,000j\) &
 тривіальний \\
-\passthrough{\lstinline!tw-0-3!} & & & & \(+ 1,000 + 0,000j\) &
+\passthrough{\lstinline!tw-0-3!} & 0 & 3 & 0 & \(+ 1,000 + 0,000j\) &
 тривіальний \\
-\passthrough{\lstinline!tw-1-0!} & & & & \(+ 1,000 + 0,000j\) &
+\passthrough{\lstinline!tw-1-0!} & 1 & 0 & 0 & \(+ 1,000 + 0,000j\) &
 тривіальний \\
-\passthrough{\lstinline!tw-1-1!} & & & & \(+ 0,924 - 0,383j\) &
+\passthrough{\lstinline!tw-1-1!} & 1 & 1 & 1 & \(+ 0,924 - 0,383j\) &
 нетривіальний \\
-\passthrough{\lstinline!tw-1-2!} & & & & \(+ 0,707 - 0,707j\) &
+\passthrough{\lstinline!tw-1-2!} & 1 & 2 & 2 & \(+ 0,707 - 0,707j\) &
 нетривіальний \\
-\passthrough{\lstinline!tw-1-3!} & & & & \(+ 0,383 - 0,924j\) &
+\passthrough{\lstinline!tw-1-3!} & 1 & 3 & 3 & \(+ 0,383 - 0,924j\) &
 нетривіальний \\
-\passthrough{\lstinline!tw-2-0!} & & & & \(+ 1,000 + 0,000j\) &
+\passthrough{\lstinline!tw-2-0!} & 2 & 0 & 0 & \(+ 1,000 + 0,000j\) &
 тривіальний \\
-\passthrough{\lstinline!tw-2-1!} & & & & \(+ 0,707 - 0,707j\) &
+\passthrough{\lstinline!tw-2-1!} & 2 & 1 & 2 & \(+ 0,707 - 0,707j\) &
 нетривіальний \\
-\passthrough{\lstinline!tw-2-2!} & & & & \(+ 0,000 - 1,000j\) &
+\passthrough{\lstinline!tw-2-2!} & 2 & 2 & 4 & \(+ 0,000 - 1,000j\) &
 нетривіальний \\
-\passthrough{\lstinline!tw-2-3!} & & & & \(- 0,707 - 0,707j\) &
+\passthrough{\lstinline!tw-2-3!} & 2 & 3 & 6 & \(- 0,707 - 0,707j\) &
 нетривіальний \\
-\passthrough{\lstinline!tw-3-0!} & & & & \(+ 1,000 + 0,000j\) &
+\passthrough{\lstinline!tw-3-0!} & 3 & 0 & 0 & \(+ 1,000 + 0,000j\) &
 тривіальний \\
-\passthrough{\lstinline!tw-3-1!} & & & & \(+ 0,383 - 0,924j\) &
+\passthrough{\lstinline!tw-3-1!} & 3 & 1 & 3 & \(+ 0,383 - 0,924j\) &
 нетривіальний \\
-\passthrough{\lstinline!tw-3-2!} & & & & \(- 0,707 - 0,707j\) &
+\passthrough{\lstinline!tw-3-2!} & 3 & 2 & 6 & \(- 0,707 - 0,707j\) &
 нетривіальний \\
-\passthrough{\lstinline!tw-3-3!} & & & & \(- 0,924 - 0,383j\) &
+\passthrough{\lstinline!tw-3-3!} & 3 & 3 & 9 & \(- 0,924 - 0,383j\) &
 нетривіальний \\
 \end{longtable}
 
@@ -6309,22 +6315,22 @@ DFG (56~елементів)}\tabularnewline
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-& \(+ 1,000000\) & \(0,000000\) & \(+ 1,000000\) & \(0,000000\) \\
-& \(+ 0,923880\) & \(+ 0,382683\) & \(+ 0,382683\) & \(+ 0,923880\) \\
-& \(+ 0,707107\) & \(+ 0,707107\) & \(- 0,707107\) & \(+ 0,707107\) \\
-& \(+ 0,382683\) & \(+ 0,923880\) & \(- 0,923880\) & \(- 0,382683\) \\
-& \(+ 0,000000\) & \(+ 1,000000\) & \(0,000000\) & \(- 1,000000\) \\
-& \(- 0,382683\) & \(+ 0,923880\) & \(+ 0,923880\) & \(- 0,382683\) \\
-& \(- 0,707107\) & \(+ 0,707107\) & \(+ 0,707107\) & \(+ 0,707107\) \\
-& \(- 0,923880\) & \(+ 0,382683\) & \(- 0,382683\) & \(+ 0,923880\) \\
-& \(- 1,000000\) & \(0,000000\) & \(- 1,000000\) & \(0,000000\) \\
-& \(- 0,923880\) & \(- 0,382683\) & \(- 0,382683\) & \(- 0,923880\) \\
-& \(- 0,707107\) & \(- 0,707107\) & \(+ 0,707107\) & \(- 0,707107\) \\
-& \(- 0,382683\) & \(- 0,923880\) & \(+ 0,923880\) & \(+ 0,382683\) \\
-& \(0,000000\) & \(- 1,000000\) & \(0,000000\) & \(+ 1,000000\) \\
-& \(+ 0,382683\) & \(- 0,923880\) & \(- 0,923880\) & \(+ 0,382683\) \\
-& \(+ 0,707107\) & \(- 0,707107\) & \(- 0,707107\) & \(- 0,707107\) \\
-& \(+ 0,923880\) & \(- 0,382683\) & \(+ 0,382683\) & \(- 0,923880\) \\
+0 & \(+ 1,000000\) & \(0,000000\) & \(+ 1,000000\) & \(0,000000\) \\
+1 & \(+ 0,923880\) & \(+ 0,382683\) & \(+ 0,382683\) & \(+ 0,923880\) \\
+2 & \(+ 0,707107\) & \(+ 0,707107\) & \(- 0,707107\) & \(+ 0,707107\) \\
+3 & \(+ 0,382683\) & \(+ 0,923880\) & \(- 0,923880\) & \(- 0,382683\) \\
+4 & \(+ 0,000000\) & \(+ 1,000000\) & \(0,000000\) & \(- 1,000000\) \\
+5 & \(- 0,382683\) & \(+ 0,923880\) & \(+ 0,923880\) & \(- 0,382683\) \\
+6 & \(- 0,707107\) & \(+ 0,707107\) & \(+ 0,707107\) & \(+ 0,707107\) \\
+7 & \(- 0,923880\) & \(+ 0,382683\) & \(- 0,382683\) & \(+ 0,923880\) \\
+8 & \(- 1,000000\) & \(0,000000\) & \(- 1,000000\) & \(0,000000\) \\
+9 & \(- 0,923880\) & \(- 0,382683\) & \(- 0,382683\) & \(- 0,923880\) \\
+10 & \(- 0,707107\) & \(- 0,707107\) & \(+ 0,707107\) & \(- 0,707107\) \\
+11 & \(- 0,382683\) & \(- 0,923880\) & \(+ 0,923880\) & \(+ 0,382683\) \\
+12 & \(0,000000\) & \(- 1,000000\) & \(0,000000\) & \(+ 1,000000\) \\
+13 & \(+ 0,382683\) & \(- 0,923880\) & \(- 0,923880\) & \(+ 0,382683\) \\
+14 & \(+ 0,707107\) & \(- 0,707107\) & \(- 0,707107\) & \(- 0,707107\) \\
+15 & \(+ 0,923880\) & \(- 0,382683\) & \(+ 0,382683\) & \(- 0,923880\) \\
 \end{longtable}
 
 Таблиця Б.6
@@ -6360,22 +6366,22 @@ Im
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-& \(+ 2,000000\) & \(0,000000\) \\
-& \(+ 1,306563\) & \(+ 1,306563\) \\
-& \(0,000000\) & \(+ 1,414214\) \\
-& \(- 0,541197\) & \(+ 0,541197\) \\
-& \(0,000000\) & \(0,000000\) \\
-& \(+ 0,541197\) & \(+ 0,541197\) \\
-& \(0,000000\) & \(+ 1,414214\) \\
-& \(- 1,306563\) & \(+ 1,306563\) \\
-& \(- 2,000000\) & \(0,000000\) \\
-& \(- 1,306563\) & \(- 1,306563\) \\
-& \(0,000000\) & \(- 1,414214\) \\
-& \(+ 0,541197\) & \(- 0,541197\) \\
-& \(0,000000\) & \(0,000000\) \\
-& \(- 0,541197\) & \(- 0,541197\) \\
-& \(0,000000\) & \(- 1,414214\) \\
-& \(+ 1,306563\) & \(- 1,306563\) \\
+0 & \(+ 2,000000\) & \(0,000000\) \\
+1 & \(+ 1,306563\) & \(+ 1,306563\) \\
+2 & \(0,000000\) & \(+ 1,414214\) \\
+3 & \(- 0,541197\) & \(+ 0,541197\) \\
+4 & \(0,000000\) & \(0,000000\) \\
+5 & \(+ 0,541197\) & \(+ 0,541197\) \\
+6 & \(0,000000\) & \(+ 1,414214\) \\
+7 & \(- 1,306563\) & \(+ 1,306563\) \\
+8 & \(- 2,000000\) & \(0,000000\) \\
+9 & \(- 1,306563\) & \(- 1,306563\) \\
+10 & \(0,000000\) & \(- 1,414214\) \\
+11 & \(+ 0,541197\) & \(- 0,541197\) \\
+12 & \(0,000000\) & \(0,000000\) \\
+13 & \(- 0,541197\) & \(- 0,541197\) \\
+14 & \(0,000000\) & \(- 1,414214\) \\
+15 & \(+ 1,306563\) & \(- 1,306563\) \\
 \end{longtable}
 
 \textbf{Б.5. Очікувані спектри.}
@@ -6428,22 +6434,22 @@ Im
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-& \(+ 120,000\) & \(0,000\) & & \\
-& \(- 8,000\) & \(+ 40,219\) & & \\
-& \(- 8,000\) & \(+ 19,314\) & & \\
-& \(- 8,000\) & \(+ 11,973\) & & \\
-& \(- 8,000\) & \(+ 8,000\) & & \\
-& \(- 8,000\) & \(+ 5,345\) & & \\
-& \(- 8,000\) & \(+ 3,314\) & & \\
-& \(- 8,000\) & \(+ 1,591\) & & \\
-& \(- 8,000\) & \(0,000\) & & \\
-& \(- 8,000\) & \(- 1,591\) & & \\
-& \(- 8,000\) & \(- 3,314\) & & \\
-& \(- 8,000\) & \(- 5,345\) & & \\
-& \(- 8,000\) & \(- 8,000\) & & \\
-& \(- 8,000\) & \(- 11,973\) & & \\
-& \(- 8,000\) & \(- 19,314\) & & \\
-& \(- 8,000\) & \(- 40,219\) & & \\
+0 & \(+ 120,000\) & \(0,000\) & \(+ 1,000\) & \(0,000\) \\
+1 & \(- 8,000\) & \(+ 40,219\) & \(+ 1,000\) & \(0,000\) \\
+2 & \(- 8,000\) & \(+ 19,314\) & \(+ 1,000\) & \(0,000\) \\
+3 & \(- 8,000\) & \(+ 11,973\) & \(+ 1,000\) & \(0,000\) \\
+4 & \(- 8,000\) & \(+ 8,000\) & \(+ 1,000\) & \(0,000\) \\
+5 & \(- 8,000\) & \(+ 5,345\) & \(+ 1,000\) & \(0,000\) \\
+6 & \(- 8,000\) & \(+ 3,314\) & \(+ 1,000\) & \(0,000\) \\
+7 & \(- 8,000\) & \(+ 1,591\) & \(+ 1,000\) & \(0,000\) \\
+8 & \(- 8,000\) & \(0,000\) & \(+ 1,000\) & \(0,000\) \\
+9 & \(- 8,000\) & \(- 1,591\) & \(+ 1,000\) & \(0,000\) \\
+10 & \(- 8,000\) & \(- 3,314\) & \(+ 1,000\) & \(0,000\) \\
+11 & \(- 8,000\) & \(- 5,345\) & \(+ 1,000\) & \(0,000\) \\
+12 & \(- 8,000\) & \(- 8,000\) & \(+ 1,000\) & \(0,000\) \\
+13 & \(- 8,000\) & \(- 11,973\) & \(+ 1,000\) & \(0,000\) \\
+14 & \(- 8,000\) & \(- 19,314\) & \(+ 1,000\) & \(0,000\) \\
+15 & \(- 8,000\) & \(- 40,219\) & \(+ 1,000\) & \(0,000\) \\
 \end{longtable}
 
 \textbf{Б.6. Структури даних симулятора.}
@@ -6527,12 +6533,12 @@ ALAP
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\passthrough{\lstinline!source!} & & & & & \\
-\passthrough{\lstinline!row-dft4!} & & & & & \\
-\passthrough{\lstinline!twiddle!} & & & & & \\
-\passthrough{\lstinline!col-dft4!} & & & & & \\
-\passthrough{\lstinline!sink!} & & & & & \\
-& & & & & \\
+\passthrough{\lstinline!source!} & 16 & 0 & 0 & 0 & 0 \\
+\passthrough{\lstinline!row-dft4!} & 4 & 600 & 600 & 0 & 400 \\
+\passthrough{\lstinline!twiddle!} & 16 & 1600 & 1600 & 0 & 200 \\
+\passthrough{\lstinline!col-dft4!} & 4 & 2400 & 2400 & 0 & 400 \\
+\passthrough{\lstinline!sink!} & 16 & 3400 & 3400 & 0 & 0 \\
+Всього & 56 & --- & --- & 0 & --- \\
 \end{longtable}
 
 \textbf{В.2. Гістограма мобільності.}
@@ -6574,9 +6580,9 @@ ALAP
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-& & Усі вузли лежать на критичному шляху -- граф
+0 & 56 & Усі вузли лежать на критичному шляху -- граф
 критично-збалансований \\
-\(> 0\) & & Вузлів зі слабшою залежністю по часу немає \\
+\(> 0\) & 0 & Вузлів зі слабшою залежністю по часу немає \\
 \end{longtable}
 
 \textbf{В.3. Часи активацій по ярусах і профіль паралельності.}
@@ -6635,12 +6641,12 @@ ALAP
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\passthrough{\lstinline!source!} & & & & & \\
-\passthrough{\lstinline!row-dft4!} & & & & & \\
-\passthrough{\lstinline!twiddle!} & & & & & \\
-\passthrough{\lstinline!col-dft4!} & & & & & \\
-\passthrough{\lstinline!sink!} & & & & & \\
-& & & & & \\
+\passthrough{\lstinline!source!} & 16 & 0 & 0 & 0 & 16 \\
+\passthrough{\lstinline!row-dft4!} & 4 & 600 & 1000 & 400 & 4 \\
+\passthrough{\lstinline!twiddle!} & 16 & 1600 & 1800 & 200 & 16 \\
+\passthrough{\lstinline!col-dft4!} & 4 & 2400 & 2800 & 400 & 4 \\
+\passthrough{\lstinline!sink!} & 16 & 3400 & 3400 & 0 & 16 \\
+Всього & 56 & 0 & 3400 & 3400 & 16 \\
 \end{longtable}
 
 \textbf{В.4. Зведені метрики розкладу та паралелізму.}
@@ -6680,31 +6686,31 @@ ALAP
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-К-сть вузлів \(|V|\) & &
+К-сть вузлів \(|V|\) & 56 &
 \passthrough{\lstinline!graph.nodes!}\passthrough{\lstinline!.length!} \\
-К-сть дуг \(|E|\) & &
+К-сть дуг \(|E|\) & 64 &
 \passthrough{\lstinline!graph.edges!}\passthrough{\lstinline!.length!} \\
-Критичний шлях \(T_{kr}\), у.о. & & ASAP/ALAP-DP,
+Критичний шлях \(T_{kr}\), у.о. & 3400 & ASAP/ALAP-DP,
 \(600 + 400 + 600 + 200 + 600 + 400 + 600\) \\
-Послідовна робота \(T_{ps}\), у.о. & &
+Послідовна робота \(T_{ps}\), у.о. & 6400 &
 \(\sum_{n \in V}^{}\text{latency}(n) = 8 \cdot 400 + 16 \cdot 200\) \\
 Коефіцієнт паралелізму \(K_{p}\) & \(\approx 1,882\) &
 \(T_{ps}/T_{kr} = 6400/3400\) \\
 Теоретичний \(K_{p}^{\text{теор}}\) (без зовнішніх дуг) &
 \(\approx 2,909\) & \(T_{ps}/T_{kr}^{\text{вн}} = 6400/2200\), де
 \(T_{kr}^{\text{вн}} = 400 + 600 + 200 + 600 + 400\) \\
-Пікова паралельність \(P_{\max}\) & &
+Пікова паралельність \(P_{\max}\) & 16 &
 \passthrough{\lstinline!schedule.peakConcurrency!} \\
-Максимальна мобільність & &
+Максимальна мобільність & 0 &
 \(\max_{n \in V}(\text{ALAP}_{n} - \text{ASAP}_{n})\) \\
-К-сть критичних вузлів & & Усі вузли з мобільністю = 0 \\
+К-сть критичних вузлів & 56 & Усі вузли з мобільністю = 0 \\
 Частка часу обчислень у \(T_{kr}\) & \(\approx 29,4\%\) &
 \(1000/3400\) \\
 Частка часу передавання у \(T_{kr}\) & \(\approx 70,6\%\) &
 \(2400/3400\) \\
 Середнє завантаження & \(\approx 11,8\%\) &
 \(T_{ps}/(T_{kr} \cdot P_{\max})\) \\
-Час завершення симуляції & &
+Час завершення симуляції & 3400 &
 \passthrough{\lstinline!schedule.simFinishTime!} \\
 \end{longtable}
 
@@ -6746,15 +6752,15 @@ ALAP
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-Прямий ДПФ: компл. множень & & \(N^{2}\) \\
-Прямий ДПФ: дійсних множень & & \(4N^{2}\) \\
-Прямий ДПФ: компл. додавань & & \(N(N - 1)\) \\
-Radix-4: нетривіальних компл. множень & & з 16
+Прямий ДПФ: компл. множень & 256 & \(N^{2}\) \\
+Прямий ДПФ: дійсних множень & 1024 & \(4N^{2}\) \\
+Прямий ДПФ: компл. додавань & 240 & \(N(N - 1)\) \\
+Radix-4: нетривіальних компл. множень & 9 & з 16
 \passthrough{\lstinline!twiddle!}-вузлів з \(k ≢ 0\) \\
-Radix-4: дійсних множень & & нетривіальних \(\times 4\) \\
-Radix-4: компл. додавань & & \passthrough{\lstinline!dft4!} вузлів
+Radix-4: дійсних множень & 36 & нетривіальних \(\times 4\) \\
+Radix-4: компл. додавань & 64 & \passthrough{\lstinline!dft4!} вузлів
 \(\times 8\) \\
-Тривіальних \passthrough{\lstinline!twiddle!} & & вузли з
+Тривіальних \passthrough{\lstinline!twiddle!} & 7 & вузли з
 \(k \equiv 0\ (mod\ 16)\) \\
 Коефіцієнт прискорення \(K_{M}\) & \(\approx 28,444\) &
 \(N^{2}/9 = 256/9\) \\
@@ -6805,12 +6811,17 @@ RMS-похибка
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\passthrough{\lstinline!ramp!} & & & виконано \\
-\passthrough{\lstinline!impulse!} & & & виконано \\
-\passthrough{\lstinline!sin1!} & & & виконано \\
-\passthrough{\lstinline!sin3!} & & & виконано \\
-\passthrough{\lstinline!sin1+3!} & & & виконано \\
-\passthrough{\lstinline!two-impulses!} & & & виконано \\
+\passthrough{\lstinline!ramp!} & \(1,42 \cdot 10^{-14}\) &
+\(5,32 \cdot 10^{-15}\) & виконано \\
+\passthrough{\lstinline!impulse!} & \(0,00\) & \(0,00\) & виконано \\
+\passthrough{\lstinline!sin1!} & \(2,22 \cdot 10^{-16}\) &
+\(1,11 \cdot 10^{-16}\) & виконано \\
+\passthrough{\lstinline!sin3!} & \(2,22 \cdot 10^{-16}\) &
+\(1,11 \cdot 10^{-16}\) & виконано \\
+\passthrough{\lstinline!sin1+3!} & \(4,44 \cdot 10^{-16}\) &
+\(2,22 \cdot 10^{-16}\) & виконано \\
+\passthrough{\lstinline!two-impulses!} & \(2,22 \cdot 10^{-16}\) &
+\(1,11 \cdot 10^{-16}\) & виконано \\
 \end{longtable}
 
 \textbf{В.7. Перелік нетривіальних поворотних множників}
@@ -6855,15 +6866,15 @@ twiddle}\tabularnewline
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-& \passthrough{\lstinline!tw-1-1!} & & \(+ 0,9239 - 0,3827j\) \\
-& \passthrough{\lstinline!tw-1-2!} & & \(+ 0,7071 - 0,7071j\) \\
-& \passthrough{\lstinline!tw-1-3!} & & \(+ 0,3827 - 0,9239j\) \\
-& \passthrough{\lstinline!tw-2-1!} & & \(+ 0,7071 - 0,7071j\) \\
-& \passthrough{\lstinline!tw-2-2!} & & \(+ 0,0000 - 1,0000j\) \\
-& \passthrough{\lstinline!tw-2-3!} & & \(- 0,7071 - 0,7071j\) \\
-& \passthrough{\lstinline!tw-3-1!} & & \(+ 0,3827 - 0,9239j\) \\
-& \passthrough{\lstinline!tw-3-2!} & & \(- 0,7071 - 0,7071j\) \\
-& \passthrough{\lstinline!tw-3-3!} & & \(- 0,9239 - 0,3827j\) \\
+1 & \passthrough{\lstinline!tw-1-1!} & 1 & \(+ 0,9239 - 0,3827j\) \\
+2 & \passthrough{\lstinline!tw-1-2!} & 2 & \(+ 0,7071 - 0,7071j\) \\
+3 & \passthrough{\lstinline!tw-1-3!} & 3 & \(+ 0,3827 - 0,9239j\) \\
+4 & \passthrough{\lstinline!tw-2-1!} & 2 & \(+ 0,7071 - 0,7071j\) \\
+5 & \passthrough{\lstinline!tw-2-2!} & 4 & \(+ 0,0000 - 1,0000j\) \\
+6 & \passthrough{\lstinline!tw-2-3!} & 6 & \(- 0,7071 - 0,7071j\) \\
+7 & \passthrough{\lstinline!tw-3-1!} & 3 & \(+ 0,3827 - 0,9239j\) \\
+8 & \passthrough{\lstinline!tw-3-2!} & 6 & \(- 0,7071 - 0,7071j\) \\
+9 & \passthrough{\lstinline!tw-3-3!} & 9 & \(- 0,9239 - 0,3827j\) \\
 \end{longtable}
 
 \textbf{В.8. Перевірка детермінізму (NF5).}
@@ -6954,22 +6965,22 @@ Sink
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-& \passthrough{\lstinline!snk0!} & & \\
-& \passthrough{\lstinline!snk1!} & & \\
-& \passthrough{\lstinline!snk2!} & & \\
-& \passthrough{\lstinline!snk3!} & & \\
-& \passthrough{\lstinline!snk4!} & & \\
-& \passthrough{\lstinline!snk5!} & & \\
-& \passthrough{\lstinline!snk6!} & & \\
-& \passthrough{\lstinline!snk7!} & & \\
-& \passthrough{\lstinline!snk8!} & & \\
-& \passthrough{\lstinline!snk9!} & & \\
-& \passthrough{\lstinline!snk10!} & & \\
-& \passthrough{\lstinline!snk11!} & & \\
-& \passthrough{\lstinline!snk12!} & & \\
-& \passthrough{\lstinline!snk13!} & & \\
-& \passthrough{\lstinline!snk14!} & & \\
-& \passthrough{\lstinline!snk15!} & & \\
+0 & \passthrough{\lstinline!snk0!} & 3400 & 0 \\
+1 & \passthrough{\lstinline!snk1!} & 3400 & 0 \\
+2 & \passthrough{\lstinline!snk2!} & 3400 & 0 \\
+3 & \passthrough{\lstinline!snk3!} & 3400 & 0 \\
+4 & \passthrough{\lstinline!snk4!} & 3400 & 0 \\
+5 & \passthrough{\lstinline!snk5!} & 3400 & 0 \\
+6 & \passthrough{\lstinline!snk6!} & 3400 & 0 \\
+7 & \passthrough{\lstinline!snk7!} & 3400 & 0 \\
+8 & \passthrough{\lstinline!snk8!} & 3400 & 0 \\
+9 & \passthrough{\lstinline!snk9!} & 3400 & 0 \\
+10 & \passthrough{\lstinline!snk10!} & 3400 & 0 \\
+11 & \passthrough{\lstinline!snk11!} & 3400 & 0 \\
+12 & \passthrough{\lstinline!snk12!} & 3400 & 0 \\
+13 & \passthrough{\lstinline!snk13!} & 3400 & 0 \\
+14 & \passthrough{\lstinline!snk14!} & 3400 & 0 \\
+15 & \passthrough{\lstinline!snk15!} & 3400 & 0 \\
 \end{longtable}
 
 \textbf{В.10. Виміри UI-продуктивності у браузерах.}
@@ -7052,23 +7063,23 @@ Chrome, Edge, Firefox описано у Розділі 4 (табл. 4.7) та п
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-& Функціональна IDEF0-схема задачі моделювання потокового обчислювача
+1 & Функціональна IDEF0-схема задачі моделювання потокового обчислювача
 ШПФ & IDEF0 & рис. 1.1 & PlantUML \\
-& Use Case-діаграма симулятора потокового обчислювача ШПФ & UML Use Case
+2 & Use Case-діаграма симулятора потокового обчислювача ШПФ & UML Use Case
 & рис. 1.2 & PlantUML \\
-& C4 Context-діаграма веб-симулятора потокового обчислювача ШПФ & C4
+3 & C4 Context-діаграма веб-симулятора потокового обчислювача ШПФ & C4
 Context & рис. 2.1 & PlantUML \\
-& Схема тристадійної radix-4 декомпозиції 16-точкового ШПФ &
+4 & Схема тристадійної radix-4 декомпозиції 16-точкового ШПФ &
 Алгоритмічна & рис. Г.1 & PlantUML \\
-& C4 Container-діаграма архітектури веб-симулятора & C4 Container & рис.
+5 & C4 Container-діаграма архітектури веб-симулятора & C4 Container & рис.
 2.3 & PlantUML \\
-& Граф потоку даних обчислювача 16-точкового ШПФ radix-4 \(4 \times 4\)
+6 & Граф потоку даних обчислювача 16-точкового ШПФ radix-4 \(4 \times 4\)
 & DFG & рис. Г.2 & PlantUML \\
-& Макет інтерфейсу веб-симулятора потокового 16-точкового ШПФ &
+7 & Макет інтерфейсу веб-симулятора потокового 16-точкового ШПФ &
 Wireframe & рис. 2.5 & PlantUML \\
-& Життєвий цикл токена у \passthrough{\lstinline!DataflowRuntime!} &
+8 & Життєвий цикл токена у \passthrough{\lstinline!DataflowRuntime!} &
 Sequence & рис. Г.3 & PlantUML \\
-& Часова діаграма активацій вузлів DFG при \(N = 16\) & Timing & рис.
+9 & Часова діаграма активацій вузлів DFG при \(N = 16\) & Timing & рис.
 4.1 & PlantUML \\
 \end{longtable}
 
@@ -7113,23 +7124,23 @@ Sequence & рис. Г.3 & PlantUML \\
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-&
+1.1 &
 \passthrough{\lstinline!Рис.!}\passthrough{\lstinline! !}\passthrough{\lstinline!1.1!}\passthrough{\lstinline! !}\passthrough{\lstinline!--!}\passthrough{\lstinline! !}\passthrough{\lstinline!Функціональна!}\passthrough{\lstinline! !}\passthrough{\lstinline!IDEF!}\passthrough{\lstinline!0-схема!}\passthrough{\lstinline! !}\passthrough{\lstinline!задачі!}\passthrough{\lstinline! !}\passthrough{\lstinline!моделювання!}\passthrough{\lstinline! !}\passthrough{\lstinline!потокового!}\passthrough{\lstinline! !}\passthrough{\lstinline!обчислювача!}\passthrough{\lstinline! !}\passthrough{\lstinline!ШПФ.!}\passthrough{\lstinline!txt!} \\
-&
+1.2 &
 \passthrough{\lstinline!Рис.!}\passthrough{\lstinline! !}\passthrough{\lstinline!1.2!}\passthrough{\lstinline! !}\passthrough{\lstinline!--!}\passthrough{\lstinline! !}\passthrough{\lstinline!Use!}\passthrough{\lstinline! !}\passthrough{\lstinline!Case!}\passthrough{\lstinline!-діаграма!}\passthrough{\lstinline! !}\passthrough{\lstinline!симулятора!}\passthrough{\lstinline! !}\passthrough{\lstinline!потокового!}\passthrough{\lstinline! !}\passthrough{\lstinline!обчислювача!}\passthrough{\lstinline! !}\passthrough{\lstinline!ШПФ.!}\passthrough{\lstinline!txt!} \\
-&
+2.1 &
 \passthrough{\lstinline!Рис.!}\passthrough{\lstinline! !}\passthrough{\lstinline!2.1!}\passthrough{\lstinline! !}\passthrough{\lstinline!--!}\passthrough{\lstinline! !}\passthrough{\lstinline!C!}\passthrough{\lstinline!4!}\passthrough{\lstinline! !}\passthrough{\lstinline!Context!}\passthrough{\lstinline!-діаграма!}\passthrough{\lstinline! !}\passthrough{\lstinline!веб-симулятора!}\passthrough{\lstinline! !}\passthrough{\lstinline!потокового!}\passthrough{\lstinline! !}\passthrough{\lstinline!обчислювача!}\passthrough{\lstinline! !}\passthrough{\lstinline!ШПФ.!}\passthrough{\lstinline!txt!} \\
-&
+Г.1 &
 \passthrough{\lstinline!Рис.!}\passthrough{\lstinline! !}\passthrough{\lstinline!Г.1!}\passthrough{\lstinline! !}\passthrough{\lstinline!--!}\passthrough{\lstinline! !}\passthrough{\lstinline!Схема!}\passthrough{\lstinline! !}\passthrough{\lstinline!тристадійної!}\passthrough{\lstinline! !}\passthrough{\lstinline!radix!}\passthrough{\lstinline!-4!}\passthrough{\lstinline! !}\passthrough{\lstinline!декомпозиції!}\passthrough{\lstinline! !}\passthrough{\lstinline!16-точкового!}\passthrough{\lstinline! !}\passthrough{\lstinline!ШПФ.!}\passthrough{\lstinline!txt!} \\
-&
+2.3 &
 \passthrough{\lstinline!Рис.!}\passthrough{\lstinline! !}\passthrough{\lstinline!2.3!}\passthrough{\lstinline! !}\passthrough{\lstinline!--!}\passthrough{\lstinline! !}\passthrough{\lstinline!C!}\passthrough{\lstinline!4!}\passthrough{\lstinline! !}\passthrough{\lstinline!Container!}\passthrough{\lstinline!-діаграма!}\passthrough{\lstinline! !}\passthrough{\lstinline!архітектури!}\passthrough{\lstinline! !}\passthrough{\lstinline!веб-симулятора.!}\passthrough{\lstinline!txt!} \\
-&
+Г.2 &
 \passthrough{\lstinline!Рис.!}\passthrough{\lstinline! !}\passthrough{\lstinline!Г.2!}\passthrough{\lstinline! !}\passthrough{\lstinline!--!}\passthrough{\lstinline! !}\passthrough{\lstinline!Граф!}\passthrough{\lstinline! !}\passthrough{\lstinline!потоку!}\passthrough{\lstinline! !}\passthrough{\lstinline!даних!}\passthrough{\lstinline! !}\passthrough{\lstinline!обчислювача!}\passthrough{\lstinline! !}\passthrough{\lstinline!16-точкового!}\passthrough{\lstinline! !}\passthrough{\lstinline!ШПФ!}\passthrough{\lstinline! !}\passthrough{\lstinline!radix!}\passthrough{\lstinline!-4!}\passthrough{\lstinline! !}\passthrough{\lstinline!4×4.!}\passthrough{\lstinline!txt!} \\
-&
+2.5 &
 \passthrough{\lstinline!Рис.!}\passthrough{\lstinline! !}\passthrough{\lstinline!2.5!}\passthrough{\lstinline! !}\passthrough{\lstinline!--!}\passthrough{\lstinline! !}\passthrough{\lstinline!Макет!}\passthrough{\lstinline! !}\passthrough{\lstinline!інтерфейсу!}\passthrough{\lstinline! !}\passthrough{\lstinline!веб-симулятора!}\passthrough{\lstinline! !}\passthrough{\lstinline!потокового!}\passthrough{\lstinline! !}\passthrough{\lstinline!16-точкового!}\passthrough{\lstinline! !}\passthrough{\lstinline!ШПФ.!}\passthrough{\lstinline!txt!} \\
-&
+Г.3 &
 \passthrough{\lstinline!Рис.!}\passthrough{\lstinline! !}\passthrough{\lstinline!Г.3!}\passthrough{\lstinline! !}\passthrough{\lstinline!--!}\passthrough{\lstinline! !}\passthrough{\lstinline!Життєвий!}\passthrough{\lstinline! !}\passthrough{\lstinline!цикл!}\passthrough{\lstinline! !}\passthrough{\lstinline!токена!}\passthrough{\lstinline! !}\passthrough{\lstinline!у!}\passthrough{\lstinline! !}\passthrough{\lstinline!DataflowRuntime!}\passthrough{\lstinline!.!}\passthrough{\lstinline!txt!} \\
-&
+4.1 &
 \passthrough{\lstinline!Рис.!}\passthrough{\lstinline! !}\passthrough{\lstinline!4.1!}\passthrough{\lstinline! !}\passthrough{\lstinline!--!}\passthrough{\lstinline! !}\passthrough{\lstinline!Часова!}\passthrough{\lstinline! !}\passthrough{\lstinline!діаграма!}\passthrough{\lstinline! !}\passthrough{\lstinline!активацій!}\passthrough{\lstinline! !}\passthrough{\lstinline!вузлів!}\passthrough{\lstinline! !}\passthrough{\lstinline!DFG!}\passthrough{\lstinline! !}\passthrough{\lstinline!при!}\passthrough{\lstinline! !}\passthrough{\lstinline!N!}\passthrough{\lstinline!=16.!}\passthrough{\lstinline!txt!} \\
 \end{longtable}
 
