@@ -168,6 +168,24 @@ export default function Toolbar({ onOpenPresets, onToast }: ToolbarProps) {
     }
   }, [onToast]);
 
+  const doExportUI = useCallback(async () => {
+    const el = document.querySelector<HTMLElement>(`.${s.shell}`) ?? document.body;
+    try {
+      const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg-app').trim() || '#f6f7fb';
+      const { toPng } = await import('html-to-image');
+      const url = await toPng(el, { backgroundColor: bg, pixelRatio: 2 });
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `dft-ui-${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      onToast?.('Full UI exported as PNG');
+    } catch {
+      onToast?.('Export failed');
+    }
+  }, [onToast]);
+
   const hkOpts = { enableOnFormTags: false as const };
   useHotkeys('space', (e) => { e.preventDefault(); toggleRun(); }, hkOpts, [toggleRun]);
   useHotkeys('s', () => step(), hkOpts, [step]);
@@ -381,11 +399,22 @@ export default function Toolbar({ onOpenPresets, onToast }: ToolbarProps) {
         <Tooltip>
           <TooltipTrigger asChild>
             <button type="button" className={ui.btn} onClick={doExport}>
-              <ImageDown size={14} /> Export PNG
+              <ImageDown size={14} /> Graph PNG
             </button>
           </TooltipTrigger>
           <TooltipContent sideOffset={6} className="tooltip-content">
             Export graph as PNG <kbd>E</kbd>
+          </TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button type="button" className={ui.btn} onClick={doExportUI}>
+              <ImageDown size={14} /> UI PNG
+            </button>
+          </TooltipTrigger>
+          <TooltipContent sideOffset={6} className="tooltip-content">
+            Export full UI screenshot as PNG
           </TooltipContent>
         </Tooltip>
 
