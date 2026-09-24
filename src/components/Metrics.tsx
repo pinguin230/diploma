@@ -38,10 +38,10 @@ export default function Metrics() {
             <span className={p.metricLabel}>Avg queue</span>
             <span className={p.metricValue}>{fmt(queueEma, 2)}</span>
           </div>
-          <div className={p.metric}>
-            <span className={p.metricLabel}>FPS (EMA)</span>
-            <span className={p.metricValue}>{fmt(fpsEma, 1)}</span>
-          </div>
+          {/*<div className={p.metric}>*/}
+          {/*  <span className={p.metricLabel}>FPS (EMA)</span>*/}
+          {/*  <span className={p.metricValue}>{fmt(fpsEma, 1)}</span>*/}
+          {/*</div>*/}
           <div className={p.metric}>
             <span className={p.metricLabel}>Tick (ms)</span>
             <span className={p.metricValue}>{fmt(tickTimeMs, 1)}</span>

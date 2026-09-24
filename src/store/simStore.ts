@@ -615,9 +615,16 @@ export const useSimStore = create<SimState>()(
       },
       step() {
         const t0 = performance.now();
-        const dt = 16 * get().speed;
-        set((s) => ({ simTime: s.simTime + dt })); // ← посунути логічний час
-        get().runtime?.tick(dt);
+        const runtime = get().runtime;
+        if (!runtime) return;
+
+        // Фіксований крок симчасу: менший за затримки графа (edge≈600,
+        // dft4=400, twiddle=200), тож токени встигають «проїхати» дугами
+        // за кілька натискань — видно проміжні стани між стадіями.
+        const STEP_DT = 100;
+        set((s) => ({ simTime: s.simTime + STEP_DT }));
+        runtime.tick(STEP_DT); // спрацьовують лише вже готові вузли
+
         requestAnimationFrame(() =>
           console.log(`[NF2] Крок (rAF): ${(performance.now() - t0).toFixed(2)} мс`),
         );

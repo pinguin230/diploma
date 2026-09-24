@@ -13,6 +13,22 @@ type DFT4NodeProps = {
   };
 };
 
+// Теплова карта через відтінки синього (DFT-4 = обчислювальний вузол)
+const HEAT_BG: Record<string, string> = {
+  heat0: '#1e1e1e',
+  heat1: '#26304a',
+  heat2: '#2f3f63',
+  heat3: '#3a5187',
+  heat4: '#4a68b0',
+};
+const HEAT_BORDER: Record<string, string> = {
+  heat0: '#555',
+  heat1: '#6d91e088',
+  heat2: '#6d91e0aa',
+  heat3: '#6d91e0cc',
+  heat4: '#6d91e0',
+};
+
 export function DFT4Node({ id, data }: DFT4NodeProps) {
   const heatClass = useHeatClass(id);
 
@@ -20,7 +36,14 @@ export function DFT4Node({ id, data }: DFT4NodeProps) {
   const portPositions = ['12.5%', '37.5%', '62.5%', '87.5%'];
 
   return (
-      <div className={`app-node dft4-node ${heatClass}`} style={styles.nodeBody}>
+      <div
+        className={`app-node dft4-node ${heatClass}`}
+        style={{
+          ...styles.nodeBody,
+          background: HEAT_BG[heatClass] ?? HEAT_BG.heat0,
+          border: `2px solid ${HEAT_BORDER[heatClass] ?? HEAT_BORDER.heat0}`,
+        }}
+      >
         <div style={styles.header}>{data.label || 'DFT-4'}</div>
 
         {/* 4 Вхідні порти (Left) */}
@@ -59,15 +82,14 @@ const styles = {
   nodeBody: {
     width: '80px',
     height: '140px', // Більша висота, щоб вмістити 4 порти
-    background: '#1e1e1e',
-    border: '2px solid #555',
     borderRadius: '8px',
     color: 'white',
     display: 'flex',
     flexDirection: 'column' as const,
     alignItems: 'center',
     position: 'relative' as const,
-    boxShadow: '0 4px 6px rgba(0,0,0,0.3)'
+    boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+    transition: 'background 0.2s ease, border-color 0.2s ease',
   },
   header: {
     fontSize: '12px',

@@ -4,10 +4,12 @@ import { useEffect, useRef, useCallback } from 'react';
 import {
   Background,
   Controls,
+  Panel,
   ReactFlow,
   addEdge,
   useEdgesState,
   useNodesState,
+  useViewport,
   type Edge,
   type Node,
   type Connection,
@@ -31,6 +33,46 @@ const nodeTypes = {
   sink: SinkNode,
 } as const;
 const edgeTypes = { token: TokenEdge } as const;
+
+const MIN_ZOOM = 0.1;
+const MAX_ZOOM = 2;
+
+function ZoomSlider() {
+  const { zoom } = useViewport();
+  const { zoomTo } = useReactFlow();
+
+  return (
+    <Panel
+      position='bottom-right'
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        padding: '6px 10px',
+        background: 'rgba(20,24,28,0.85)',
+        border: '1px solid #2a3340',
+        borderRadius: '8px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.45)',
+        color: '#cbd5e1',
+        fontSize: '11px',
+      }}
+    >
+      <span style={{ opacity: 0.7 }}>Зум</span>
+      <input
+        type='range'
+        min={MIN_ZOOM}
+        max={MAX_ZOOM}
+        step={0.01}
+        value={zoom}
+        onChange={(e) => zoomTo(Number(e.target.value), { duration: 0 })}
+        style={{ width: '140px', cursor: 'pointer' }}
+      />
+      <span style={{ width: '34px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
+        {Math.round(zoom * 100)}%
+      </span>
+    </Panel>
+  );
+}
 
 export default function GraphView() {
   const graph = useSimStore((s) => s.graph);
@@ -108,7 +150,7 @@ export default function GraphView() {
   useEffect(() => {
     const g = generateDFT4x4();
     setGraph(g);
-    const nodePositions = layoutDFT4x4(g, { stageGap: 280, rowGap: 140 });
+    const nodePositions = layoutDFT4x4(g, { stageGap: 260, rowGap: 110 });
     setNodes(nodePositions);
   }, [setGraph, setNodes]);
 
@@ -125,7 +167,7 @@ export default function GraphView() {
   }, [pendingNodePositions, setNodes, setPendingNodePositions]);
 
   useEffect(() => {
-    queueMicrotask(() => rf.fitView({ padding: 0.15, includeHiddenNodes: true }));
+    queueMicrotask(() => rf.fitView({ padding: 0.08, includeHiddenNodes: true, minZoom: MIN_ZOOM }));
   }, [nodes.length, rf]);
 
   useEffect(() => {
@@ -196,10 +238,14 @@ export default function GraphView() {
       nodeTypes={nodeTypes}
       nodesDraggable={nodesDraggable}
       onNodeClick={onNodeClick}
+      minZoom={MIN_ZOOM}
+      maxZoom={MAX_ZOOM}
       fitView
+      fitViewOptions={{ padding: 0.08, minZoom: MIN_ZOOM }}
     >
       <Background />
       <Controls />
+      <ZoomSlider />
     </ReactFlow>
   );
 }

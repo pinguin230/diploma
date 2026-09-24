@@ -42,6 +42,21 @@ export default function SpectrumView() {
   const mags = useMemo(() => X.map((v) => Math.hypot(v.re, v.im)), [X]);
   const maxMag = useMemo(() => Math.max(1e-12, ...mags), [mags]);
 
+  // Чи дістався хоч один вихідний відлік (sink) реальних даних
+  const hasData = useMemo(() => {
+    for (let k = 0; k < N; k++) {
+      const raw = sinks[`snk${k}`];
+      if (!raw) continue;
+      try {
+        const v = JSON.parse(raw);
+        if (v && typeof v.re === 'number' && typeof v.im === 'number') return true;
+      } catch {
+        /* ignore */
+      }
+    }
+    return false;
+  }, [N, sinks]);
+
   useEffect(() => {
     const c = canvasRef.current;
     if (!c) return;
@@ -124,18 +139,24 @@ export default function SpectrumView() {
           </button>
         </div>
       </div>
-      <canvas ref={canvasRef} className={p.spectrumCanvas} />
-      <div className={p.spectrumCaption}>
-        {hover && hover.k !== null ? (
-          <span>
-            k = {hover.k} · |X| = {hover.mag.toFixed(3)} · ∠ ={' '}
-            {((hover.phase * 180) / Math.PI).toFixed(1)}°
-          </span>
-        ) : (
-          <span>Hover bars to inspect bin</span>
-        )}
-        <span>{scale === 'linear' ? 'linear scale' : 'log (dB)'}</span>
-      </div>
+      {hasData ? (
+        <>
+          <canvas ref={canvasRef} className={p.spectrumCanvas} />
+          <div className={p.spectrumCaption}>
+            {hover && hover.k !== null ? (
+              <span>
+                k = {hover.k} · |X| = {hover.mag.toFixed(3)} · ∠ ={' '}
+                {((hover.phase * 180) / Math.PI).toFixed(1)}°
+              </span>
+            ) : (
+              <span>Hover bars to inspect bin</span>
+            )}
+            <span>{scale === 'linear' ? 'linear scale' : 'log (dB)'}</span>
+          </div>
+        </>
+      ) : (
+        <div className={p.emptyState}>Run the simulation to see the output spectrum.</div>
+      )}
     </section>
   );
 }

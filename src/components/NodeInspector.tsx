@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
+import { createPortal } from 'react-dom';
 import clsx from 'clsx';
 import { BlockMath, InlineMath } from 'react-katex';
-import { X } from 'lucide-react';
+import { X, Maximize2 } from 'lucide-react';
 import { useSimStore } from '@/store/simStore';
 import {
   traceDft4,
@@ -16,7 +17,8 @@ import { Dft4ButterflyDiagram, TwiddleDiagram } from '@/components/node-diagram'
 import p from '@/styles/panels.module.scss';
 import ui from '@/styles/ui.module.scss';
 
-type Tab = 'values' | 'formula' | 'trace' | 'complexity' | 'params';
+// type Tab = 'values' | 'formula' | 'trace' | 'complexity' | 'params';
+type Tab = 'values' | 'formula' | 'trace';
 
 export default function NodeInspector() {
   const { visible, nodeId, kind, twiddle, baModel } = useSimStore((s) => s.inspector);
@@ -123,20 +125,20 @@ export default function NodeInspector() {
           >
             Trace
           </button>
-          <button
-            type="button"
-            className={clsx(tab === 'complexity' && p.active)}
-            onClick={() => setTab('complexity')}
-          >
-            Complexity
-          </button>
-          <button
-            type="button"
-            className={clsx(tab === 'params' && p.active)}
-            onClick={() => setTab('params')}
-          >
-            Params
-          </button>
+          {/*<button*/}
+          {/*  type="button"*/}
+          {/*  className={clsx(tab === 'complexity' && p.active)}*/}
+          {/*  onClick={() => setTab('complexity')}*/}
+          {/*>*/}
+          {/*  Complexity*/}
+          {/*</button>*/}
+          {/*<button*/}
+          {/*  type="button"*/}
+          {/*  className={clsx(tab === 'params' && p.active)}*/}
+          {/*  onClick={() => setTab('params')}*/}
+          {/*>*/}
+          {/*  Params*/}
+          {/*</button>*/}
         </div>
 
         {tab === 'values' && (
@@ -266,7 +268,7 @@ export default function NodeInspector() {
                     step={50}
                     defaultValue={nodeSpec?.latency ?? 0}
                     key={nodeId}
-                    style={{ width: 80, background: 'var(--bg-input, #1e293b)', color: 'var(--fg)', border: '1px solid #334155', borderRadius: 4, padding: '2px 6px', fontSize: 12 }}
+                    style={{ width: 80, background: 'var(--bg-sunken)', color: 'var(--fg-primary)', border: '1px solid var(--border-strong)', borderRadius: 4, padding: '2px 6px', fontSize: 12 }}
                     onBlur={(e) => {
                       if (nodeId) updateNodeLatency(nodeId, Number(e.target.value));
                     }}
@@ -285,7 +287,7 @@ export default function NodeInspector() {
                         step={50}
                         defaultValue={edge.delay ?? 0}
                         key={edge.id}
-                        style={{ width: 80, background: 'var(--bg-input, #1e293b)', color: 'var(--fg)', border: '1px solid #334155', borderRadius: 4, padding: '2px 6px', fontSize: 12 }}
+                        style={{ width: 80, background: 'var(--bg-sunken)', color: 'var(--fg-primary)', border: '1px solid var(--border-strong)', borderRadius: 4, padding: '2px 6px', fontSize: 12 }}
                         onBlur={(e) => updateEdgeDelay(edge.id, Number(e.target.value))}
                       />
                     </div>
@@ -311,6 +313,8 @@ function TraceView({
   outputs: Record<string, any> | null | undefined;
   twiddle?: { N: number; k: number } | null;
 }) {
+  const [expanded, setExpanded] = useState(false);
+
   let result: TraceResult;
   if (kind === 'dft4') result = traceDft4(inputs);
   else if (kind === 'twiddle') result = traceTwiddle(inputs, twiddle?.N, twiddle?.k);
@@ -327,11 +331,88 @@ function TraceView({
     return null;
   })();
 
+  // Діаграму потоку сигналів можна розгорнути у великий попап (зручно під час захисту)
+  const diagramBlock = diagram && (
+    <div style={{ position: 'relative' }}>
+      {diagram}
+      <button
+        type="button"
+        className={clsx(ui.btn, ui.btnIcon, ui.btnGhost)}
+        style={{ position: 'absolute', top: 6, right: 6, height: 24, width: 24 }}
+        onClick={() => setExpanded(true)}
+        aria-label="Expand diagram"
+        title="Розгорнути діаграму"
+      >
+        <Maximize2 size={13} />
+      </button>
+    </div>
+  );
+
+  const modal =
+    expanded && diagram
+      ? createPortal(
+          <div
+            onClick={() => setExpanded(false)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'rgba(0,0,0,0.6)',
+              backdropFilter: 'blur(2px)',
+              padding: 24,
+            }}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                position: 'relative',
+                width: 'min(900px, 92vw)',
+                maxHeight: '92vh',
+                overflow: 'auto',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-strong)',
+                borderRadius: 'var(--radius-lg, 10px)',
+                boxShadow: '0 20px 60px rgba(0,0,0,0.55)',
+                padding: 20,
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: 12,
+                }}
+              >
+                <strong style={{ fontSize: 13 }}>
+                  {kind === 'dft4' ? 'Діаграма метелика DFT-4' : 'Діаграма поворотного множника'}
+                </strong>
+                <button
+                  type="button"
+                  className={clsx(ui.btn, ui.btnIcon, ui.btnGhost)}
+                  style={{ height: 26, width: 26 }}
+                  onClick={() => setExpanded(false)}
+                  aria-label="Close diagram"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+              <div style={{ '--diagram-max-h': '78vh' } as CSSProperties}>{diagram}</div>
+            </div>
+          </div>,
+          document.body,
+        )
+      : null;
+
   if (result.kind === 'missing') {
     return (
       <>
         <div className={p.emptyState}>{result.message}</div>
-        {diagram}
+        {diagramBlock}
+        {modal}
       </>
     );
   }
@@ -341,7 +422,8 @@ function TraceView({
       <div className={p.formulaBlock}>
         <BlockMath math={result.math} />
       </div>
-      {diagram}
+      {diagramBlock}
+      {modal}
       {result.note && (
         <p
           style={{

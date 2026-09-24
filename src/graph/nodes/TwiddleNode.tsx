@@ -11,11 +11,34 @@ type TwiddleNodeProps = {
   };
 };
 
+// Теплова карта через відтінки амбри (Twiddle = поворотний множник)
+const HEAT_BG: Record<string, string> = {
+  heat0: '#2c2c2c',
+  heat1: '#3a3320',
+  heat2: '#4a3f1e',
+  heat3: '#5e4f1c',
+  heat4: '#7a6420',
+};
+const HEAT_BORDER: Record<string, string> = {
+  heat0: '#777',
+  heat1: '#fbbf2466',
+  heat2: '#fbbf2499',
+  heat3: '#fbbf24cc',
+  heat4: '#fbbf24',
+};
+
 export function TwiddleNode({ id, data }: TwiddleNodeProps) {
   const heatClass = useHeatClass(id);
 
   return (
-      <div className={`app-node twiddle-node ${heatClass}`} style={styles.nodeBody}>
+      <div
+        className={`app-node twiddle-node ${heatClass}`}
+        style={{
+          ...styles.nodeBody,
+          background: HEAT_BG[heatClass] ?? HEAT_BG.heat0,
+          border: `1px solid ${HEAT_BORDER[heatClass] ?? HEAT_BORDER.heat0}`,
+        }}
+      >
         <Handle type="target" position={Position.Left} id="in" style={styles.handleTarget} />
 
         <div style={styles.content}>
@@ -31,8 +54,6 @@ export function TwiddleNode({ id, data }: TwiddleNodeProps) {
 const styles = {
   nodeBody: {
     padding: '8px 12px',
-    background: '#2c2c2c',
-    border: '1px solid #777',
     borderRadius: '16px', // Робимо його овальним для відмінності
     color: '#fbbf24', // Жовтуватий колір для множників
     fontSize: '12px',
@@ -41,6 +62,7 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     minWidth: '70px',
+    transition: 'background 0.2s ease, border-color 0.2s ease',
   },
   content: {
     display: 'flex',
